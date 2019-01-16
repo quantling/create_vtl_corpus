@@ -12,7 +12,7 @@ Utterance = namedtuple('Utterance', ['sampa',
 
 STOPS = ('p', 't', 'k', 'b', 'd', 'g')
 
-def generate_gestural_score(ges_name, sampa, durations=None):
+def generate_gestural_score(ges_name, sampa, durations=None, *, phone_attributes):
 
     tc_pho = 0.015  # specific time_constant of regular gestures
     tc_lp = 0.005  # specific time_constant of lung-pressure gestures
@@ -24,7 +24,7 @@ def generate_gestural_score(ges_name, sampa, durations=None):
     f0_value = 80  # specific value of F0 in [Hz]
 
     phone_mapping = dict()
-    with open('./resources/configuration.txt', 'rt') as map_file:
+    with open(phone_attributes, 'rt') as map_file:
         for line in map_file:
             key, *values = line.split()
             if len(values) != 7:

@@ -1,11 +1,10 @@
 from math import floor
 import os
-from multiprocessing import Pool
 
 from scipy.io import wavfile
-from textgrid import TextGrid
 from praatio import tgio
 
+from .textgrid import TextGrid
 
 def create_utterance_split_wave(tg_name, wav_name, utterance_name, wav_dir, text_grid_dir, ii=0):
     """
@@ -45,7 +44,7 @@ def create_utterance_split_wave(tg_name, wav_name, utterance_name, wav_dir, text
 
     with open(utterance_name, mode) as utt_file:
 
-        if ii != 0:
+        if ii == 0:
             # write header
             utt_file.write('Label\tSampa transcription\tPhone durations\n')
 
@@ -53,7 +52,7 @@ def create_utterance_split_wave(tg_name, wav_name, utterance_name, wav_dir, text
 
         for wordstart, wordend, word in words.simple_transcript:
          
-            if word in ('<P>', '<LAUGH>'):
+            if word in ('<P>', '<LAUGH>', '<UNINTELLIGIBLE>', '<THROATCLEARING>'):
                 continue
 
             wordstart = float(wordstart)
@@ -154,15 +153,4 @@ def create_utterance_split_wave(tg_name, wav_name, utterance_name, wav_dir, text
             ii += 1
 
     return ii
-
-
-def extract_pitch_tier(wav_dir, pitch_contour_dir, *, n_jobs=1):
-
-    base_names = [os.path.splitext(ff)[0] for ff in os.listdir(wav_dir) if ff.endswith('.wav')]
-
-    commands = [f"praat --run extractpitch.praat {wav_dir}/{base_name}.wav {pitch_contour_dir}/{base_name}.PitchTier" for base_name in base_names]
-
-    # generate PitchTier
-    with Pool(n_jobs) as pool:
-        pool.map(os.system, commands)
 

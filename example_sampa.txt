@@ -1,20 +1,21 @@
-Badminton /b E t . m I n . t @ n /
-Cowboy /k aU . b OY/
-Performance /p 9 6 . f O 6 . m E n s/
-Service /s 9 6 . v I s/
-Seminar /z e . m i: . n a: 6/
-Bereich /b @ . r aI C/
-Rhythmus /r Y t . m U s/
-Handy /h E n . d i:/
-Regie /r e: . Z i:/
-Milieu /m I l . j 2:/
-Variante /v a . r i a n . t @/
-typisch /t y: . p I S/
-Senator /z e . n a: . t o: 6/
-Jura /j u: . r a/
-jedoch /j e: . d O x/
-Journal /Z U . n a: l/
-Tango /t a N . g o:/
-Dynamo /d y . n a: . m o:/
-symbolisch /z Y m . b o: . l I S/
-Liebhaber /l i: p . h a: . b 6/
+Label	Sampa transcription	Phone durations
+Badminton	/b E t . m I n . t @ n /	
+Cowboy	/k aU . b OY/	
+Performance	 /p 9 6 . f O 6 . m E n s/	
+Service	/s 9 6 . v I s/	
+Seminar	/z e . m i: . n a: 6/	
+Bereich	/b @ . r aI C/	
+Rhythmus	/r Y t . m U s/	
+Handy	/h E n . d i:/	
+Regie	/r e: . Z i:/	
+Milieu	/m I l . j 2:/	
+Variante	/v a . r i a n . t @/	
+typisch	/t y: . p I S/	
+Senator	/z e . n a: . t o: 6/	
+Jura	/j u: . r a/	
+jedoch	/j e: . d O x/	
+Journal	/Z U . n a: l/	
+Tango	/t a N . g o:/	
+Dynamo	/d y . n a: . m o:/	
+symbolisch	/z Y m . b o: . l I S/	
+Liebhaber	/l i: p . h a: . b 6/	
