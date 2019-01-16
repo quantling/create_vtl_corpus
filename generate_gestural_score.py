@@ -80,7 +80,7 @@ def generate_gestural_score(ges_name, sampa, durations=None):
         # write vowel tier
         ###########################################################################
         ges_file.write('  <gesture_sequence type="vowel-gestures" unit="">\n')
-        ges_file.write('    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
+        #ges_file.write('    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
 
 
         #syllableCell=regexp(innerTrans, '\.', 'split');
@@ -172,10 +172,10 @@ def generate_gestural_score(ges_name, sampa, durations=None):
         #phoneCell=regexp(innerTrans, '(\S+)', 'tokens');
 
         # judge whether the last phoneme is a stop
-        # if true, then add an empty gesture(duration==50ms, time_constant==5ms,
+        # if true, then add an empty gesture(duration==30ms, time_constant==5ms,
         # neutral==0) at vowel tier, which ensures the stop release
         if utterance.sampa[-1] in STOPS:
-            return_str = write_one_gesture('', 0.05, 0.005, 0)
+            return_str = write_one_gesture('', 0.030, 0.005, 0)
             ges_file.write(return_str)
         ges_file.write('  </gesture_sequence>\n')
 
@@ -183,7 +183,7 @@ def generate_gestural_score(ges_name, sampa, durations=None):
         # write lip tier
         ###########################################################################
         ges_file.write('  <gesture_sequence type="lip-gestures" unit="">\n')
-        ges_file.write('    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
+        #ges_file.write('    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
 
         return_str, total_duration = write_reg_con_tier(utterance, 'lip')  # the last parameter indicates the palce of articulation
         ges_file.write(return_str)
@@ -195,7 +195,7 @@ def generate_gestural_score(ges_name, sampa, durations=None):
         # write tongue-tip tier
         ###########################################################################
         ges_file.write('  <gesture_sequence type="tongue-tip-gestures" unit="">\n')
-        ges_file.write('    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
+        #ges_file.write('    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
         return_str, total_duration = write_reg_con_tier(utterance, 'tongue-tip')  # the last parameter indicates the palce of articulation
         ges_file.write(return_str)
         if return_str == '':
@@ -206,7 +206,7 @@ def generate_gestural_score(ges_name, sampa, durations=None):
         # write tongue-body tier
         ###########################################################################
         ges_file.write('  <gesture_sequence type="tongue-body-gestures" unit="">\n')
-        ges_file.write('    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
+        #ges_file.write('    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
         return_str, total_duration = write_reg_con_tier(utterance, 'tongue-body')  # the last parameter indicates the palce of articulation
         ges_file.write(return_str)
         if return_str == '':
@@ -219,18 +219,19 @@ def generate_gestural_score(ges_name, sampa, durations=None):
         # just filling an empty gesture in case of aborting in API call,
         # but this is not mandatory for initializing purpose
         ges_file.write('  <gesture_sequence type="velic-gestures" unit="">\n')
-        ges_file.write(f'    <gesture value="0.500000" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
+        #ges_file.write(f'    <gesture value="0.500000" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
         ges_file.write('  </gesture_sequence>\n')
 
 
         # write glottal-shape tier
         ###########################################################################
         ges_file.write('  <gesture_sequence type="glottal-shape-gestures" unit="">\n')
-        ges_file.write('    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
+        #ges_file.write('    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
         return_str = write_glottal_tier(utterance, 0.015)  # the last parameter is tao (time constant)
-        # if the syllable ends with a stop
+        # if true, then add an empty gesture(duration==30ms, time_constant==5ms,
+        # neutral==0), which ensures the stop release
         if utterance.sampa[-1] in STOPS:
-            temp_str= '    <gesture value="" slope="0.000000" duration_s="0.050000" time_constant_s="0.010000" neutral="0" />\n'
+            temp_str= '    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.010000" neutral="0" />\n'
             return_str += temp_str
         ges_file.write(return_str)
         ges_file.write('  </gesture_sequence>\n')
@@ -247,12 +248,12 @@ def generate_gestural_score(ges_name, sampa, durations=None):
         totoal_duration = sum(utterance.duration)
 
         # judge whether the last phoneme is a stop
-        # if ture, then add an empty gesture(duration==50ms, time_constant==5ms) at vowel tier,
-        # and an extra duration (50ms) at then end of valid lung-pressure gesture, which ensures the stop release
+        # if true, then add an empty gesture(duration==30ms, time_constant==5ms) at vowel tier,
+        # and an extra duration (30ms) at then end of valid lung-pressure gesture, which ensures the stop release
         if utterance.sampa[-1] in STOPS:
-            total_duration += 0.050
+            total_duration += 0.030
         ges_file.write('  <gesture_sequence type="f0-gestures" unit="st">\n')
-        ges_file.write(f'    <gesture value="{f0_value:.6f}" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
+        #ges_file.write(f'    <gesture value="{f0_value:.6f}" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
         return_str = write_constant_tier(total_duration, f0_value, tc_pho)
         ges_file.write(return_str)
         ges_file.write('  </gesture_sequence>\n')
@@ -279,9 +280,9 @@ def generate_gestural_score(ges_name, sampa, durations=None):
         #ges_file.write(f'    <gesture value="0" slope="0.000000" duration_s="{first_lung_pressure_dur:.3f}" time_constant_s="{tc_lp:.3f}" neutral="0" />\n')
 
         ges_file.write('  <gesture_sequence type="lung-pressure-gestures" unit="dPa">\n')
-        ges_file.write(f'    <gesture value="0.000000" slope="0.000000" duration_s="0.010000" time_constant_s="{tc_lp:.6f}" neutral="0" />\n')  # phase in 1/3
-        ges_file.write(f'    <gesture value="{lp_value/3:.6f}" slope="0.000000" duration_s="0.010000" time_constant_s="{tc_lp:.6f}" neutral="0" />\n')  # phase in 2/3
-        ges_file.write(f'    <gesture value="{lp_value*2/3:.6f}" slope="0.000000" duration_s="0.010000" time_constant_s="{tc_lp:.6f}" neutral="0" />\n')  # phase in 3/3
+        #ges_file.write(f'    <gesture value="0.000000" slope="0.000000" duration_s="0.010000" time_constant_s="{tc_lp:.6f}" neutral="0" />\n')  # phase in 1/3
+        #ges_file.write(f'    <gesture value="{lp_value/3:.6f}" slope="0.000000" duration_s="0.010000" time_constant_s="{tc_lp:.6f}" neutral="0" />\n')  # phase in 2/3
+        #ges_file.write(f'    <gesture value="{lp_value*2/3:.6f}" slope="0.000000" duration_s="0.010000" time_constant_s="{tc_lp:.6f}" neutral="0" />\n')  # phase in 3/3
         #second_lung_pressure_dur = total_duration - first_lung_pressure_dur
         second_lung_pressure_dur = total_duration
         if second_lung_pressure_dur > 0.0:
@@ -368,11 +369,11 @@ def write_reg_con_tier(utterance, arti_place):
             return_str += print_empty_gesture(utterance.duration[ii])
 
     # judge whethe the last phoneme is a stop
-    # if ture, then add an empty gesture(duration==50ms, time_constant==5ms,
-    # neutral==0) at vowel tier, which ensures the stop release
+    # if true, then add an empty gesture(duration==30ms, time_constant==5ms,
+    # neutral==0), which ensures the stop release
     if utterance.sampa[-1] in STOPS:
-        return_str += write_one_gesture('', 0.05, 0.005, 0)
-        total_dur += 0.05
+        return_str += write_one_gesture('', 0.030, 0.005, 0)
+        total_dur += 0.030
 
     return (return_str, total_dur)
 
