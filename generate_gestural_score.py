@@ -1,15 +1,3 @@
-#function gsFile=generateGesturalScore(gsFile, sampaTrans)
-#%
-#% gsFile=generateGesturalScore(gsFile, sampaTrans, spe_tc_pho,spe_tc_LP, ...
-#%                                         spe_emptyLPDurBeg,spe_emptyLPDurEnd,spe_LPValue,spe_F0)
-#%
-#% this function generates gestural scores with predefined parameters.
-#% these default parameters can be manipulated in the file 'resources\defaultSetting.txt'.
-#% aternatively, you can specify them in the function options when calling this function.
-#%
-#
-#
-#
 
 from collections import namedtuple
 
@@ -31,20 +19,16 @@ def generate_gestural_score(ges_name, sampa, durations=None):
     tc_lp_beg = 0.005  # specific duration of the beginning lung-pressure gesture
     tc_lp_end = 0.015  # specific duration of the ending lung-pressure gesture
     empty_lp_dur_beg = 0.01  #% in this new fashion, it is re-written based on the type of the initial consonant
-    empty_lp_dur_end = 0.05
+    empty_lp_dur_end = 0.03
     lp_value = 8000  # specific value of valid lung-pressure gesture in [dPa]
     f0_value = 80  # specific value of F0 in [Hz]
-
-
-#    % read mapping table and some default configurations for phonemes
-#    mappingCell=res2cell('resources\configuration.txt')
 
     phone_mapping = dict()
     with open('./resources/configuration.txt', 'rt') as map_file:
         for line in map_file:
             key, *values = line.split()
             if len(values) != 7:
-                raise ValueError("Each phone needs 7 attributes, i. e. 8 couloumns")
+                raise ValueError("Each phone needs 7 attributes, i. e. 8 coloumns")
             phone_mapping[key] = tuple(values)
 
     inner_tran = []
@@ -82,9 +66,6 @@ def generate_gestural_score(ges_name, sampa, durations=None):
         ges_file.write('  <gesture_sequence type="vowel-gestures" unit="">\n')
         #ges_file.write('    <gesture value="" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
 
-
-        #syllableCell=regexp(innerTrans, '\.', 'split');
-        #phoneCount=1;
 
         # list of syllables where each syllable is a list of phones
         syllables = [syllable.split() for syllable in ' '.join(sampa).split(' . ')]
@@ -131,9 +112,25 @@ def generate_gestural_score(ges_name, sampa, durations=None):
                         # when it is a diphthong, split it into beginning part
                         # (1/3 duration) and ending part (2/3 duration). And
                         # the beginning part and the preceding consonant will be merged.
-                        if phone in ('aI', 'aU', 'OY'):
-                            diphthong_beg = phone[0]
-                            diphthong_end = phone[1]
+                        if phone in ('aI', 'aU', 'OY', 'i:6', 'O6', 'e:6',
+                                'I6', 'E6', 'E:6', 'eI', 'y:6', 'a:6', 'u:6',
+                                'Y6', 'U6', 'o:6', 'a6', '2:6'):
+                            if len(phone) == 2:
+                                diphthong_beg = phone[0]
+                                diphthong_end = phone[1]
+                            elif phone == 'e:6':
+                                diphthong_beg = 'e'
+                                diphthong_end = '6'
+                            elif phone == 'y:6':
+                                diphthong_beg = 'y'
+                                diphthong_end = '6'
+                            elif phone == '2:6':
+                                diphthong_beg = '2'
+                                diphthong_end = '6'
+                            elif len(phone) == 3:
+                                diphthong_beg = phone[0:2]
+                                diphthong_end = phone[2]
+
                             diphthong_beg_dur = 1/3 * phone_duration
                             diphthong_end_dur = 2/3 * phone_duration
                             # the operation ensures that the 1/3 boundary point occurs exactly
@@ -219,7 +216,7 @@ def generate_gestural_score(ges_name, sampa, durations=None):
         # just filling an empty gesture in case of aborting in API call,
         # but this is not mandatory for initializing purpose
         ges_file.write('  <gesture_sequence type="velic-gestures" unit="">\n')
-        #ges_file.write(f'    <gesture value="0.500000" slope="0.000000" duration_s="0.030000" time_constant_s="0.015000" neutral="1" />\n')  # phase in
+        ges_file.write(f'    <gesture value="0.500000" slope="0.000000" duration_s="0.010000" time_constant_s="0.015000" neutral="1" />\n')
         ges_file.write('  </gesture_sequence>\n')
 
 
