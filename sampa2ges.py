@@ -10,16 +10,15 @@ def sampa_to_ges(utt_name, ges_dir, *, phone_attributes):
 
         for ii, line in enumerate(uttfile):
             utterance, sampa, durations = line.split('\t')
+            sampa = sampa.strip('/')
             sampa = sampa.split()
             durations = durations.split()
             if durations == []:  # if no durations are given set to None
                 durations = None
             else:
-                assert len(sampa) == len(durations)
+                assert len(sampa) == len(durations), f"line {ii + 2}"
             if not sampa:
-                raise ValueError("sampa transcription is missing")
-            sampa[0] = sampa[0].strip('/')
-            sampa[-1] = sampa[-1].strip('/')
+                raise ValueError(f"sampa transcription is missing in line {ii + 2}")
 
             base_name = f'{ii:06d}-{utterance:.16s}'
 

@@ -52,7 +52,8 @@ def create_utterance_split_wave(tg_name, wav_name, utterance_name, wav_dir, text
 
         for wordstart, wordend, word in words.simple_transcript:
          
-            if word in ('<P>', '<LAUGH>', '<UNINTELLIGIBLE>', '<THROATCLEARING>'):
+            #if word in ('<P>', '<LAUGH>', '<UNINTELLIGIBLE>', '<THROATCLEARING>', '<BREATH>', '<COUGH>', '<YAWN>'):
+            if '<' in word:
                 continue
 
             wordstart = float(wordstart)
@@ -79,8 +80,9 @@ def create_utterance_split_wave(tg_name, wav_name, utterance_name, wav_dir, text
                         continue
                     syls_phones.append(phone)
                     durations.append(float(phoneend) - float(phonestart))
-                word_syls.append(syls_phones)
-                durations.append(0.0)
+                if syls_phones:
+                    word_syls.append(syls_phones)
+                    durations.append(0.0)
 
             if word_syls == [] or len(durations) <= 1:
                 continue
