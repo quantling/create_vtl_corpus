@@ -7,7 +7,6 @@ from . import tgwav2utt, pitch_contour, sampa2ges
 
 VERSION = "1.0"
 
-#GECO_PATH = "/home/tino/Documents/phd/corpora/GECO"
 GECO_PATH = None
 
 if not GECO_PATH:
