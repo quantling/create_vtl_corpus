@@ -2,6 +2,9 @@
 Readme
 ======
 
+.. image:: https://zenodo.org/badge/167427297.svg
+   :target: https://zenodo.org/badge/latestdoi/167427297
+
 This package supplies the necessary functions in order to synthesize speech
 from a phonemic transscription. Furthermore, it defines helpers to improve the
 result if more information as the pitch contour is available.
