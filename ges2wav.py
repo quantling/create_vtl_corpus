@@ -4,7 +4,7 @@ import shutil
 import os
 
 VTL = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + '/bin/VocalTractLabApi.so')
-speaker_file_name = ctypes.c_char_p((os.path.dirname(__file__) + '/JD2.speaker').encode())
+speaker_file_name = ctypes.c_char_p((os.path.dirname(__file__) + '/bin/JD2.speaker').encode())
 
 name = sys.argv[1]
 ges_dir = sys.argv[2]
