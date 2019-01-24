@@ -1,0 +1,49 @@
+{
+    "title": "create_vtl_corpus: Synthesizing a speech corpus with VocalTractLab",
+    "license": {
+      "id": "MIT"
+    },
+    "creators": [
+        {
+            "affiliation": "University of Tuebingen, Quantitative Linguistics",
+            "name": "Konstantin Sering"
+        },
+        {
+            "name": "Niels Stehwien"
+        },
+        {
+            "name": "Yingming Gao"
+        }
+    ],
+    "grants": [
+      {
+        "funder": {
+          "name": "Humboldt Foundation"
+        },
+        "program": "Alexander von Humboldt Professorship",
+        "title": "Alexander von Humboldt Professorship awarded to R. H. Baayen"
+      },
+      {
+        "acronym": "WIDE",
+        "code": "742545",
+        "funder": {
+          "acronyms": [
+            "EC"
+          ],
+          "name": "European Commission"
+        },
+        "program": "ERC",
+        "title": "Wide Incremental learning with Discrimination nEtworks"
+      }
+    ],
+    "keywords": [
+      "speech corpus",
+      "speech synthesis",
+      "vocal tract lab",
+      "linguistics",
+      "python",
+      "cognitive science",
+      "machine learning"
+    ],
+    "language": "eng"
+}
