@@ -2,7 +2,7 @@ import re
 import os
 from multiprocessing import Pool
 
-def fit_f0(pitch_contour_dir, text_grid_dir, targetoptimizer_path='./bin/targetoptimizer', *, n_jobs=1):
+def fit_f0(pitch_contour_dir, text_grid_dir, targetoptimizer_path='./vocaltractlab_api/targetoptimizer', *, n_jobs=1):
     """
     Fits pitch contours and creates vocaltractlab gestures for the f0.
 

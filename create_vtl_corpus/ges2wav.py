@@ -3,9 +3,9 @@ import sys
 import shutil
 import os
 
-VTL = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + '/bin/VocalTractLabApi.so')
-#speaker_file_name = ctypes.c_char_p((os.path.dirname(__file__) + '/bin/CK_female.speaker').encode())
-speaker_file_name = ctypes.c_char_p((os.path.dirname(__file__) + '/bin/JD2.speaker').encode())
+VTL = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + '/vocaltractlab_api/VocalTractLabApi.so')
+#speaker_file_name = ctypes.c_char_p((os.path.dirname(__file__) + '/vocaltractlab_api/CK_female.speaker').encode())
+speaker_file_name = ctypes.c_char_p((os.path.dirname(__file__) + '/vocaltractlab_api/JD2.speaker').encode())
 
 name = sys.argv[1]
 ges_dir = sys.argv[2]

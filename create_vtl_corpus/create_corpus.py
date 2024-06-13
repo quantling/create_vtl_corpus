@@ -49,7 +49,7 @@ def create_corpus(version, *, geco_path=None):
     ## extract pitch contours with praat
     #pitch_contour.extract_pitch_tier(os.path.abspath(WAV_ORIG_DIR), os.path.abspath(PITCH_DIR), praat_script_path="./extractpitch.praat",  n_jobs=8)
     #
-    #pitch_contour.fit_f0(os.path.abspath(PITCH_DIR), os.path.abspath(TG_DIR), "./bin/targetoptimizer", n_jobs=8)
+    #pitch_contour.fit_f0(os.path.abspath(PITCH_DIR), os.path.abspath(TG_DIR), "./vocaltractlab_api/targetoptimizer", n_jobs=8)
 
 
     # create segmentfiles

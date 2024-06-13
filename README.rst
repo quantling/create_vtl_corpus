@@ -6,12 +6,21 @@ Readme
    :target: https://zenodo.org/badge/latestdoi/167427297
 
 This package supplies the necessary functions in order to synthesize speech
-from a phonemic transscription. Furthermore, it defines helpers to improve the
+from a phonemic transcription. Furthermore, it defines helpers to improve the
 result if more information as the pitch contour is available.
 
-This python tool is based on the work and on the Matlab code on Yingming Gao.
+Version 2.0.0 and later
+-----------------------
+From version 2.0.0 we are relying on the new segment-to-gesture API introduced
+in VTL 2.3 and use the JD3.speaker instead of the JD2.speaker.
 
-The overall logic is in ``create_corpus.py`` which executes the approriate functions from top to bottom. The functions are supplied by the other files.
+Old version 1.1.0
+-----------------
+The original version of this tool is based on the work and on the Matlab code
+on Yingming Gao. This can be viewed by checking out the tag ``1.1.0``.
+
+The overall logic is in ``create_corpus.py`` which executes the appropriate
+functions from top to bottom. The functions are supplied by the other files.
 
 .. note::
 
