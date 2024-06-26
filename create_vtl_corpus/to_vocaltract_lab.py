@@ -18,6 +18,7 @@ import pandas as pd
 import os
 import argparse
 import subprocess
+from paule import util
 
 
 class CreateVocaltractLab:
@@ -110,6 +111,32 @@ class CreateVocaltractLab:
             print("The lab files and mp3 files do not match, correcting this now")
             self.format_corpus()
 
+    def extract_sampa(self):
+        """
+        Extracts the SAMPA phonemes from the aligned corpus
+
+        Params:
+        -
+
+        Returns:
+        -
+        """
+        aligned = os.path.join(self.path_to_corpus + "_aligned", "textgrids")
+        for file in os.listdir(aligned):
+            if file.endswith(".TextGrid"):
+                with open(os.path.join(aligned, file), "rt") as textgrid:
+                    lines = textgrid.readlines()
+                    phoneme_lines = lines[lines.index("item []: \n") :]
+                    phonemes = []
+                    for line in phoneme_lines:
+                        if "text" in line:
+                            phonemes.append(line.split()[-1])
+
+                    with open(
+                        os.path.join(aligned, file.removesuffix(".TextGrid") + ".lab"),
+                        "wt",
+                    ) as lab_file:
+                        lab_file.write(" ".join(phonemes)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
