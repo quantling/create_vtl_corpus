@@ -6,9 +6,9 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'CreateVTLCorpus'
-copyright = '2024, Tino Sering'
-author = 'Tino Sering'
+project = 'createVTLcorpus'
+copyright = '2024, Konstantin Sering'
+author = 'Konstantin Sering'
 release = '0.0.1'
 
 # -- General configuration ---------------------------------------------------

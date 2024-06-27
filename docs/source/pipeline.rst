@@ -1,0 +1,68 @@
+========
+Pipeline
+========
+
+Some conceptual thoughts on the processing pipeline to generate the control
+parameter trajectories, splice out the single words and do the segment-based
+synthesis.
+
+
+Output Format
+=============
+As the final output create_vtl_corpus generates a pandas.DataFrame with the following columns:
+
+* 'file_name' : name of the mp3 file in the common voice corpus
+* 'word_type' : word type, i. e. type of the word in terms of graphemic transcription
+* 'sentence' : transcription of the full sentence
+* 'wav_recording' : spliced out audio as mono audio signal
+* 'sr_recording' : sampling rate of the recording
+* 'sampa_phones' : list of phones in sampa notation
+* 'phone_durations' : list of durations of the phones
+* 'vector' : fastText vector embedding for the word_type
+* 'cp_segment' : cp-trajectories of the segment-based synthesis
+
+The following columns are added, even if they can be generated out of the entries we already have for convenience:
+
+* 'wav_segment' : wave form as mono audio from the segment-based synthesis
+* 'sr_segment' : sampling rate for the mono audio from the segment-based synthesis
+* 'melspec_recording' : acoustic representation of human recording of the common voice corpus (log-mel spectrogram)
+* 'melspec_segment' : acoustic representation of the segment-based approach (log-mel spectrogram)
+
+
+Pipeline
+========
+The idea of the processing pipeline is:
+
+1. align the audio corpus and transcriptions with the MFA
+2. extract the word types and splice out the audio
+3. extract the phones and phone durations from the alignment
+#. convert stereo audio to mono
+#. extract the pitch of the audio signal
+#. generate gestural scores with the segment-based approach in VTL
+#. fit the pitch with the targetoptimizer
+#. merge the f0 gesture of the targetoptimizer to the gestural scores of the
+   segment-based approach
+#. synthesize cp-trajectories from the patched gestural scores
+#. synthesize audio (wav_segment, sr_segment) from the cp-trajectories
+#. retrieve the fastText embedding vector for the word type
+#. calculate the aucoustic representation (log-mel-spectrogram) for the wav_recording, and wav_segment
+
+
+Notes
+=====
+Some random notes to keep in mind.
+
+* pauses between words are dropped
+* we use the MFA (IPA like) phonemes and not the ARPA ones
+
+
+Resources
+=========
+The following resources are used:
+
+* VocalTractLab (use the version included in create_vtl_corpus)
+* targetoptimizer (use the version included in create_vtl_corpus)
+* Montreal force aligner
+* Mozilla Common Voice
+* fastText word embedding model
+

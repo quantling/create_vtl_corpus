@@ -10,6 +10,9 @@ Welcome to CreateVTLCorpus's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   pipeline
+   glossary
+
 
 
 Indices and tables
