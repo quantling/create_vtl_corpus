@@ -13,6 +13,7 @@ Welcome to CreateVTLCorpus's documentation!
    pipeline
    usage
    glossary
+   installation
 
 
 
