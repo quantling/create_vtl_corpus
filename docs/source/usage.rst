@@ -16,6 +16,4 @@ CreateVocaltractlab Class
 
 .. autoclass:: create_vtl_corpus.CreateVocaltractlab
    :members:
-   :undoc-members:
-   :show-inheritance:
 
