@@ -1,19 +1,3 @@
-"""
-This file generates the vocaltract lab trajectories for a corpus. 
-It's assumed that a corpus has the following shape 
- as is common with Mozillas Common Voice Corpus)
- This file uses the Montreal Forced Aligner 
-
-corpus/
-├── validated.txt          a file where the transripts are stored
-|
-├── clips/
-|     └──*.mp3
-└── *.files_not_relevant_to this project
-
-
-"""
-
 import pandas as pd
 import os
 import argparse
@@ -26,6 +10,37 @@ class CreateVocaltractLab:
     def __init__(self, path_to_corpus: str, language: str):
         self.path_to_corpus = path_to_corpus
         self.language = language
+
+    """
+    This class generates the vocaltract lab trajectories for a corpus. 
+    It's assumed that a corpus has the following shape 
+    as is common with Mozillas Common Voice Corpus using MFA 
+
+    corpus/
+    ├── validated.txt          a file where the transripts are stored
+    |
+    ├── clips/
+    |     └──*.mp3
+    └── *.files_not_relevant_to this project
+
+    Attributes:
+    ---------------
+    path_to_corpus: str
+        The path to the corpus
+    language: str
+        The language of the corpus as an abbreviation
+
+    Methods:
+    ---------------
+    format_corpus():
+        Takes the path to the corpus and formats it to the fitting form
+    run_aligner():
+        Runs the Montreal Forced Aligner on the corpus
+    check_structure():
+        Checks if the corpus has the right format and if not corrects this
+
+
+"""
 
     def format_corpus(self):
         """
@@ -136,7 +151,8 @@ class CreateVocaltractLab:
                         os.path.join(aligned, file.removesuffix(".TextGrid") + ".lab"),
                         "wt",
                     ) as lab_file:
-                        lab_file.write(" ".join(phonemes)
+                        lab_file.write(" ".join(phonemes))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

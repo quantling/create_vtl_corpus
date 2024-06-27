@@ -10,3 +10,12 @@ This is a collection of possible use cases, which we target the library for.
 
 3. Filter after words? Create 1000 more "post" word types.
 
+
+CreateVocaltractlab Class
+==========================
+
+.. autoclass:: create_vtl_corpus.CreateVocaltractlab
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
