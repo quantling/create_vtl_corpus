@@ -11,6 +11,7 @@ Welcome to CreateVTLCorpus's documentation!
    :caption: Contents:
 
    pipeline
+   usage
    glossary
 
 

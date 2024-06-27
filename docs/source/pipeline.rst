@@ -13,6 +13,7 @@ As the final output create_vtl_corpus generates a pandas.DataFrame with the foll
 
 * 'file_name' : name of the mp3 file in the common voice corpus
 * 'word_type' : word type, i. e. type of the word in terms of graphemic transcription
+* 'word_position' : postion of the word type in the sentence
 * 'sentence' : transcription of the full sentence
 * 'wav_recording' : spliced out audio as mono audio signal
 * 'sr_recording' : sampling rate of the recording
