@@ -61,9 +61,9 @@ Resources
 =========
 The following resources are used:
 
-* VocalTractLab (use the version included in create_vtl_corpus)
+*  `VocalTractLab <https://vocaltractlab.de/>`__ (use the version included in create_vtl_corpus)
 * targetoptimizer (use the version included in create_vtl_corpus)
-* Montreal force aligner
-* Mozilla Common Voice
-* fastText word embedding model
+* `Montreal forced aligner  <https://montreal-forced-aligner.readthedocs.io/en/latest/getting_started.html>`__
+* `Mozilla Common Voice <https://commonvoice.mozilla.org/en>`__`
+* `fastText word embedding model <https://fasttext.cc/>`__`
 
