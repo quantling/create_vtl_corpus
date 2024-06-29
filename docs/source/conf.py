@@ -11,6 +11,11 @@ copyright = "2024, Konstantin Sering"
 author = "Konstantin Sering"
 release = "0.0.1"
 
+# add modules to the path
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath("../../create_vtl_corpus"))
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
@@ -27,10 +32,3 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "alabaster"
 html_static_path = ["_static"]
-
-
-# add modules to the path
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath("../../create_vtl_corpus"))
