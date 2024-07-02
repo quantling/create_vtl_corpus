@@ -54,7 +54,7 @@ Notes
 Some random notes to keep in mind.
 
 * pauses between words are dropped
-* we use the MFA (IPA like) phonemes and not the ARPA ones
+* we use the MFA (IPA like) phonemes and not the ARPA ones and then convert them to the SAMPA like phonemes needed for VTL
 
 
 Resources

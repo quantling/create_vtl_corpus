@@ -2,19 +2,17 @@ import pandas as pd
 import os
 import argparse
 import subprocess
-from paule import util
+
+# from paule import util
+from praatio import textgrid
+import soundfile as sf
 
 
 class CreateVocaltractLab:
-
-    def __init__(self, path_to_corpus: str, language: str):
-        self.path_to_corpus = path_to_corpus
-        self.language = language
-
     """
-    This class generates the vocaltract lab trajectories for a corpus. 
-    It's assumed that a corpus has the following shape 
-    as is common with Mozillas Common Voice Corpus using MFA 
+    This class generates the vocaltract lab trajectories for a corpus.
+    It's assumed that a corpus has the following shape
+    as is common with Mozillas Common Voice Corpus using MFA
 
     corpus/
     ├── validated.txt          a file where the transripts are stored
@@ -38,9 +36,94 @@ class CreateVocaltractLab:
         Runs the Montreal Forced Aligner on the corpus
     check_structure():
         Checks if the corpus has the right format and if not corrects this
+    extract_sampa():
+        Extracts the SAMPA phonemes from the aligned corpus
+    """
 
-
-"""
+    def __init__(self, path_to_corpus: str, *, language: str):
+        self.path_to_corpus = path_to_corpus
+        self.language = language
+        self.mfa_to_sampa_dict = {
+            "a": "a",
+            "aj": "aI",
+            "aw": "aU",
+            "aː": "a:",
+            "b": "b",
+            "bʲ": "b'",
+            "c": "c",
+            "cʰ": "c",  # c_h not possible in SAMPA but in X SAMPA
+            "d": "d",
+            "dʒ": "dZ",
+            "dʲ": "d'",
+            "e": "e",
+            "ej": "eI",
+            "f": "f",
+            "fʲ": "f'",
+            "h": "h",
+            "i": "i",
+            "iː": "i:",
+            "j": "j",
+            "k": "k",
+            "kʰ": "k",  # "k_h", is not possible in SAMPA ibut in X SAMPA
+            "l": "l",
+            "m": "m",
+            "mʲ": "m'",
+            "m̩": "m%",
+            "n": "n",
+            "n̩": "n%",
+            "o": "o",
+            "ow": "oU",
+            "p": "p",
+            "pʰ": "p",  # "p_h", is not possible in SAMPA ibut in X SAMPA
+            "pʲ": "p'",
+            "s": "s",
+            "t": "t",
+            "tʃ": "tS",
+            "tʰ": "t",  # "t_h", is not possible in SAMPA ibut in X SAMPA
+            "tʲ": "t'",
+            "u": "u",
+            "uː": "u:",
+            "v": "v",
+            "vʲ": "v'",
+            "w": "w",
+            "z": "z",
+            "æ": "{",
+            "ç": "C",
+            "ð": "D",
+            "ŋ": "N",
+            "ɐ": "6",
+            "ɑ": "A",
+            "ɑː": "A:",
+            "ɒ": "Q",
+            "ɒː": "Q:",
+            "ɔ": "O",
+            "ɔj": "OI",
+            "ə": "@",
+            "əw": "@U",
+            "ɚ": "@`",
+            "ɛ": "E",
+            "ɛː": "E:",
+            "ɜ": "3",
+            "ɜː": "3:",
+            "ɝ": "3`",
+            "ɟ": "J",
+            "ɡ": "g",
+            "ɪ": "I",
+            "ɫ": "5",
+            "ɫ̩": "5=",
+            "ɱ": "F",
+            "ɲ": "J",
+            "ɹ": "r",
+            "ɾ": "4",
+            "ʃ": "S",
+            "ʉ": "}",
+            "ʉː": "}:",
+            "ʊ": "U",
+            "ʎ": "L",
+            "ʒ": "Z",
+            "ʔ": "?",
+            "θ": "T",
+        }
 
     def format_corpus(self):
         """
@@ -56,14 +139,17 @@ class CreateVocaltractLab:
         data = pd.read_table(
             os.path.join(self.path_to_corpus, "validated.tsv"), sep="\t"
         )
-
+        clip_names = list()
         for _, row in data.iterrows():
             transcript = row["sentence"]
-            file_name = row["path"].removesuffix(".mp3") + ".lab"
+            clip_name = row["path"].removesuffix(".mp3")
+            clip_names.append(clip_name)
+            file_name = clip_name + ".lab"
             with open(
                 os.path.join(self.path_to_corpus, "clips", file_name), "wt"
             ) as lab_file:
                 lab_file.write(transcript)
+        return clip_names
 
     def run_aligner(self):
         """
@@ -79,8 +165,8 @@ class CreateVocaltractLab:
             print("aligning corpus in english")
             command = "conda run -n aligner mfa  align".split() + [
                 os.path.join(self.path_to_corpus, "clips"),
-                "english_us_arpa",
-                "english_us_arpa",
+                "english_mfa",
+                "english_mfa",
                 os.path.join(self.path_to_corpus + "_aligned"),
             ]
 
@@ -93,7 +179,8 @@ class CreateVocaltractLab:
                 os.path.join(self.path_to_corpus + "_aligned"),
             ]
 
-        subprocess.run(command)
+        run = subprocess.run(command)
+        assert run.returncode == 0, "The aligner did not run successfully"
 
     def check_structure(self):
         """
@@ -103,7 +190,8 @@ class CreateVocaltractLab:
         -
 
         Returns:
-         -
+         clipnames: List[str]
+            A set of the clip names
         """
         assert os.path.exists(
             os.path.join(self.path_to_corpus, "validated.tsv")
@@ -116,42 +204,157 @@ class CreateVocaltractLab:
         # Traverse the directory and collect the file names
         for file in os.listdir(with_clips):
             if file.endswith(".lab"):
+
                 lab_files.add(os.path.splitext(file)[0])
             elif file.endswith(".mp3"):
                 mp3_files.add(os.path.splitext(file)[0])
 
         if lab_files == mp3_files:
-            return
+
+            clip_names = lab_files
+            return list(clip_names)
         else:
             print("The lab files and mp3 files do not match, correcting this now")
-            self.format_corpus()
+            clip_names = self.format_corpus()
 
-    def extract_sampa(self):
+        return list(clip_names)
+
+    def extract_sampas_and_cut_audio(self, path_to_corpus: str, clip_list: list):
         """
-        Extracts the SAMPA phonemes from the aligned corpus
-
-        Params:
-        -
+        Extracts the sampas and cuts the audio word by word for the whole corpus
+        Parameters:
+        path_to_corpus (str): The path to the corpus
+        clip_list (list): A list of the clip names present in the corpus
 
         Returns:
-        -
+        Dataframe: A dataframe with the following labels
+        'file_name' : name of the clip
+        'label' : the spoken word
+        'cp_norm' : normalized cp-trajectories
+        'melspec_norm_recorded' : normalized mel spectrogram of the audio clip
+        'melspec_norm_synthesized' : normalized mel spectrogram synthesized from the cp-trajectories
+        'vector' : embedding vector of the word, based on fastText Embeddings
+        'client_id' : id of the client
         """
-        aligned = os.path.join(self.path_to_corpus + "_aligned", "textgrids")
-        for file in os.listdir(aligned):
-            if file.endswith(".TextGrid"):
-                with open(os.path.join(aligned, file), "rt") as textgrid:
-                    lines = textgrid.readlines()
-                    phoneme_lines = lines[lines.index("item []: \n") :]
-                    phonemes = []
-                    for line in phoneme_lines:
-                        if "text" in line:
-                            phonemes.append(line.split()[-1])
 
-                    with open(
-                        os.path.join(aligned, file.removesuffix(".TextGrid") + ".lab"),
-                        "wt",
-                    ) as lab_file:
-                        lab_file.write(" ".join(phonemes))
+        labels = list()
+        cp_norms = list()
+        melspec_norm_recordeds = list()
+        melspec_norm_synthesizeds = list()
+        vectors = list()
+        client_ids = list()
+
+        # remove extension for TextGrid
+        for filename_no_extension in clip_list:
+            clip_name = filename_no_extension + ".mp3"
+            print(clip_name)
+            target_audio, sampling_rate = sf.read(
+                os.path.join(path_to_corpus, "clips", clip_name)
+            )
+
+            assert (
+                len(target_audio.shape) == 1
+            ), f"The audio file {clip_name} is not mono"
+            tg = textgrid.openTextgrid(
+                os.path.join(
+                    path_to_corpus + "_aligned", filename_no_extension + ".TextGrid"
+                ),
+                False,
+            )
+
+            for word_index, word in enumerate(tg.getTier("words")):
+                phones = list()
+                phone_durations = list()
+                for phone in tg.getTier("phones").entries:
+                    if phone.label == "spn":
+                        break
+                    if phone.start >= word.end:
+                        break
+                    if phone.start < word.start:
+
+                        continue
+                    print("MFA Phones", phone.label)
+                    phones.append(self.mfa_to_sampa_dict[phone.label])
+                    print("sampa phones", phones)
+                    phone_durations.append(phone.end - phone.start)
+
+                if not phones:
+                    continue
+
+                # write seg file
+                rows = []
+                for i, phone in enumerate(phones):
+                    row = "name = %s; duration_s = %f;" % (phone, phone_durations[i])
+                    rows.append(row)
+                text = "\n".join(rows)
+                path = os.path.join(path_to_corpus + "_aligned", "clips")
+                seg_file_name = str(
+                    os.path.join(
+                        path, f"temp_output/target_audio_word_{word_index}.seg"
+                    )
+                )
+                with open(seg_file_name, "w") as text_file:
+                    text_file.write(text)
+                """
+                # get tract files and gesture score
+                seg_file_name = ctypes.c_char_p(seg_file_name.encode())
+
+                ges_file_name = str(
+                    os.path.join(path, f"temp_output/target_audio_word_{word_index}.ges")
+                )
+                ges_file_name = ctypes.c_char_p(ges_file_name.encode())
+
+                devnull = open("/dev/null", "w")
+                with contextlib.redirect_stdout(devnull):
+                    util.VTL.vtlSegmentSequenceToGesturalScore(seg_file_name, ges_file_name)
+                tract_file_name = str(
+                    os.path.join(path, f"temp_output/target_audio_word_{word_index}.txt")
+                )
+                c_tract_file_name = ctypes.c_char_p(tract_file_name.encode())
+
+                util.VTL.vtlGesturalScoreToTractSequence(ges_file_name, c_tract_file_name)
+                cps = util.read_cp(tract_file_name)
+
+                cp_norm = util.normalize_cp(cps)
+                wav_rec = target_audio[
+                    int(word.start * sampling_rate) : int(word.end * sampling_rate)
+                ]
+                melspec_norm_rec = util.normalize_mel_librosa(
+                    util.librosa_melspec(wav_rec, sampling_rate)
+                )
+                wav_syn, wav_syn_sr = util.speak(cps)
+                melspec_norm_syn = util.normalize_mel_librosa(
+                    util.librosa_melspec(wav_syn, wav_syn_sr)
+                )
+
+                fasttext_vector = FASTTEXT_EMBEDDINGS.get_word_vector(word.label)
+
+                melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
+
+                data.append(
+                    {
+                        "file_name": filename_no_extension,
+                        "label": word.label,
+                        "cp_norm": cp_norm,
+                        "mespec_norm_recorded": melspec_norm_rec,
+                        "melspec_norm_synthesized": melspec_norm_syn,
+                        "vector": fasttext_vector,
+                        "client_id": id,
+                    }
+                )
+                """
+        df = pd.DataFrame(
+            {
+                "file_name": clip_list,
+                "label": labels,
+                "cp_norm": cp_norms,
+                "melspec_norm_recorded": melspec_norm_recordeds,
+                "melspec_norm_synthesized": melspec_norm_synthesizeds,
+                "vector": vectors,
+                "client_id": client_ids,
+            }
+        )
+        return df
 
 
 if __name__ == "__main__":
@@ -170,10 +373,14 @@ if __name__ == "__main__":
         default="en",
         help="The language of the corpus as an abbreviation",
     )
+    parser.add_argument("--needs_aligner", action="store_true", default=False)
     args = parser.parse_args()
 
     assert os.path.isdir(args.corpus), "The provided path is not a directory"
 
-    vtl = CreateVocaltractLab(args.corpus, args.language)
-    vtl.check_structure()
-    vtl.run_aligner()
+    vtl = CreateVocaltractLab(args.corpus, language=args.language)
+    clip_list = vtl.check_structure()
+    if args.needs_aligner:
+        vtl.run_aligner()
+    print(clip_list)
+    vtl.extract_sampas_and_cut_audio(args.corpus, clip_list)

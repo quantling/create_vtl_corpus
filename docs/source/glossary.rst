@@ -28,9 +28,10 @@ SAMPA
 
 MFA alphabet
 ============
-The phonetic alphabet used by default by the MFA seems to be a variant of the
+The phonetic alphabet used by default by the MFA is a opinionated version of
 IPA symbols. With the create_vtl_corpus we target this alphabet in the
-segment-based synthesis with VTL.
+segment-based synthesis with VTL. You can read more about this alphabet in the
+`MFA documentation <https://mfa-models.readthedocs.io/en/latest/mfa_phone_set.html>`_.
 
 
 Segment-based synthesis
