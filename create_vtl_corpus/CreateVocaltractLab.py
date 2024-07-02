@@ -212,12 +212,14 @@ class CreateVocaltractLab:
         if lab_files == mp3_files:
 
             clip_names = lab_files
-            return list(clip_names)
+            print("The lab files and mp3 files match")
+
+            return sorted(clip_names)
         else:
             print("The lab files and mp3 files do not match, correcting this now")
             clip_names = self.format_corpus()
 
-        return list(clip_names)
+        return sorted(clip_names)
 
     def extract_sampas_and_cut_audio(self, path_to_corpus: str, clip_list: list):
         """
@@ -264,6 +266,7 @@ class CreateVocaltractLab:
 
             for word_index, word in enumerate(tg.getTier("words")):
                 phones = list()
+                labels.append(word.label)
                 phone_durations = list()
                 for phone in tg.getTier("phones").entries:
                     if phone.label == "spn":
@@ -273,6 +276,7 @@ class CreateVocaltractLab:
                     if phone.start < word.start:
 
                         continue
+                    print(word.label)
                     print("MFA Phones", phone.label)
                     phones.append(self.mfa_to_sampa_dict[phone.label])
                     print("sampa phones", phones)
@@ -288,6 +292,11 @@ class CreateVocaltractLab:
                     rows.append(row)
                 text = "\n".join(rows)
                 path = os.path.join(path_to_corpus + "_aligned", "clips")
+                if not os.path.exists(path):
+                    os.mkdir(path=path)
+                # delete this later
+                if not os.path.exists(os.path.join(path, "temp_output")):
+                    os.mkdir(path=os.path.join(path, "temp_output"))
                 seg_file_name = str(
                     os.path.join(
                         path, f"temp_output/target_audio_word_{word_index}.seg"
