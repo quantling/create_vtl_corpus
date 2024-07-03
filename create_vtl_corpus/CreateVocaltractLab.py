@@ -2,8 +2,11 @@ import pandas as pd
 import os
 import argparse
 import subprocess
+import ctypes
+import fasttext
+import contextlib
 
-# from paule import util
+from paule import util
 from praatio import textgrid
 import soundfile as sf
 
@@ -43,6 +46,7 @@ class CreateVocaltractLab:
     def __init__(self, path_to_corpus: str, *, language: str):
         self.path_to_corpus = path_to_corpus
         self.language = language
+        self.fast_text_model = self.load_fasttext_model(language)
         self.mfa_to_sampa_dict = {
             "a": "a",
             "aj": "aI",
@@ -124,6 +128,25 @@ class CreateVocaltractLab:
             "ʔ": "?",
             "θ": "T",
         }
+
+    def load_fasttext_model(self, language: str):
+        """
+        Loads the fasttext model for the given language
+
+        Params:
+        language (str): The language of the model
+
+        Returns:
+        fasttext.FastText._FastText: The loaded fasttext model
+        """
+        if language == "en":
+            model = fasttext.load_model("../../cc.en.300.bin")
+        elif language == "de":
+            model = fasttext.load_model("../../cc.de.300.bin")
+        else:
+            raise ValueError("The language is not supported")
+        print("Fasttext model loaded")
+        return model
 
     def format_corpus(self):
         """
@@ -232,14 +255,27 @@ class CreateVocaltractLab:
         Dataframe: A dataframe with the following labels
         'file_name' : name of the clip
         'label' : the spoken word
+        'word_position' : the position of the word in the sentence
+        'sentence' : the sentence the word is part of
+        'wav_recording' : spliced out audio as mono audio signal
+        'sr_recording' : sampling rate of the recording
+        'sampa_phones' : the sampa(like) phonemes of the word
+        'phone_durations' : the duration of each phone in the word
         'cp_norm' : normalized cp-trajectories
         'melspec_norm_recorded' : normalized mel spectrogram of the audio clip
         'melspec_norm_synthesized' : normalized mel spectrogram synthesized from the cp-trajectories
         'vector' : embedding vector of the word, based on fastText Embeddings
         'client_id' : id of the client
+
         """
 
         labels = list()
+        word_positions = list()
+        sentences = list()
+        wavs = list()
+        sampling_rates = list()
+        phone_durations = list()
+        sampa_phones = list()
         cp_norms = list()
         melspec_norm_recordeds = list()
         melspec_norm_synthesizeds = list()
@@ -263,10 +299,23 @@ class CreateVocaltractLab:
                 ),
                 False,
             )
-
+            sentence_list = []
             for word_index, word in enumerate(tg.getTier("words")):
+                sentence_list.append(word.label)
+            sentence = " ".join(sentence_list)
+            for word_index, word in enumerate(tg.getTier("words")):
+
                 phones = list()
+
+                # adding easy to add variables to the lists
                 labels.append(word.label)
+                sampling_rates.append(sampling_rate)
+                word_positions.append(word_index)
+                fasttext_vector = self.fast_text_model.get_word_vector(word.label)
+                vectors.append(fasttext_vector)
+                client_ids.append(filename_no_extension)
+                sentences.append(sentence)
+
                 phone_durations = list()
                 for phone in tg.getTier("phones").entries:
                     if phone.label == "spn":
@@ -276,6 +325,7 @@ class CreateVocaltractLab:
                     if phone.start < word.start:
 
                         continue
+
                     print(word.label)
                     print("MFA Phones", phone.label)
                     phones.append(self.mfa_to_sampa_dict[phone.label])
@@ -285,6 +335,11 @@ class CreateVocaltractLab:
                 if not phones:
                     continue
 
+                # splicing audio
+                wav_rec = target_audio[
+                    int(word.start * sampling_rate) : int(word.end * sampling_rate)
+                ]
+                wavs.append(wav_rec)
                 # write seg file
                 rows = []
                 for i, phone in enumerate(phones):
@@ -304,58 +359,59 @@ class CreateVocaltractLab:
                 )
                 with open(seg_file_name, "w") as text_file:
                     text_file.write(text)
-                """
+
                 # get tract files and gesture score
                 seg_file_name = ctypes.c_char_p(seg_file_name.encode())
 
                 ges_file_name = str(
-                    os.path.join(path, f"temp_output/target_audio_word_{word_index}.ges")
+                    os.path.join(
+                        path, f"temp_output/target_audio_word_{word_index}.ges"
+                    )
                 )
                 ges_file_name = ctypes.c_char_p(ges_file_name.encode())
 
                 devnull = open("/dev/null", "w")
                 with contextlib.redirect_stdout(devnull):
-                    util.VTL.vtlSegmentSequenceToGesturalScore(seg_file_name, ges_file_name)
+                    util.VTL.vtlSegmentSequenceToGesturalScore(
+                        seg_file_name, ges_file_name
+                    )
                 tract_file_name = str(
-                    os.path.join(path, f"temp_output/target_audio_word_{word_index}.txt")
+                    os.path.join(
+                        path, f"temp_output/target_audio_word_{word_index}.txt"
+                    )
                 )
                 c_tract_file_name = ctypes.c_char_p(tract_file_name.encode())
 
-                util.VTL.vtlGesturalScoreToTractSequence(ges_file_name, c_tract_file_name)
+                util.VTL.vtlGesturalScoreToTractSequence(
+                    ges_file_name, c_tract_file_name
+                )
                 cps = util.read_cp(tract_file_name)
 
                 cp_norm = util.normalize_cp(cps)
-                wav_rec = target_audio[
-                    int(word.start * sampling_rate) : int(word.end * sampling_rate)
-                ]
+                cp_norms.append(cp_norm)
+
                 melspec_norm_rec = util.normalize_mel_librosa(
                     util.librosa_melspec(wav_rec, sampling_rate)
                 )
+                melspec_norm_recordeds.append(melspec_norm_rec)
                 wav_syn, wav_syn_sr = util.speak(cps)
                 melspec_norm_syn = util.normalize_mel_librosa(
                     util.librosa_melspec(wav_syn, wav_syn_sr)
                 )
 
-                fasttext_vector = FASTTEXT_EMBEDDINGS.get_word_vector(word.label)
-
                 melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
+                melspec_norm_synthesizeds.append(melspec_norm_syn)
 
-                data.append(
-                    {
-                        "file_name": filename_no_extension,
-                        "label": word.label,
-                        "cp_norm": cp_norm,
-                        "mespec_norm_recorded": melspec_norm_rec,
-                        "melspec_norm_synthesized": melspec_norm_syn,
-                        "vector": fasttext_vector,
-                        "client_id": id,
-                    }
-                )
-                """
         df = pd.DataFrame(
             {
                 "file_name": clip_list,
                 "label": labels,
+                "word_position": word_positions,
+                "sentence": sentences,
+                "wav_recording": wavs,
+                "sr_recording": sampling_rates,
+                "sampa_phones": sampa_phones,
+                "phone_durations": phone_durations,
                 "cp_norm": cp_norms,
                 "melspec_norm_recorded": melspec_norm_recordeds,
                 "melspec_norm_synthesized": melspec_norm_synthesizeds,
@@ -393,3 +449,4 @@ if __name__ == "__main__":
         vtl.run_aligner()
     print(clip_list)
     vtl.extract_sampas_and_cut_audio(args.corpus, clip_list)
+    print("Done! :P")
