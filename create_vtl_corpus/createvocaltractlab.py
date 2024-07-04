@@ -11,7 +11,7 @@ from praatio import textgrid
 import soundfile as sf
 
 
-class CreateVocaltractLab:
+class CreateVocalTractLab:
     """
     This class generates the vocaltract lab trajectories for a corpus.
     It's assumed that a corpus has the following shape

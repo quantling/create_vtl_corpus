@@ -14,5 +14,5 @@ This is a collection of possible use cases, which we target the library for.
 CreateVocaltractlab Class
 ==========================
 
-.. autoclass:: create_vtl_corpus.CreateVocaltractlab
+.. autoclass:: create_vtl_corpus.createvocaltractlab.CreateVocalTractLab
    :members:
