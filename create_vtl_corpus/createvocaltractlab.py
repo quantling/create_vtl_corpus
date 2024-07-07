@@ -68,7 +68,7 @@ class CreateVocalTractLab:
             "iː": "i:",
             "j": "j",
             "k": "k",
-            "kʰ": "k",  # "k_h", is not possible in SAMPA ibut in X SAMPA
+            "kʰ": "k",  # "k_h", is not possible in SAMPA but in X SAMPA
             "l": "l",
             "m": "m",
             "mʲ": "m'",
@@ -78,12 +78,12 @@ class CreateVocalTractLab:
             "o": "o",
             "ow": "oU",
             "p": "p",
-            "pʰ": "p",  # "p_h", is not possible in SAMPA ibut in X SAMPA
+            "pʰ": "p",  # "p_h", is not possible in SAMPA but in X SAMPA
             "pʲ": "p'",
             "s": "s",
             "t": "t",
             "tʃ": "tS",
-            "tʰ": "t",  # "t_h", is not possible in SAMPA ibut in X SAMPA
+            "tʰ": "t",  # "t_h", is not possible in SAMPA but in X SAMPA
             "tʲ": "t'",
             "u": "u",
             "uː": "u:",
