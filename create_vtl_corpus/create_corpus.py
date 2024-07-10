@@ -5,12 +5,20 @@ import subprocess
 import ctypes
 import fasttext
 import contextlib
-
+import logging
+import shutil
+import fasttext.util
 from paule import util
 from praatio import textgrid
 import soundfile as sf
 
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 DIR = os.path.dirname(__file__)
+
 
 class CreateCorpus:
     """
@@ -43,6 +51,26 @@ class CreateCorpus:
     extract_sampa():
         Extracts the SAMPA phonemes from the aligned corpus
     """
+
+    fast_text_model_english = "cc.en.300.bin"
+    fast_text_model_german = "cc.de.300.bin"
+
+    @staticmethod
+    def setup(language: str):
+
+        if language == "en":
+            model_name = CreateCorpus.fast_text_model_english
+
+        elif language == "de":
+            model_name = CreateCorpus.fast_text_model_german
+        else:
+            raise ValueError("The language is not supported")
+        path_to_text_model = os.path.join(DIR, "resources", model_name)
+        if not os.path.exists(path_to_text_model):
+            logging.warning("FastTextModel doesn't exist. Downloading fasttext model")
+            fasttext.util.download_model(language, if_exists="ignore")
+            shutil.move(f"cc.{language}.300.bin", path_to_text_model)
+            os.remove(f"cc.{language}.300.bin.gz")
 
     def __init__(self, path_to_corpus: str, *, language: str):
         self.path_to_corpus = path_to_corpus
@@ -141,12 +169,16 @@ class CreateCorpus:
         fasttext.FastText._FastText: The loaded fasttext model
         """
         if language == "en":
-            model = fasttext.load_model(os.path.join(DIR, "resources/cc.en.300.bin"))
+            model = fasttext.load_model(
+                os.path.join(DIR, "resources", CreateCorpus.fast_text_model_english)
+            )
         elif language == "de":
-            model = fasttext.load_model(os.path.join(DIR, "resources/cc.de.300.bin"))
+            model = fasttext.load_model(
+                os.path.join(DIR, "resources", CreateCorpus.fast_text_model_german)
+            )
         else:
             raise ValueError("The language is not supported")
-        print("Fasttext model loaded")
+        logging.info("Fasttext model loaded")
         return model
 
     def format_corpus(self):
@@ -443,7 +475,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     assert os.path.isdir(args.corpus), "The provided path is not a directory"
-
+    CreateCorpus.setup(language=args.language)
     corpus_worker = CreateCorpus(args.corpus, language=args.language)
     clip_list = corpus_worker.check_structure()
     if args.needs_aligner:

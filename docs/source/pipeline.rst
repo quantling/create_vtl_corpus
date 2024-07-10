@@ -6,6 +6,11 @@ Some conceptual thoughts on the processing pipeline to generate the control
 parameter trajectories, splice out the single words and do the segment-based
 synthesis.
 
+Goal
+======
+The goal of the pipeline is to generate a corpus for a vocal tract synthesis with VocalTractLab (VTL) from the Mozilla Common Voice corpus. The corpus is specifically tailored
+for the `PAULE model <https://github.com/quantling/paule>`__  but it can be used for other purposes.
+
 
 Output Format
 =============
@@ -64,6 +69,6 @@ The following resources are used:
 *  `VocalTractLab <https://vocaltractlab.de/>`__ (use the version included in create_vtl_corpus)
 * targetoptimizer (use the version included in create_vtl_corpus)
 * `Montreal forced aligner  <https://montreal-forced-aligner.readthedocs.io/en/latest/getting_started.html>`__
-* `Mozilla Common Voice <https://commonvoice.mozilla.org/en>`__`
-* `fastText word embedding model <https://fasttext.cc/>`__`
+* `Mozilla Common Voice <https://commonvoice.mozilla.org/en>`__
+* `fastText word embedding model <https://fasttext.cc/>`__
 
