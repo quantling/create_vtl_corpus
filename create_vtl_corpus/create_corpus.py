@@ -218,7 +218,7 @@ class CreateCorpus:
         -
         """
         if self.language == "en":
-            print("aligning corpus in english")
+            logging.info("aligning corpus in english")
             command = "conda run -n aligner mfa  align".split() + [
                 os.path.join(self.path_to_corpus, "clips"),
                 "english_mfa",
@@ -227,7 +227,7 @@ class CreateCorpus:
             ]
 
         if self.language == "de":
-            print("aligning corpus in german")
+            logging.info("aligning corpus in german")
             command = "conda run -n aligner mfa  align".split() + [
                 os.path.join(self.path_to_corpus, "clips"),
                 "german_mfa",
@@ -268,11 +268,12 @@ class CreateCorpus:
         if lab_files == mp3_files:
 
             clip_names = lab_files
-            print("The lab files and mp3 files match")
-
+            logging.info("The lab files and mp3 files match")
             return sorted(clip_names)
         else:
-            print("The lab files and mp3 files do not match, correcting this now")
+            logging.warning(
+                "The lab files and mp3 files do not match, correcting this now"
+            )
             clip_names = self.format_corpus()
 
         return sorted(clip_names)
@@ -318,7 +319,7 @@ class CreateCorpus:
         # remove extension for TextGrid
         for filename_no_extension in clip_list:
             clip_name = filename_no_extension + ".mp3"
-            print(clip_name)
+
             target_audio, sampling_rate = sf.read(
                 os.path.join(path_to_corpus, "clips", clip_name)
             )
@@ -359,15 +360,15 @@ class CreateCorpus:
 
                         continue
 
-                    print(word.label)
-                    print("MFA Phones", phone.label)
                     phones.append(self.mfa_to_sampa_dict[phone.label])
-                    print("sampa phones", phones)
+
                     phone_durations.append(phone.end - phone.start)
 
                 if not phones:
                     continue
-
+                logging.info(
+                    f"Processing word {word.label} in {filename_no_extension}, resulting phones: {phones}"
+                )
                 # splicing audio
                 wav_rec = target_audio[
                     int(word.start * sampling_rate) : int(word.end * sampling_rate)
@@ -480,6 +481,6 @@ if __name__ == "__main__":
     clip_list = corpus_worker.check_structure()
     if args.needs_aligner:
         corpus_worker.run_aligner()
-    print(clip_list)
+    logging.info(clip_list)
     corpus_worker.extract_sampas_and_cut_audio(args.corpus, clip_list)
-    print("Done! :P")
+    logging.info("Done! :P")
