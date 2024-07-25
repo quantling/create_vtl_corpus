@@ -1,20 +1,21 @@
-import pandas as pd
 import os
 import argparse
 import subprocess
 import ctypes
-import fasttext
 import contextlib
 import logging
 import shutil
+
+import pandas as pd
+import fasttext
 import fasttext.util
 from paule import util
 from praatio import textgrid
 import soundfile as sf
-
+from tqdm import tqdm
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 DIR = os.path.dirname(__file__)
@@ -83,7 +84,7 @@ class CreateCorpus:
             "aː": "a:",
             "b": "b",
             "bʲ": "b'",
-            "c": "c",
+            "c": "k",  # trying k instead of c
             "cʰ": "c",  # c_h not possible in SAMPA but in X SAMPA
             "d": "d",
             "dʒ": "dZ",
@@ -127,8 +128,8 @@ class CreateCorpus:
             "ɐ": "6",
             "ɑ": "A",
             "ɑː": "A:",
-            "ɒ": "Q",
-            "ɒː": "Q:",
+            "ɒ": "O",  # acutal sampa Q
+            "ɒː": "O:",  # acutal  x sampa Q:
             "ɔ": "O",
             "ɔj": "OI",
             "ə": "@",
@@ -156,7 +157,20 @@ class CreateCorpus:
             "ʒ": "Z",
             "ʔ": "?",
             "θ": "T",
-        }
+            "ʁ": "R",
+            "eː": "e:",
+            "x": "x",
+            "ts": "ts",
+            "ɔʏ": "OY",
+            "oː": "o:",
+            "œ": "9",
+            "yː": "y:",
+            "ʏ": "Y",
+            "øː": "2:",
+            "ø": "2",
+            "pf": "pf",
+            "l̩": "l%",
+        }  # this dict can be made shorter with : automatically passing etc
 
     def load_fasttext_model(self, language: str):
         """
@@ -294,7 +308,7 @@ class CreateCorpus:
         'wav_recording' : spliced out audio as mono audio signal
         'sr_recording' : sampling rate of the recording
         'sampa_phones' : the sampa(like) phonemes of the word
-        'phone_durations' : the duration of each phone in the word
+        'phone_durations_lists' : the duration of each phone in the word as list
         'cp_norm' : normalized cp-trajectories
         'melspec_norm_recorded' : normalized mel spectrogram of the audio clip
         'melspec_norm_synthesized' : normalized mel spectrogram synthesized from the cp-trajectories
@@ -307,17 +321,23 @@ class CreateCorpus:
         word_positions = list()
         sentences = list()
         wavs = list()
+        wavs_sythesized = list()
         sampling_rates = list()
-        phone_durations = list()
+        sampling_rates_sythesized = list()
+        phone_durations_list = list()
         sampa_phones = list()
         cp_norms = list()
-        melspec_norm_recordeds = list()
-        melspec_norm_synthesizeds = list()
+        melspecs_norm_recorded = list()
+        melspecs_norm_synthesized = list()
         vectors = list()
         client_ids = list()
+        names = list()
+
+        used_phonemes = set()
 
         # remove extension for TextGrid
-        for filename_no_extension in clip_list:
+
+        for filename_no_extension in tqdm(clip_list):
             clip_name = filename_no_extension + ".mp3"
 
             target_audio, sampling_rate = sf.read(
@@ -341,15 +361,6 @@ class CreateCorpus:
 
                 phones = list()
 
-                # adding easy to add variables to the lists
-                labels.append(word.label)
-                sampling_rates.append(sampling_rate)
-                word_positions.append(word_index)
-                fasttext_vector = self.fast_text_model.get_word_vector(word.label)
-                vectors.append(fasttext_vector)
-                client_ids.append(filename_no_extension)
-                sentences.append(sentence)
-
                 phone_durations = list()
                 for phone in tg.getTier("phones").entries:
                     if phone.label == "spn":
@@ -360,20 +371,35 @@ class CreateCorpus:
 
                         continue
 
-                    phones.append(self.mfa_to_sampa_dict[phone.label])
+                    sampa_phone = self.mfa_to_sampa_dict[phone.label]
+                    used_phonemes.add(sampa_phone)
+                    phones.append(sampa_phone)
 
                     phone_durations.append(phone.end - phone.start)
 
                 if not phones:
                     continue
-                logging.info(
-                    f"Processing word {word.label} in {filename_no_extension}, resulting phones: {phones}"
+                logging.debug(
+                    f"Processing word '{word.label}' in {filename_no_extension}, resulting phones: {phones}"
                 )
                 # splicing audio
                 wav_rec = target_audio[
                     int(word.start * sampling_rate) : int(word.end * sampling_rate)
                 ]
+                assert wav_rec is not None, "The audio is None"
                 wavs.append(wav_rec)
+                # adding easy to add variables to the lists
+                labels.append(word.label)
+                sampling_rates.append(sampling_rate)
+                word_positions.append(word_index)
+                fasttext_vector = self.fast_text_model.get_word_vector(word.label)
+                vectors.append(fasttext_vector)
+                client_ids.append(filename_no_extension)
+                sentences.append(sentence)
+                names.append(clip_name)
+                sampa_phones.append(phones)
+                phone_durations_list.append(phone_durations)
+
                 # write seg file
                 rows = []
                 for i, phone in enumerate(phones):
@@ -383,7 +409,7 @@ class CreateCorpus:
                 path = os.path.join(path_to_corpus + "_aligned", "clips")
                 if not os.path.exists(path):
                     os.mkdir(path=path)
-                # delete this later
+                # delete this later?
                 if not os.path.exists(os.path.join(path, "temp_output")):
                     os.mkdir(path=os.path.join(path, "temp_output"))
                 seg_file_name = str(
@@ -427,28 +453,78 @@ class CreateCorpus:
                 melspec_norm_rec = util.normalize_mel_librosa(
                     util.librosa_melspec(wav_rec, sampling_rate)
                 )
-                melspec_norm_recordeds.append(melspec_norm_rec)
+
+                melspecs_norm_recorded.append(melspec_norm_rec)
                 wav_syn, wav_syn_sr = util.speak(cps)
+                wavs_sythesized.append(wav_syn)
+                sampling_rates_sythesized.append(wav_syn_sr)
                 melspec_norm_syn = util.normalize_mel_librosa(
                     util.librosa_melspec(wav_syn, wav_syn_sr)
                 )
 
                 melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
-                melspec_norm_synthesizeds.append(melspec_norm_syn)
+                melspecs_norm_synthesized.append(melspec_norm_syn)
+                if word.label == "chocolate":
+                    sf.write("manual_tests/chocolate.wav", wav_rec, sampling_rate)
+                    import matplotlib.pyplot as plt
+
+                    util.librosa.display.specshow(melspec_norm_rec, x_axis="time")
+                    plt.colorbar()
+                    plt.savefig("manual_tests/chocolate.png")
+                    with open(
+                        "manual_tests/chocolate_updated_again.seg", "w"
+                    ) as text_file:
+                        text_file.write(text)
+
+                if len(names) != len(wavs):
+                    print(
+                        f"The wavs are not the same length,at '{word.label}' Expected: {len(names)}) but got {len(wavs)}"
+                    )
+                if word.label == "utopie":
+                    sf.write("manual_tests/Utopie.wav", wav_rec, sampling_rate)
+                    import matplotlib.pyplot as plt
+
+                    util.librosa.display.specshow(melspec_norm_rec, x_axis="time")
+                    plt.colorbar()
+                    plt.savefig("manual_tests/Utopie.png")
+                    with open("manual_tests/Utopie.seg", "w") as text_file:
+                        text_file.write(text)
+
+        logging.info(f"Used phonemes: {used_phonemes}")
+        for idx, array in enumerate(
+            [
+                names,
+                labels,
+                word_positions,
+                sentences,
+                wavs,
+                sampling_rates,
+                sampa_phones,
+                phone_durations_list,
+                cp_norms,
+                melspecs_norm_recorded,
+                melspecs_norm_synthesized,
+                vectors,
+                client_ids,
+            ]
+        ):
+            logging.info(f"Length of array {idx}: {len(array)}")
 
         df = pd.DataFrame(
             {
-                "file_name": clip_list,
+                "file_name": names,
                 "label": labels,
                 "word_position": word_positions,
                 "sentence": sentences,
                 "wav_recording": wavs,
+                "wav_synthesized": wavs_sythesized,
                 "sr_recording": sampling_rates,
+                "sr_synthesized": sampling_rates_sythesized,
                 "sampa_phones": sampa_phones,
-                "phone_durations": phone_durations,
+                "phone_durations": phone_durations_list,
                 "cp_norm": cp_norms,
-                "melspec_norm_recorded": melspec_norm_recordeds,
-                "melspec_norm_synthesized": melspec_norm_synthesizeds,
+                "melspec_norm_recorded": melspecs_norm_recorded,
+                "melspec_norm_synthesized": melspecs_norm_synthesized,
                 "vector": vectors,
                 "client_id": client_ids,
             }
@@ -463,13 +539,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--corpus",
         type=str,
-        default="../../mini_corpus",
+        default="../../cv-corpus-18.0-delta-2024-06-14/de",
         help="The path to the corpus which should be converted to the vocaltract lab format",
     )
     parser.add_argument(
         "--language",
         type=str,
-        default="en",
+        default="de",
         help="The language of the corpus as an abbreviation",
     )
     parser.add_argument("--needs_aligner", action="store_true", default=False)
@@ -482,5 +558,8 @@ if __name__ == "__main__":
     if args.needs_aligner:
         corpus_worker.run_aligner()
     logging.info(clip_list)
-    corpus_worker.extract_sampas_and_cut_audio(args.corpus, clip_list)
+    df = corpus_worker.extract_sampas_and_cut_audio(args.corpus, clip_list)
+    logging.info(df)
+    path_to_save_corpus = os.join.path(args.corpus, "corpus_as_df.pkl")
+    df.to_pickle(path_to_save_corpus)
     logging.info("Done! :P")

@@ -3,3 +3,4 @@ bin/targetoptimizer
 vtl_corpus1.0/
 docs/_build/
 create_vtl_corpus/resources
+create_vtl_corpus/manual_tests
