@@ -49,7 +49,7 @@ class CreateCorpus:
         Runs the Montreal Forced Aligner on the corpus
     check_structure():
         Checks if the corpus has the right format and if not corrects this
-    extract_sampa():
+    create_dataframe():
         Extracts the SAMPA phonemes from the aligned corpus
     """
 
@@ -292,9 +292,9 @@ class CreateCorpus:
 
         return sorted(clip_names)
 
-    def extract_sampas_and_cut_audio(self, path_to_corpus: str, clip_list: list):
+    def create_data_frame(self, path_to_corpus: str, clip_list: list):
         """
-        Extracts the sampas and cuts the audio word by word for the whole corpus
+        Creates Dataframe with Vocaltract Lab data and other data
         Parameters:
         path_to_corpus (str): The path to the corpus
         clip_list (list): A list of the clip names present in the corpus
@@ -558,8 +558,8 @@ if __name__ == "__main__":
     if args.needs_aligner:
         corpus_worker.run_aligner()
     logging.info(clip_list)
-    df = corpus_worker.extract_sampas_and_cut_audio(args.corpus, clip_list)
+    df = corpus_worker.create_data_frame(args.corpus, clip_list)
     logging.info(df)
-    path_to_save_corpus = os.join.path(args.corpus, "corpus_as_df.pkl")
+    path_to_save_corpus = os.path.join(args.corpus, "corpus_as_df.pkl")
     df.to_pickle(path_to_save_corpus)
     logging.info("Done! :P")
