@@ -29,7 +29,7 @@
     <gesture value="Y" slope="0.000000" duration_s="0.100000" time_constant_s="0.012000" neutral="0" />
     <gesture value="2" slope="0.000000" duration_s="0.100000" time_constant_s="0.012000" neutral="0" />
     <gesture value="2" slope="0.000000" duration_s="0.100000" time_constant_s="0.012000" neutral="0" />
-    <gesture value="@" slope="0.000000" duration_s="0.320000" time_constant_s="0.012000" neutral="0" />
+    <gesture value="@" slope="0.000000" duration_s="0.420000" time_constant_s="0.012000" neutral="0" />
   </gesture_sequence>
   <gesture_sequence type="lip-gestures" unit="">
     <gesture value="" slope="0.000000" duration_s="0.315000" time_constant_s="0.012000" neutral="1" />

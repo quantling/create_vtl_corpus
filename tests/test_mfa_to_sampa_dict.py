@@ -117,7 +117,7 @@ def test_each_phone():
         sf.write(f"tests/clips/temp_output/phones/{phone}.wav", wav_syn, wav_syn_sr)
         assert len(wav_syn) > 0
         if len(wav_syn) == len(no_phoneme):
-            not (
+            assert not (
                 np.array_equal(wav_syn, no_phoneme)
             ), f"Phone: {phone} appears to be  no phoneme just standard noise"
         assert wav_syn is not None, f"Phone: {phone} is None"
