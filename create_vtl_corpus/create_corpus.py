@@ -170,6 +170,8 @@ class CreateCorpus:
             "ø": "2",
             "pf": "pf",
             "l̩": "l%",
+            "t̪": "t_d",
+            "ʈʲ": "t_d'",
         }  # this dict can be made shorter with : automatically passing etc
 
     def load_fasttext_model(self, language: str):
@@ -337,7 +339,11 @@ class CreateCorpus:
 
         # remove extension for TextGrid
 
+        # with Pool(n_jobs) as pool:
+        #    list_of_rows = pool.map(create_rows_from_clip, clip_list)
+
         for filename_no_extension in tqdm(clip_list):
+            # rows = create_rows_from_clip(filename_no_extension)
             clip_name = filename_no_extension + ".mp3"
 
             target_audio, sampling_rate = sf.read(
