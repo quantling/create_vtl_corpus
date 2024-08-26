@@ -83,16 +83,16 @@ class CreateCorpus:
             "aw": "aU",
             "aː": "a:",
             "b": "b",
-            "bʲ": "b'",
+            "bʲ": "b",  # b' not possible with VTL
             "c": "k",  # trying k instead of c
-            "cʰ": "c",  # c_h not possible in SAMPA but in X SAMPA
+            "cʰ": "s",  # c_h not possible in SAMPA but in X SAMPA, trying s instead of k to get a softer sound
             "d": "d",
             "dʒ": "dZ",
-            "dʲ": "d'",
+            "dʲ": "d",  # d' not possible with VTL
             "e": "e",
-            "ej": "eI",
+            "ej": "I",
             "f": "f",
-            "fʲ": "f'",
+            "fʲ": "f",  # f' not possible with VTL
             "h": "h",
             "i": "i",
             "iː": "i:",
@@ -101,61 +101,61 @@ class CreateCorpus:
             "kʰ": "k",  # "k_h", is not possible in SAMPA ibut in X SAMPA
             "l": "l",
             "m": "m",
-            "mʲ": "m'",
-            "m̩": "m%",
+            "mʲ": "m",  # m' not possible with VTL
+            "m̩": "m",  # glottal stop is sadly also not avaible in VTL (seemingly)
             "n": "n",
-            "n̩": "n%",
+            "n̩": "n",  # glottal stop is sadly also not avaible in VTL (seemingly)
             "o": "o",
-            "ow": "oU",
+            "ow": "aU",  # for some reason oU is not possible in VTL
             "p": "p",
             "pʰ": "p",  # "p_h", is not possible in SAMPA ibut in X SAMPA
-            "pʲ": "p'",
+            "pʲ": "p",  # p' not possible with VTL ( not explicitly tested but infered from other cases)
             "s": "s",
             "t": "t",
             "tʃ": "tS",
             "tʰ": "t",  # "t_h", is not possible in SAMPA ibut in X SAMPA
-            "tʲ": "t'",
+            "tʲ": "t",  # t' not possible with VTL ( not explicitly tested but infered from other cases)
             "u": "u",
             "uː": "u:",
             "v": "v",
-            "vʲ": "v'",
-            "w": "w",
+            "vʲ": "v",  # v' not possible with VTL ( not explicitly tested but infered from other cases)
+            "w": "U",
             "z": "z",
-            "æ": "{",
+            "æ": "a",  # Near-open front unrounded vowel { not possible with VTL, replacing with open front unrounded vowel
             "ç": "C",
             "ð": "D",
             "ŋ": "N",
             "ɐ": "6",
-            "ɑ": "A",
-            "ɑː": "A:",
+            "ɑ": "o",  # open back unrounded vowel not possible with VTL, Close-mid back rounded vowel
+            "ɑː": "o:",
             "ɒ": "O",  # acutal sampa Q
-            "ɒː": "O:",  # acutal  x sampa Q:
+            "ɒː": "O",  # acutal  x sampa Q:
             "ɔ": "O",
-            "ɔj": "OI",
+            "ɔj": "OY",
             "ə": "@",
-            "əw": "@U",
-            "ɚ": "@`",
+            "əw": "aU",  # @U not possible with VTL, this is a shaky mapping
+            "ɚ": "@",  # @` not possible with VTL ( not explicitly tested but infered from other cases)
             "ɛ": "E",
             "ɛː": "E:",
-            "ɜ": "3",
-            "ɜː": "3:",
-            "ɝ": "3`",
-            "ɟ": "J",
+            "ɜ": "2",  # Open-mid central unrounded vowel not possible with VTL, replacing Close-mid front rounded vowel since both sound kinda like the german ö
+            "ɜː": "2:",
+            "ɝ": "2",  # 2` not possible with VTL ( not explicitly tested but infered from other cases)
+            "ɟ": "dZ",  # J not possible with VTL, its a rare phoneme and coudl either be approximated with j\ or dZ
             "ɡ": "g",
             "ɪ": "I",
-            "ɫ": "5",
-            "ɫ̩": "5=",
-            "ɱ": "F",
-            "ɲ": "J",
+            "ɫ": "l",  # ɫ not possible with VTL, this phoneme is a long l "dark l" and is not present in german( example world : "Allah" in Arabic)
+            "ɫ̩": "l",  # glottal stop is sadly also not available in VTL (seemingly)
+            "ɱ": "m",  # ɱ not possible with VTL, this phoneme is a labiodental nasal
+            "ɲ": "n",  # ɲ not possible with VTL, this phoneme is a palatal nasal, kind of like the spanish ñ
             "ɹ": "r",
-            "ɾ": "4",
+            "ɾ": "r",  # ɾ ( SAMPA : 4) not possible with VTL, this phoneme is a alveolar tap
             "ʃ": "S",
-            "ʉ": "}",
-            "ʉː": "}:",
+            "ʉ": "u",  # ʉ not possible with VTL(X-SAMPA : } ), this phoneme is a close central rounded vowel
+            "ʉː": "u:",
             "ʊ": "U",
-            "ʎ": "L",
+            "ʎ": "l",  # ʎ not possible with VTL (SAMPA L ), this phoneme is a palatal lateral approximant
             "ʒ": "Z",
-            "ʔ": "?",
+            "ʔ": "?",  # basic glottal stop
             "θ": "T",
             "ʁ": "R",
             "eː": "e:",
@@ -169,9 +169,17 @@ class CreateCorpus:
             "øː": "2:",
             "ø": "2",
             "pf": "pf",
-            "l̩": "l%",
-            "t̪": "t_d",
-            "ʈʲ": "t_d'",
+            "l̩": "l",  # glottal stop is sadly also not avaible in VTL (seemingly) at least as an additive to a phoneme
+            "t̪": "T",  #   t̪ not possible with VTL (SAMPA t_d) ( not explicitly tested but infered from other cases)
+            "ʈʲ": "T",  # t` not possible with VTL ( not explicitly tested but infered from other cases)
+            "ʈ": "t",  # t` not possible with VTL ( not explicitly tested but infered from other cases)
+            "ʋ": "v",  #    X-SAMPA P or v\ according to Wikipedia, but not available in VTL
+            "d̪": "d",  # d_d not possible with VTL ( and maybe not correct phoneme as well)
+            "kʷ": "k",  # k_w not possible with VTL ( and maybe not correct phoneme as well)
+            "cʷ": "C",  # c_w not possible with VTL ( and maybe not correct phoneme as well)
+            "ɖ": "d",  # d` not possible with VTL ( and maybe not correct phoneme as well)
+            "tʷ": "t",  # t_w not possible with VTL (inferring from other cases)
+            "ɟʷ": "dZ",  # J_w not possible with VTL (inferring from other cases)
         }  # this dict can be made shorter with : automatically passing etc
 
     def load_fasttext_model(self, language: str):
@@ -212,43 +220,85 @@ class CreateCorpus:
             os.path.join(self.path_to_corpus, "validated.tsv"), sep="\t"
         )
         clip_names = list()
+        sentences = list()
+        senteces_that_are_not_strings = 0
+        if not os.path.exists(os.path.join(self.path_to_corpus, "clips_validated")):
+            os.mkdir(os.path.join(self.path_to_corpus, "clips_validated"))
+            need_new_clips = True
+            logging.info(
+                "The clips_validated folder was created, validated clips will be copied from the clips folder"
+            )
+        else:
+            logging.info(
+                "The clips_validated folder already exists. We assume it is filled already. If not delete and rerun"
+            )
+            need_new_clips = False
+
         for _, row in data.iterrows():
             transcript = row["sentence"]
             clip_name = row["path"].removesuffix(".mp3")
             clip_names.append(clip_name)
-            file_name = clip_name + ".lab"
-            with open(
-                os.path.join(self.path_to_corpus, "clips", file_name), "wt"
-            ) as lab_file:
-                lab_file.write(transcript)
-        return clip_names
+            sentences.append(transcript)
+            if need_new_clips:
+                shutil.copy(
+                    os.path.join(self.path_to_corpus, "clips", clip_name + ".mp3"),
+                    os.path.join(
+                        self.path_to_corpus, "clips_validated", clip_name + ".mp3"
+                    ),
+                )
 
-    def run_aligner(self):
+                file_name = clip_name + ".lab"
+                with open(
+                    os.path.join(self.path_to_corpus, "clips_validated", file_name),
+                    "wt",
+                ) as lab_file:
+                    # print(transcript)
+                    if not isinstance(transcript, str):
+                        logging.debug(
+                            f"Transcript for {clip_name} is not a string, skipping this clip"
+                        )
+                        senteces_that_are_not_strings += 1
+                        continue
+                    lab_file.write(transcript)
+
+        if senteces_that_are_not_strings > 0:
+            logging.warning(
+                f"{senteces_that_are_not_strings} sentences were not strings and were skipped. Thats {senteces_that_are_not_strings/len(clip_names)*100}% of the sentences"
+            )
+        else:
+            logging.info("All sentences were strings")
+        return clip_names, sentences
+
+    def run_aligner(self, mfa_workers: int):
         """
-         Runs the Montreal Forced Aligner on the corpus
+                 Runs the Montreal Forced Aligner on the corpus
+        q
+                Params:
+                mfaworkers (int): The number of workers to use
 
-        Params:
-        -
-
-        Returns:
-        -
+                Returns:
+                -
         """
         if self.language == "en":
             logging.info("aligning corpus in english")
             command = "conda run -n aligner mfa  align".split() + [
-                os.path.join(self.path_to_corpus, "clips"),
+                os.path.join(self.path_to_corpus, "clips_validated"),
                 "english_mfa",
                 "english_mfa",
                 os.path.join(self.path_to_corpus + "_aligned"),
+                f"--num_jobs {mfa_workers}",
+                "--use_mp",
             ]
 
         if self.language == "de":
             logging.info("aligning corpus in german")
             command = "conda run -n aligner mfa  align".split() + [
-                os.path.join(self.path_to_corpus, "clips"),
+                os.path.join(self.path_to_corpus, "clips_validated"),
                 "german_mfa",
                 "german_mfa",
                 os.path.join(self.path_to_corpus + "_aligned"),
+                f"--num_jobs {mfa_workers}",
+                "--use_mp",
             ]
 
         run = subprocess.run(command)
@@ -281,20 +331,26 @@ class CreateCorpus:
             elif file.endswith(".mp3"):
                 mp3_files.add(os.path.splitext(file)[0])
 
-        if lab_files == mp3_files:
+        if mp3_files == lab_files:
 
             clip_names = lab_files
             logging.info("The lab files and mp3 files match")
             return sorted(clip_names)
+        ## Find a way to use the sentences from the validated.tsv file
         else:
             logging.warning(
                 "The lab files and mp3 files do not match, correcting this now"
             )
-            clip_names = self.format_corpus()
+            clip_names, sentence_list = self.format_corpus()
+        missing_clips = set(clip_names).difference(lab_files.intersection(mp3_files))
+        assert (
+            missing_clips == set()
+        ), f"The lab files and mp3 files do not match, since the following clips are missing: {missing_clips}"
+        return clip_names, sentence_list
 
-        return sorted(clip_names)
-
-    def create_data_frame(self, path_to_corpus: str, clip_list: list):
+    def create_data_frame(
+        self, path_to_corpus: str, clip_list: list, sentence_list: list
+    ):
         """
         Creates Dataframe with Vocaltract Lab data and other data
         Parameters:
@@ -310,6 +366,7 @@ class CreateCorpus:
         'wav_recording' : spliced out audio as mono audio signal
         'sr_recording' : sampling rate of the recording
         'sampa_phones' : the sampa(like) phonemes of the word
+        "mfa_phones" : the phonemes as outputted by the aligner
         'phone_durations_lists' : the duration of each phone in the word as list
         'cp_norm' : normalized cp-trajectories
         'melspec_norm_recorded' : normalized mel spectrogram of the audio clip
@@ -334,38 +391,46 @@ class CreateCorpus:
         vectors = list()
         client_ids = list()
         names = list()
+        mfa_phones = list()
 
         used_phonemes = set()
-
+        files_skiped = 0
         # remove extension for TextGrid
 
         # with Pool(n_jobs) as pool:
         #    list_of_rows = pool.map(create_rows_from_clip, clip_list)
-
-        for filename_no_extension in tqdm(clip_list):
+        for filename_no_extension, sentence in tqdm(
+            zip(clip_list, sentence_list), total=len(clip_list)
+        ):
             # rows = create_rows_from_clip(filename_no_extension)
             clip_name = filename_no_extension + ".mp3"
 
             target_audio, sampling_rate = sf.read(
-                os.path.join(path_to_corpus, "clips", clip_name)
+                os.path.join(path_to_corpus, "clips_validated", clip_name)
             )
 
             assert (
                 len(target_audio.shape) == 1
             ), f"The audio file {clip_name} is not mono"
-            tg = textgrid.openTextgrid(
-                os.path.join(
-                    path_to_corpus + "_aligned", filename_no_extension + ".TextGrid"
-                ),
-                False,
-            )
-            sentence_list = []
-            for word_index, word in enumerate(tg.getTier("words")):
-                sentence_list.append(word.label)
-            sentence = " ".join(sentence_list)
+            try:
+                tg = textgrid.openTextgrid(
+                    os.path.join(
+                        path_to_corpus + "_aligned", filename_no_extension + ".TextGrid"
+                    ),
+                    False,
+                )
+            except FileNotFoundError:
+                logging.warning(
+                    f"The TextGrid file for {filename_no_extension} was not found"
+                )
+                clip_list.remove(filename_no_extension)
+                files_skiped += 1
+                continue
+
             for word_index, word in enumerate(tg.getTier("words")):
 
                 phones = list()
+                mfa_phones_word_level = list()
 
                 phone_durations = list()
                 for phone in tg.getTier("phones").entries:
@@ -377,9 +442,12 @@ class CreateCorpus:
 
                         continue
 
-                    sampa_phone = self.mfa_to_sampa_dict[phone.label]
+                    mfa_phone = phone.label
+                    mfa_phones_word_level.append(mfa_phone)
+                    sampa_phone = self.mfa_to_sampa_dict[mfa_phone]
                     used_phonemes.add(sampa_phone)
                     phones.append(sampa_phone)
+                    mfa_phones_word_level.append(mfa_phone)
 
                     phone_durations.append(phone.end - phone.start)
 
@@ -405,6 +473,7 @@ class CreateCorpus:
                 names.append(clip_name)
                 sampa_phones.append(phones)
                 phone_durations_list.append(phone_durations)
+                mfa_phones.append(mfa_phones_word_level)
 
                 # write seg file
                 rows = []
@@ -512,6 +581,7 @@ class CreateCorpus:
                 melspecs_norm_synthesized,
                 vectors,
                 client_ids,
+                mfa_phones,
             ]
         ):
             logging.info(f"Length of array {idx}: {len(array)}")
@@ -527,6 +597,7 @@ class CreateCorpus:
                 "sr_recording": sampling_rates,
                 "sr_synthesized": sampling_rates_sythesized,
                 "sampa_phones": sampa_phones,
+                "mfa_phones": mfa_phones,
                 "phone_durations": phone_durations_list,
                 "cp_norm": cp_norms,
                 "melspec_norm_recorded": melspecs_norm_recorded,
@@ -535,6 +606,10 @@ class CreateCorpus:
                 "client_id": client_ids,
             }
         )
+        shutil.rmtree(
+            os.path.join(path_to_corpus + "_aligned" + "/clips/temp_output")
+        )  # we don't need the temp_output files anymore
+        logging.info(f"Files skipped: {files_skiped}")
         return df
 
 
@@ -554,18 +629,38 @@ if __name__ == "__main__":
         default="de",
         help="The language of the corpus as an abbreviation",
     )
-    parser.add_argument("--needs_aligner", action="store_true", default=False)
+    parser.add_argument(
+        "--mfa_workers",
+        type=int,
+        default=6,
+        help="The number of mfa workers to use",
+    )
+    parser.add_argument(
+        "--needs_aligner",
+        action="store_true",
+        default=False,
+        help="If the aligner should be run",
+    )
+    parser.add_argument(
+        "--search_df",
+        action="store_true",
+        default=False,
+        help=" If a already created dataframe should be searched for and then used instead of creating a new one",
+    )
     args = parser.parse_args()
 
     assert os.path.isdir(args.corpus), "The provided path is not a directory"
     CreateCorpus.setup(language=args.language)
     corpus_worker = CreateCorpus(args.corpus, language=args.language)
-    clip_list = corpus_worker.check_structure()
+    if args.search_df:
+        pass
+    clip_list, sentence_list = corpus_worker.check_structure()
     if args.needs_aligner:
-        corpus_worker.run_aligner()
-    logging.info(clip_list)
-    df = corpus_worker.create_data_frame(args.corpus, clip_list)
+        mfa_workers = args.mfa_workers
+        corpus_worker.run_aligner(mfa_workers)
+    df = corpus_worker.create_data_frame(args.corpus, clip_list, sentence_list)
     logging.info(df)
     path_to_save_corpus = os.path.join(args.corpus, "corpus_as_df.pkl")
     df.to_pickle(path_to_save_corpus)
+
     logging.info("Done! :P")

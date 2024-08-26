@@ -72,3 +72,14 @@ The following resources are used:
 * `Mozilla Common Voice <https://commonvoice.mozilla.org/en>`__
 * `fastText word embedding model <https://fasttext.cc/>`__
 
+
+
+Phonemes 
+========
+The phonemes are converted from the MFA phonemes to the SAMPA phonemes. The following table shows the conversion:
+
+
+
+Some phonemes are perhabs not perfectly converted, since VTL does not accept all the phonemes of the SAMPA notation. Also, the MFA phonemes are not always perfectly aligned with the SAMPA phonemes.
+If VTL accepts more phonemes in the future, the conversion can be improved. Please contact the author if you have suggestions.
+The conversion should be good enough for the purpose of the corpus generation.
