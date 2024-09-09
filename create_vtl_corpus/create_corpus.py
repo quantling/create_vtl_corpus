@@ -1,13 +1,11 @@
 import os
 import argparse
-import subprocess
 import ctypes
 import contextlib
 import logging
 import shutil
 import re
-
-
+import subprocess
 from joblib import Parallel, delayed
 import pandas as pd
 import fasttext
@@ -16,7 +14,7 @@ from paule import util
 from praatio import textgrid
 import soundfile as sf
 from tqdm import tqdm
-
+from concurrent.futures import ProcessPoolExecutor  
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -158,7 +156,7 @@ class CreateCorpus:
             "ʊ": "U",
             "ʎ": "l",  # ʎ not possible with VTL (SAMPA L ), this phoneme is a palatal lateral approximant
             "ʒ": "Z",
-            "ʔ": "?",  # basic glottal stop
+            "ʔ": "?",  # basic glottal stop, alone prduces no sound in VTL
             "θ": "T",
             "ʁ": "R",
             "eː": "e:",
@@ -282,8 +280,11 @@ class CreateCorpus:
                 -
         """
         path_to_validated = os.path.join(self.path_to_corpus, "clips_validated")
-        path_to_aligned = os.path.join(self.path_to_corpus + "_aligned")
-        files_in_validated = [name for name in os.listdir(path_to_validated) if os.path.isfile(os.path.join(path_to_validated, name))]
+        path_to_aligned = os.path.join(self.path_to_corpus,  "clips_aligned")
+        files_in_validated = list()
+        for file in os.listdir(path_to_validated):
+            if file.endswith(".mp3"):
+                files_in_validated.append(os.path.splitext(file)[0])
         lenght_files = len(files_in_validated)
         logging.info(f"Number of files in validated: {files_in_validated}")
         if lenght_files >= batch_size:
@@ -305,9 +306,20 @@ class CreateCorpus:
 
                 # Move each file in the current batch
                 for i, file in enumerate(batch_files):
-                    source_path = os.path.join(path_to_validated, file)
-                    batch_path = os.path.join(batch_folder, file)
+                    mp3_file =  file + ".mp3"
+                    source_path = os.path.join(path_to_validated, mp3_file)
+                    batch_path = os.path.join(batch_folder, mp3_file)
                     shutil.copy(source_path, batch_path) # Copy the file to the batch folder as a safety measure, could be changed to move
+                    lab_file = file + ".lab"
+                    if not os.path.exists(os.path.join(path_to_validated, lab_file)):
+                        logging.warning(f"Lab file {lab_file} does not exist, skipping this file")
+                        continue
+                    else:
+                        source_path = os.path.join(path_to_validated, lab_file)
+                        batch_path = os.path.join(batch_folder, lab_file)
+                        shutil.copy(source_path, batch_path) # Copy the file to the batch folder as a safety measure, could be changed to move
+
+                   
                 logging.info(f"Moved {len(batch_files)} files to {batch_folder}")
 
                 if self.language == "en":
@@ -414,7 +426,7 @@ class CreateCorpus:
         return clip_names, sentence_list
 
     def create_data_frame(
-        self, path_to_corpus: str, clip_list: list, sentence_list: list
+        self, path_to_corpus: str, clip_list: list, sentence_list: list, num_cores: int
     ):
         """
         Creates Dataframe with Vocaltract Lab data and other data
@@ -425,7 +437,7 @@ class CreateCorpus:
         Returns:
         Dataframe: A dataframe with the following labels
         'file_name' : name of the clip
-        'label' : the spoken word
+        'label' : the spoken wordn
         'lexical_word' : the word as it is in the dictionary
         'word_position' : the position of the word in the sentence
         'sentence' : the sentence the word is part of
@@ -464,19 +476,16 @@ class CreateCorpus:
         files_skiped = 0
         index = 0
         # remove extension for TextGrid
-
-        # with Pool(n_jobs) as pool:
-        #    list_of_rows = pool.map(create_rows_from_clip, clip_list)
-        for filename_no_extension, sentence in tqdm(
-            zip(clip_list, sentence_list), total=len(clip_list)
-        ):
+             
+        def return_row_from_clip(filename_no_extension,sentence):
+            """This function is used to create the matching row from a clip
+            It is used for the multiprocessing part of the code
+            Parameters: filename_no_extension (str): The name of the clip
+                        sentence (str): The sentence of the clip
+            Returns: The row for the dataframe as a list"""
+            pass 
             """
-            if index < 100: #quick dirty fix to debug
-                index += 1
-                continue
-            """
-            
-            # rows = create_rows_from_clip(filename_no_extension)
+            df_row = list()
             clip_name = filename_no_extension + ".mp3"
 
             target_audio, sampling_rate = sf.read(
@@ -490,6 +499,204 @@ class CreateCorpus:
                 tg = textgrid.openTextgrid(
                     os.path.join(
                         path_to_corpus + "_aligned", filename_no_extension + ".TextGrid"
+                    ),
+                    False,
+                )
+            except FileNotFoundError:
+                logging.warning(
+                    f"The TextGrid file for {filename_no_extension} was not found"
+                )
+                clip_list.remove(filename_no_extension)
+                sentence_list.remove(sentence)
+                files_skiped += 1
+                continue
+                
+            text_grid_sentence = list()
+            
+            for word_index, word in enumerate(tg.getTier("words")):
+                text_grid_sentence.append(word.label)
+            logging.info(sentence)
+            logging.info(text_grid_sentence)
+            for word_index, word in enumerate(tg.getTier("words")):
+
+                phones = list()
+                mfa_phones_word_level = list()
+
+                phone_durations = list()
+                for phone in tg.getTier("phones").entries:
+                    if phone.label == "spn":
+                        break
+                    if phone.start >= word.end:
+                        break
+                    if phone.start < word.start:
+
+                        continue
+
+                    mfa_phone = phone.label
+                    mfa_phones_word_level.append(mfa_phone)
+                    sampa_phone = self.mfa_to_sampa_dict[mfa_phone]
+                    phones.append(sampa_phone)
+                    mfa_phones_word_level.append(mfa_phone)
+
+                    phone_durations.append(phone.end - phone.start)
+
+                if not phones:
+                    pass
+                logging.debug(
+                    f"Processing word '{word.label}' in {filename_no_extension}, resulting phones: {phones}"
+                )
+                # splicing audio
+                wav_rec = target_audio[
+                    int(word.start * sampling_rate) : int(word.end * sampling_rate)
+                ]
+                assert wav_rec is not None, "The audio is None"
+                split_sentence = re.split(r"[ -]|\.\.", sentence)
+                maximum_word_index = len(split_sentence) - 1
+                if word_index > maximum_word_index:
+                    logging.warning(
+                        f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this word, Sentence: {sentence} .last word: {sentence.split()[-1]}"
+                    )
+                
+                lexical_word = (
+                    split_sentence[word_index]
+                    .replace(".", "")
+                    .replace(",", "")
+                    .replace("?", "")
+                    .replace("!", "")
+                    .replace(":", "")
+                    .replace(";", "")
+                    .replace("(", "")
+                    .replace(")", "")
+                    .replace('"', "")
+                    .replace("'", "")
+                )  # remove dots ( might impact pronunciation however)
+                lexical_words.append(lexical_word)
+                assert (
+                    word.label.lower().replace("'", "") == lexical_word.lower()
+                ), f"Word mismatch since '{word.label.lower() .replace("'", "")}' is not equal to '{lexical_word.lower()} in sentence '{sentence}' in {filename_no_extension}. TextGrid sentece: {text_grid_sentence}"
+                df_row.append(clip_name)
+                df_row.append(word.label)
+                df_row.append(word_index)
+                df_row.append(phones)
+                df_row.append(phone_durations)
+                df_row.append(wav_rec)
+                df_row.append(sampling_rate)
+                df_row.append(mfa_phones_word_level)
+                df_row.append(lexical_word)
+                df_row.append(sentence)
+                
+
+                # write seg file
+                rows = []
+                for i, phone in enumerate(phones):
+                    row = "name = %s; duration_s = %f;" % (phone, phone_durations[i])
+                    rows.append(row)
+                text = "\n".join(rows)
+                path = os.path.join(path_to_corpus + "_aligned", "clips")
+                if not os.path.exists(path):
+                    os.mkdir(path=path)
+                # delete this later?
+                if not os.path.exists(os.path.join(path, "temp_output")):
+                    os.mkdir(path=os.path.join(path, "temp_output"))
+                seg_file_name = str(
+                    os.path.join(
+                        path, f"temp_output/target_audio_word_{word_index}.seg"
+                    )
+                )
+                with open(seg_file_name, "w") as text_file:
+                    text_file.write(text)
+
+                # get tract files and gesture score
+                seg_file_name = ctypes.c_char_p(seg_file_name.encode())
+
+                ges_file_name = str(
+                    os.path.join(
+                        path, f"temp_output/target_audio_word_{word_index}.ges"
+                    )
+                )
+                ges_file_name = ctypes.c_char_p(ges_file_name.encode())
+
+                devnull = open("/dev/null", "w")
+                with contextlib.redirect_stdout(devnull):
+                    util.VTL.vtlSegmentSequenceToGesturalScore(
+                        seg_file_name, ges_file_name
+                    )
+                tract_file_name = str(
+                    os.path.join(
+                        path, f"temp_output/target_audio_word_{word_index}.txt"
+                    )
+                )
+                c_tract_file_name = ctypes.c_char_p(tract_file_name.encode())
+
+                util.VTL.vtlGesturalScoreToTractSequence(
+                    ges_file_name, c_tract_file_name
+                )
+                cps = util.read_cp(tract_file_name)
+
+                cp_norm = util.normalize_cp(cps)
+                cp_norms.append(cp_norm)
+
+                melspec_norm_rec = util.normalize_mel_librosa(
+                    util.librosa_melspec(wav_rec, sampling_rate)
+                )
+
+                melspecs_norm_recorded.append(melspec_norm_rec)
+                wav_syn, wav_syn_sr = util.speak(cps)
+                wavs_sythesized.append(wav_syn)
+                sampling_rates_sythesized.append(wav_syn_sr)
+                melspec_norm_syn = util.normalize_mel_librosa(
+                    util.librosa_melspec(wav_syn, wav_syn_sr)
+                )
+
+                melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
+                melspecs_norm_synthesized.append(melspec_norm_syn)
+                if word.label == "chocolate":
+                    sf.write("manual_tests/chocolate.wav", wav_rec, sampling_rate)
+                    import matplotlib.pyplot as plt
+
+                    util.librosa.display.specshow(melspec_norm_rec, x_axis="time")
+                    plt.colorbar()
+                    plt.savefig("manual_tests/chocolate.png")
+                    with open(
+                        "manual_tests/chocolate_updated_again.seg", "w"
+                    ) as text_file:
+                        text_file.write(text)
+
+                if len(names) != len(wavs):
+                    print(
+                        f"The wavs are not the same length,at '{word.label}' Expected: {len(names)}) but got {len(wavs)}"
+                    )
+                if word.label == "utopie":
+                    sf.write("manual_tests/Utopie.wav", wav_rec, sampling_rate)
+                    import matplotlib.pyplot as plt
+
+                    util.librosa.display.specshow(melspec_norm_rec, x_axis="time")
+                    plt.colorbar()
+                    plt.savefig("manual_tests/Utopie.png")
+                    with open("manual_tests/Utopie.seg", "w") as text_file:
+                        text_file.write(text)
+
+        # with Pool(n_jobs) as pool:
+        #    list_of_rows = pool.map(create_rows_from_clip, clip_list)
+        """
+        path_to_aligned = os.path.join(self.path_to_corpus,  "clips_aligned")
+        for filename_no_extension, sentence in tqdm(
+            zip(clip_list, sentence_list), total=len(clip_list)
+        ):
+            
+            clip_name = filename_no_extension + ".mp3"
+
+            target_audio, sampling_rate = sf.read(
+                os.path.join(path_to_corpus, "clips_validated", clip_name)
+            )
+            
+            assert (
+                len(target_audio.shape) == 1
+            ), f"The audio file {clip_name} is not mono"
+            try:
+                tg = textgrid.openTextgrid(
+                    os.path.join(
+                      path_to_aligned, filename_no_extension + ".TextGrid"
                     ),
                     False,
                 )
@@ -586,7 +793,7 @@ class CreateCorpus:
                     row = "name = %s; duration_s = %f;" % (phone, phone_durations[i])
                     rows.append(row)
                 text = "\n".join(rows)
-                path = os.path.join(path_to_corpus + "_aligned", "clips")
+                path = os.path.join(path_to_corpus, "clips")
                 if not os.path.exists(path):
                     os.mkdir(path=path)
                 # delete this later?
@@ -774,7 +981,7 @@ if __name__ == "__main__":
     if args.needs_aligner:
         mfa_workers = args.mfa_workers
         corpus_worker.run_aligner(mfa_workers, args.aligner_batch_size)
-    df = corpus_worker.create_data_frame(args.corpus, clip_list, sentence_list, args.aligner_num_cores)
+    df = corpus_worker.create_data_frame(args.corpus, clip_list, sentence_list, args.num_cores)
     logging.info(df)
     path_to_save_corpus = os.path.join(args.corpus, "corpus_as_df.pkl")
     df.to_pickle(path_to_save_corpus)
