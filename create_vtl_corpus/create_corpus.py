@@ -15,6 +15,8 @@ from praatio import textgrid
 import soundfile as sf
 from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor  
+
+# Set up logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -381,6 +383,7 @@ class CreateCorpus:
             run = subprocess.run(command)
             assert run.returncode == 0, "The aligner did not run successfully for the single batch that was run"
         logging.info("The aligner ran successfully")
+
     def check_structure(self):
         """
         Checks if the corpus has the right  and if not corrects this
@@ -425,14 +428,14 @@ class CreateCorpus:
         ), f"The lab files and mp3 files do not match, since the following clips are missing: {missing_clips}"
         return clip_names, sentence_list
 
-    def create_data_frame(
-        self, path_to_corpus: str, clip_list: list, sentence_list: list, num_cores: int
-    ):
+
+    def create_data_frame_mp(self, clip_list: list, sentence_list: list, num_cores):
         """
-        Creates Dataframe with Vocaltract Lab data and other data
+        Creates Dataframe with Vocaltract Lab data and other data with multiprocessing
         Parameters:
-        path_to_corpus (str): The path to the corpus
         clip_list (list): A list of the clip names present in the corpus
+        sentence_list (list): A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
+        num_cores (int): The number of cores to use
 
         Returns:
         Dataframe: A dataframe with the following labels
@@ -454,42 +457,48 @@ class CreateCorpus:
 
         """
 
-        labels = list()
-        word_positions = list()
-        sentences = list()
-        wavs = list()
-        wavs_sythesized = list()
-        sampling_rates = list()
-        sampling_rates_sythesized = list()
-        phone_durations_list = list()
-        sampa_phones = list()
-        cp_norms = list()
-        melspecs_norm_recorded = list()
-        melspecs_norm_synthesized = list()
-        vectors = list()
-        client_ids = list()
-        names = list()
-        mfa_phones = list()
-        lexical_words = list()
+        
+        with ProcessPoolExecutor(max_workers = num_cores) as executor:
+     
+            futures = list(tqdm((executor.submit(generate_row, clip, sentence) for clip, sentence in zip(clip_list, sentence_list)), total = len(clip_list)))
+            results = [f.result() for f in futures]
 
-        used_phonemes = set()
-        files_skiped = 0
-        index = 0
-        # remove extension for TextGrid
-             
-        def return_row_from_clip(filename_no_extension,sentence):
-            """This function is used to create the matching row from a clip
+
+        df = pd.concat(results)
+
+        def generate_rows(filename_no_extension,sentence):
+            """This function is used to create the matching rows from a clip
             It is used for the multiprocessing part of the code
             Parameters: filename_no_extension (str): The name of the clip
                         sentence (str): The sentence of the clip
-            Returns: The row for the dataframe as a list"""
-            pass 
-            """
-            df_row = list()
+
+            Returns: The rows for the dataframe as a dataframe object  (pd.DataFrame)"""
+            
+            
+           
+
+            labels = list()
+            word_positions = list()
+            sentences = list()
+            wavs = list()
+            wavs_sythesized = list()
+            sampling_rates = list()
+            sampling_rates_sythesized = list()
+            phone_durations_list = list()
+            sampa_phones = list()
+            cp_norms = list()
+            melspecs_norm_recorded = list()
+            melspecs_norm_synthesized = list()
+            vectors = list()
+            client_ids = list()
+            names = list()
+            mfa_phones = list()
+            lexical_words = list()
+
             clip_name = filename_no_extension + ".mp3"
 
             target_audio, sampling_rate = sf.read(
-                os.path.join(path_to_corpus, "clips_validated", clip_name)
+                os.path.join(self.path_to_corpus, "clips_validated", clip_name)
             )
 
             assert (
@@ -498,7 +507,7 @@ class CreateCorpus:
             try:
                 tg = textgrid.openTextgrid(
                     os.path.join(
-                        path_to_corpus + "_aligned", filename_no_extension + ".TextGrid"
+                        self.path_to_corpus + "_aligned", filename_no_extension + ".TextGrid"
                     ),
                     False,
                 )
@@ -509,7 +518,7 @@ class CreateCorpus:
                 clip_list.remove(filename_no_extension)
                 sentence_list.remove(sentence)
                 files_skiped += 1
-                continue
+                return df_part
                 
             text_grid_sentence = list()
             
@@ -574,17 +583,24 @@ class CreateCorpus:
                 assert (
                     word.label.lower().replace("'", "") == lexical_word.lower()
                 ), f"Word mismatch since '{word.label.lower() .replace("'", "")}' is not equal to '{lexical_word.lower()} in sentence '{sentence}' in {filename_no_extension}. TextGrid sentece: {text_grid_sentence}"
-                df_row.append(clip_name)
-                df_row.append(word.label)
-                df_row.append(word_index)
-                df_row.append(phones)
-                df_row.append(phone_durations)
-                df_row.append(wav_rec)
-                df_row.append(sampling_rate)
-                df_row.append(mfa_phones_word_level)
-                df_row.append(lexical_word)
-                df_row.append(sentence)
                 
+                labels = list()
+                word_positions = list()
+                sentences = list()
+                wavs = list()
+                wavs_sythesized = list()
+                sampling_rates = list()
+                sampling_rates_sythesized = list()
+                phone_durations_list = list()
+                sampa_phones = list()
+                cp_norms = list()
+                melspecs_norm_recorded = list()
+                melspecs_norm_synthesized = list()
+                vectors = list()
+                client_ids = list()
+                names = list()
+                mfa_phones = list()
+                lexical_words = list()
 
                 # write seg file
                 rows = []
@@ -592,7 +608,7 @@ class CreateCorpus:
                     row = "name = %s; duration_s = %f;" % (phone, phone_durations[i])
                     rows.append(row)
                 text = "\n".join(rows)
-                path = os.path.join(path_to_corpus + "_aligned", "clips")
+                path = os.path.join(self.path_to_corpus, "clips")
                 if not os.path.exists(path):
                     os.mkdir(path=path)
                 # delete this later?
@@ -650,35 +666,103 @@ class CreateCorpus:
 
                 melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
                 melspecs_norm_synthesized.append(melspec_norm_syn)
-                if word.label == "chocolate":
-                    sf.write("manual_tests/chocolate.wav", wav_rec, sampling_rate)
-                    import matplotlib.pyplot as plt
-
-                    util.librosa.display.specshow(melspec_norm_rec, x_axis="time")
-                    plt.colorbar()
-                    plt.savefig("manual_tests/chocolate.png")
-                    with open(
-                        "manual_tests/chocolate_updated_again.seg", "w"
-                    ) as text_file:
-                        text_file.write(text)
-
+               
                 if len(names) != len(wavs):
                     print(
                         f"The wavs are not the same length,at '{word.label}' Expected: {len(names)}) but got {len(wavs)}"
                     )
-                if word.label == "utopie":
-                    sf.write("manual_tests/Utopie.wav", wav_rec, sampling_rate)
-                    import matplotlib.pyplot as plt
+            # fill the dataframe
 
-                    util.librosa.display.specshow(melspec_norm_rec, x_axis="time")
-                    plt.colorbar()
-                    plt.savefig("manual_tests/Utopie.png")
-                    with open("manual_tests/Utopie.seg", "w") as text_file:
-                        text_file.write(text)
+            df_part = pd.DataFrame(
+            {
+                "file_name": names,
+                "label": labels,
+                "lexical_word": lexical_words,
+                "word_position": word_positions,
+                "sentence": sentences,
+                "wav_recording": wavs,
+                "wav_synthesized": wavs_sythesized,
+                "sr_recording": sampling_rates,
+                "sr_synthesized": sampling_rates_sythesized,
+                "sampa_phones": sampa_phones,
+                "mfa_phones": mfa_phones,
+                "phone_durations": phone_durations_list,
+                "cp_norm": cp_norms,
+                "melspec_norm_recorded": melspecs_norm_recorded,
+                "melspec_norm_synthesized": melspecs_norm_synthesized,
+                "vector": vectors,
+                "client_id": client_ids,
+            })
+            return df_part
+        
 
-        # with Pool(n_jobs) as pool:
-        #    list_of_rows = pool.map(create_rows_from_clip, clip_list)
+            
+        shutil.rmtree(
+            os.path.join(self.path_to_corpus + "/clips/temp_output")
+        )  # we don't need the temp_output files anymore
+        logging.info(f"Files skipped: {files_skiped}")
+        return df
+    
+  
+        
+                
+
+        
+        
+    def create_data_frame(
+        self,  clip_list: list, sentence_list: list,
+    ):
         """
+        Creates Dataframe with Vocaltract Lab data and other data
+        Parameters:
+        path_to_corpus (str): The path to the corpus
+        clip_list (list): A list of the clip names present in the corpus
+        sentence_list (list): A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
+
+        Returns:
+        pd.dataframe: A dataframe with the following labels
+        'file_name' : name of the clip
+        'label' : the spoken wordn
+        'lexical_word' : the word as it is in the dictionary
+        'word_position' : the position of the word in the sentence
+        'sentence' : the sentence the word is part of
+        'wav_recording' : spliced out audio as mono audio signal
+        'sr_recording' : sampling rate of the recording
+        'sampa_phones' : the sampa(like) phonemes of the word
+        "mfa_phones" : the phonemes as outputted by the aligner
+        'phone_durations_lists' : the duration of each phone in the word as list
+        'cp_norm' : normalized cp-trajectories
+        'melspec_norm_recorded' : normalized mel spectrogram of the audio clip
+        'melspec_norm_synthesized' : normalized mel spectrogram synthesized from the cp-trajectories
+        'vector' : embedding vector of the word, based on fastText Embeddings
+        'client_id' : id of the client
+
+        """
+
+        labels = list()
+        word_positions = list()
+        sentences = list()
+        wavs = list()
+        wavs_sythesized = list()
+        sampling_rates = list()
+        sampling_rates_sythesized = list()
+        phone_durations_list = list()
+        sampa_phones = list()
+        cp_norms = list()
+        melspecs_norm_recorded = list()
+        melspecs_norm_synthesized = list()
+        vectors = list()
+        client_ids = list()
+        names = list()
+        mfa_phones = list()
+        lexical_words = list()
+
+        used_phonemes = set()
+        files_skiped = 0
+        index = 0
+        # remove extension for TextGrid
+             
+        
         path_to_aligned = os.path.join(self.path_to_corpus,  "clips_aligned")
         for filename_no_extension, sentence in tqdm(
             zip(clip_list, sentence_list), total=len(clip_list)
@@ -687,7 +771,7 @@ class CreateCorpus:
             clip_name = filename_no_extension + ".mp3"
 
             target_audio, sampling_rate = sf.read(
-                os.path.join(path_to_corpus, "clips_validated", clip_name)
+                os.path.join(self.path_to_corpus, "clips_validated", clip_name)
             )
             
             assert (
@@ -793,7 +877,7 @@ class CreateCorpus:
                     row = "name = %s; duration_s = %f;" % (phone, phone_durations[i])
                     rows.append(row)
                 text = "\n".join(rows)
-                path = os.path.join(path_to_corpus, "clips")
+                path = os.path.join(self.path_to_corpus, "clips")
                 if not os.path.exists(path):
                     os.mkdir(path=path)
                 # delete this later?
@@ -851,6 +935,9 @@ class CreateCorpus:
 
                 melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
                 melspecs_norm_synthesized.append(melspec_norm_syn)
+
+
+                #this is for manual testing only
                 if word.label == "chocolate":
                     sf.write("manual_tests/chocolate.wav", wav_rec, sampling_rate)
                     import matplotlib.pyplot as plt
@@ -921,7 +1008,7 @@ class CreateCorpus:
             }
         )
         shutil.rmtree(
-            os.path.join(path_to_corpus + "_aligned" + "/clips/temp_output")
+            os.path.join(self.path_to_corpus  + "/clips/temp_output")
         )  # we don't need the temp_output files anymore
         logging.info(f"Files skipped: {files_skiped}")
         return df
@@ -955,6 +1042,10 @@ if __name__ == "__main__":
         default=False,
         help="If the aligner should be run",
     )
+
+    parser.add_argument(
+        "--use_mp", action="store_true", default=False, help="if multiprocessing should be used in the creation of the dataframe"
+    )
     parser.add_argument(
         "--search_df",
         action="store_true",
@@ -969,7 +1060,7 @@ if __name__ == "__main__":
         "--aligner_batch_size", type=int, default=5000, help="How many text files the aligner should process in one batch")
 
     parser.add_argument(
-        "--num_cores", type=int, default=-1, help="The number of jobs the aligner should use, uses maximum on default")
+        "--num_cores", type=int, default=32, help="The number of jobs the multiprocessing should use, uses maximum on default. If the number is 1 or lower, no multiprocessing is used")
     args = parser.parse_args()
 
     assert os.path.isdir(args.corpus), "The provided path is not a directory"
@@ -981,7 +1072,10 @@ if __name__ == "__main__":
     if args.needs_aligner:
         mfa_workers = args.mfa_workers
         corpus_worker.run_aligner(mfa_workers, args.aligner_batch_size)
-    df = corpus_worker.create_data_frame(args.corpus, clip_list, sentence_list, args.num_cores)
+    if args.use_mp and args.num_cores > 1:
+        corpus_worker.create_data_frame_mp(args.corpus, clip_list, sentence_list, args.num_cores)
+    else:
+        df = corpus_worker.create_data_frame( clip_list, sentence_list)
     logging.info(df)
     path_to_save_corpus = os.path.join(args.corpus, "corpus_as_df.pkl")
     df.to_pickle(path_to_save_corpus)
