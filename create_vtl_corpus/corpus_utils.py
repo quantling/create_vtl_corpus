@@ -14,6 +14,8 @@ import fasttext.util
 from paule import util
 from praatio import textgrid
 import soundfile as sf
+import librosa
+import numpy as np
 
 
 
@@ -306,7 +308,7 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
                     )
                 )
                 ges_file_name = ctypes.c_char_p(ges_file_name.encode())
-                logging.info(f"Client id: {client_id}, writing ges file for word: {word.label}")
+                logging.debug(f"Client id: {client_id}, writing ges file for word: {word.label}")
                 devnull = open("/dev/null", "w")
                 with contextlib.redirect_stdout(devnull):
                     util.VTL.vtlSegmentSequenceToGesturalScore(
@@ -319,32 +321,57 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
                 )
                 c_tract_file_name = ctypes.c_char_p(tract_file_name.encode())
 
-                logging.info(f"Client id: {client_id}, writing tract file, for word: {word.label}")
+                logging.debug(f"Client id: {client_id}, writing tract file, for word: {word.label}")
 
                 util.VTL.vtlGesturalScoreToTractSequence(
                     ges_file_name, c_tract_file_name
                 )
                 cps = util.read_cp(tract_file_name)
-
+                logging.debug(f"Client id: {client_id}, normalizing cps for word: {word.label}")
                 cp_norm = util.normalize_cp(cps)
                 cp_norms.append(cp_norm)
+                logging.debug(f"Client id: {client_id}, writing melspec for word: {word.label}")
+                
 
+                # resample and extract melspec but it needs to be skipped for now since it is hanging the process
+                """
+                logging.info(f"Client id: {client_id}, commencing resampling for word: {word.label} (Andres bet)")
+                wav = librosa.resample(wav_rec, orig_sr=sampling_rate, target_sr=44100,
+                            res_type='kaiser_best', fix=True, scale=False)
+                logging.info(f"Client id: {client_id}, commencing feature extraction for word: {word.label} (Tinos bet)")
+                melspec = librosa.feature.melspectrogram(y=wav, n_fft=1024, hop_length=220, n_mels=60, sr=44100, power=1.0, fmin=10, fmax=12000)
+                logging.info(f"Client id: {client_id}, commencing amplitdue thing for word: {word.label} ")
+                melspec_db = librosa.amplitude_to_db(melspec, ref=0.15)
+                logging.info(f"Client id: {client_id}, converting melspec for word: {word.label}")
+                melspec_rec = np.array(melspec_db.T, order='C', dtype=np.float64)
+
+
+                
+                logging.info(f"Client id: {client_id}, normalizing melspec for word: {word.label}")
                 melspec_norm_rec = util.normalize_mel_librosa(
-                    util.librosa_melspec(wav_rec, sampling_rate)
+                   melspec_rec
                 )
+                loggin.info(f"Completed melspec for word: {word.label}, client_id: {client_id}")
 
                 melspecs_norm_recorded.append(melspec_norm_rec)
-                logging.info(f"Starting synthesis for {word.label} on  client_id {client_id}")
+                """
+
+                melspecs_norm_recorded.append(None)
+                logging.debug(f"Starting synthesis for {word.label} on  client_id {client_id}")
                 wav_syn, wav_syn_sr = util.speak(cps)
                 wavs_sythesized.append(wav_syn)
                 sampling_rates_sythesized.append(wav_syn_sr)
+
+                """
                 melspec_norm_syn = util.normalize_mel_librosa(
                     util.librosa_melspec(wav_syn, wav_syn_sr)
                 )
 
                 melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
                 melspecs_norm_synthesized.append(melspec_norm_syn)
-               
+                """
+
+                melspecs_norm_synthesized.append(None)
                 if len(names) != len(wavs):
                     print(
                         f"The wavs are not the same length,at '{word.label}' Expected: {len(names)}) but got {len(wavs)}"

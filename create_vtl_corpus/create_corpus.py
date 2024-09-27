@@ -698,7 +698,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--corpus",
         type=str,
-        default="../../cv-corpus-18.0-delta-2024-06-14/de",
+        default="../../mini_corpus/",
         help="The path to the corpus which should be converted to the vocaltract lab format",
     )
     parser.add_argument(
@@ -737,7 +737,7 @@ if __name__ == "__main__":
         "--aligner_batch_size", type=int, default=5000, help="How many text files the aligner should process in one batch")
 
     parser.add_argument(
-        "--num_cores", type=int, default=8, help="The number of jobs the multiprocessing should use, uses maximum on default. If the number is 1 or lower, no multiprocessing is used")
+        "--num_cores", type=int, default=1, help="The number of jobs the multiprocessing should use, uses maximum on default. If the number is 1 or lower, no multiprocessing is used")
     args = parser.parse_args()
 
     assert os.path.isdir(args.corpus), "The provided path is not a directory"
