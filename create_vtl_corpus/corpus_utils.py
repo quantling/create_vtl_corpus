@@ -191,7 +191,7 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
 
                 phone_durations = list()
                 for phone in tg.getTier("phones").entries:
-                    if phone.label == "spn":
+                    if phone.label == "spn": 
                         break
                     if phone.start >= word.end:
                         break
@@ -201,14 +201,17 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
 
                     mfa_phone = phone.label
                     mfa_phones_word_level.append(mfa_phone)
-                    sampa_phone = self.mfa_to_sampa_dict[mfa_phone]
+                    sampa_phone = DICT[mfa_phone]
                     phones.append(sampa_phone)
                     mfa_phones_word_level.append(mfa_phone)
 
                     phone_durations.append(phone.end - phone.start)
 
                 if not phones:
-                    pass
+                    logging.warning(
+                        f"No phones found for word '{word.label}' in {filename_no_extension}, skipping this word"
+                    )
+                    continue
                 logging.info(
                     f"Processing word '{word.label}' in {filename_no_extension}, resulting phones: {phones}"
                 )
@@ -259,7 +262,12 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
                 names = list()
                 mfa_phones = list()
                 lexical_words = list()
+                
 
+                #random id 
+                client_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+
+                logging.info(f"Client id: {client_id}, writing seg file")
                 # write seg file
                 rows = []
                 for i, phone in enumerate(phones):
@@ -274,7 +282,16 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
                     os.mkdir(path=os.path.join(path, "temp_output"))
                 seg_file_name = str(
                     os.path.join(
-                        path, f"temp_output/target_audio_word_{word_index}.seg"
+                        path, f"temp_output/target_audio_word_{word_index}_{client_id}.seg"
+                    )
+                )
+                if os.path.exists(seg_file_name):
+                    client_id2 = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+                    logging.warning( f"Client id: {client_id} already exists, creating new one: {client_id2}. Consider deleting the temp_output folder")
+                    client_id = client_id2
+                    seg_file_name = str(
+                    os.path.join(
+                        path, f"temp_output/target_audio_word_{word_index}_{client_id}.seg"
                     )
                 )
                 with open(seg_file_name, "w") as text_file:
@@ -285,11 +302,11 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
 
                 ges_file_name = str(
                     os.path.join(
-                        path, f"temp_output/target_audio_word_{word_index}.ges"
+                        path, f"temp_output/target_audio_word_{word_index}_{client_id}.ges"
                     )
                 )
                 ges_file_name = ctypes.c_char_p(ges_file_name.encode())
-
+                logging.info(f"Client id: {client_id}, writing ges file for word: {word.label}")
                 devnull = open("/dev/null", "w")
                 with contextlib.redirect_stdout(devnull):
                     util.VTL.vtlSegmentSequenceToGesturalScore(
@@ -297,10 +314,12 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
                     )
                 tract_file_name = str(
                     os.path.join(
-                        path, f"temp_output/target_audio_word_{word_index}.txt"
+                        path, f"temp_output/target_audio_word_{word_index}_{client_id}.txt"
                     )
                 )
                 c_tract_file_name = ctypes.c_char_p(tract_file_name.encode())
+
+                logging.info(f"Client id: {client_id}, writing tract file, for word: {word.label}")
 
                 util.VTL.vtlGesturalScoreToTractSequence(
                     ges_file_name, c_tract_file_name
@@ -315,6 +334,7 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
                 )
 
                 melspecs_norm_recorded.append(melspec_norm_rec)
+                logging.info(f"Starting synthesis for {word.label} on  client_id {client_id}")
                 wav_syn, wav_syn_sr = util.speak(cps)
                 wavs_sythesized.append(wav_syn)
                 sampling_rates_sythesized.append(wav_syn_sr)

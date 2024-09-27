@@ -14,7 +14,7 @@ from paule import util
 from praatio import textgrid
 import soundfile as sf
 from tqdm import tqdm
-from concurrent.futures import ProcessPoolExecutor  
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor  
 from corpus_utils import generate_rows, DICT
 # Set up logging
 logging.basicConfig(
@@ -350,6 +350,7 @@ class CreateCorpus:
         """
        
         logging.info(f"Starting to create the dataframe with multiprocessing using {num_cores} cores")
+    
         with ProcessPoolExecutor(max_workers = num_cores) as executor:
      
             futures = list(tqdm((executor.submit(generate_rows, clip, sentence,self.path_to_corpus) for clip, sentence in zip(clip_list, sentence_list)), total = len(clip_list)))
@@ -464,7 +465,7 @@ class CreateCorpus:
             logging.info(sentence)
             logging.info(text_grid_sentence)
             for word_index, word in enumerate(tg.getTier("words")):
-
+                
                 phones = list()
                 mfa_phones_word_level = list()
 
@@ -488,8 +489,11 @@ class CreateCorpus:
                     phone_durations.append(phone.end - phone.start)
 
                 if not phones:
+                    logging.warning(
+                        f"No phones found for word '{word.label}' in {filename_no_extension}, skipping this word"
+                    )
                     continue
-                logging.debug(
+                logging.info(
                     f"Processing word '{word.label}' in {filename_no_extension}, resulting phones: {phones}"
                 )
                 # splicing audio
@@ -677,9 +681,12 @@ class CreateCorpus:
                 "client_id": client_ids,
             }
         )
-        shutil.rmtree(
-            os.path.join(self.path_to_corpus  + "/clips/temp_output")
-        )  # we don't need the temp_output files anymore
+        if not os.path.exists(os.path.join(self.path_to_corpus, "clips/temp_output")):
+            logging.warning("Temp_output folder was not removed, because it was not found")
+        else:
+            shutil.rmtree(
+                os.path.join(self.path_to_corpus  + "/clips/temp_output")
+            )  # we don't need the temp_output files anymore
         logging.info(f"Files skipped: {files_skiped}")
         return df
 
@@ -742,7 +749,9 @@ if __name__ == "__main__":
     if args.needs_aligner:
         mfa_workers = args.mfa_workers
         corpus_worker.run_aligner(mfa_workers, args.aligner_batch_size)
-    if args.use_mp and args.num_cores > 1:
+    if args.use_mp:
+        if args.num_cores <= 1:
+            logging.info(f" You want to use multiprocessing but the number of cores is {args.num_cores}, so the mulitprocessing function likely has no benefit")
         corpus_worker.create_data_frame_mp( clip_list, sentence_list, args.num_cores)
     else:
         df = corpus_worker.create_data_frame( clip_list, sentence_list)
