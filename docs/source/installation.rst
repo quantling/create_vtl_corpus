@@ -1,9 +1,9 @@
 ==============
 Installation
 ==============
-This guide is written under the assumption that you use some kind of Dedian based Linux distribution. 
+This guide is written under the assumption that you use some kind of Debian based Linux distribution. 
 If you use a different operating system, you may need to adjust the installation instructions accordingly.
-First install a conda  and create a conda  environment with the dependecies given in the environment.yml file.
+First install conda or mamba  and create a conda  environment with the dependecies given in the environment.yml file.
 
 
 Installing MFA
