@@ -78,7 +78,7 @@ class CreateVocalTractLab:
             "o": "o",
             "ow": "oU",
             "p": "p",
-            "pʰ": "p",  # "p_h", is not possible in SAMPA but in X SAMPA
+            "pʰ": "p",  # "p_h", is not possible in SAMPA ibut in X SAMPA
             "pʲ": "p'",
             "s": "s",
             "t": "t",
