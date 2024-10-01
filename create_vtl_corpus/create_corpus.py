@@ -5,6 +5,7 @@ import contextlib
 import logging
 import shutil
 import re
+import time
 import subprocess
 from joblib import Parallel, delayed
 import pandas as pd
@@ -14,8 +15,8 @@ from paule import util
 from praatio import textgrid
 import soundfile as sf
 from tqdm import tqdm
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor  
-from corpus_utils import generate_rows, DICT
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+from corpus_utils import generate_rows, DICT, FASTTEXT_EN,FASTTEXT_DE
 # Set up logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -93,19 +94,17 @@ class CreateCorpus:
         fasttext.FastText._FastText: The loaded fasttext model
         """
         if language == "en":
-            model = fasttext.load_model(
-                os.path.join(DIR, "resources", CreateCorpus.fast_text_model_english)
-            )
+            model = FASTTEXT_EN
+            
         elif language == "de":
-            model = fasttext.load_model(
-                os.path.join(DIR, "resources", CreateCorpus.fast_text_model_german)
-            )
+            model = FASTTEXT_DE
+            
         else:
             raise ValueError("The language is not supported")
         logging.info("Fasttext model loaded")
         return model
 
-    def format_corpus(self):
+    def format_corpus(self,clip_amount):
         """
         Takes the path to the corpus and formats it to the fitting form
 
@@ -133,8 +132,10 @@ class CreateCorpus:
                 "The clips_validated folder already exists. We assume it is filled already. If not delete and rerun"
             )
             need_new_clips = False
-
+        assert clip_amount >= 0, "Amount of Sentences cannot be negative"
+        counter = 0
         for _, row in data.iterrows():
+            
             transcript = row["sentence"]
             clip_name = row["path"].removesuffix(".mp3")
             clip_names.append(clip_name)
@@ -160,6 +161,10 @@ class CreateCorpus:
                         senteces_that_are_not_strings += 1
                         continue
                     lab_file.write(transcript)
+                counter += 1
+                if counter >= clip_amount and clip_amount > 0:
+                    logging.info(f"Ended writing for {counter} clips")
+                    break
 
         if senteces_that_are_not_strings > 0:
             logging.warning(
@@ -276,12 +281,12 @@ class CreateCorpus:
             assert run.returncode == 0, "The aligner did not run successfully for the single batch that was run"
         logging.info("The aligner ran successfully")
 
-    def check_structure(self):
+    def check_structure(self, clip_amount):
         """
         Checks if the corpus has the right  and if not corrects this
 
         Params:
-        -
+        clip_amount, how many clips shall be used
 
         Returns:
          clipnames: List[str]
@@ -313,7 +318,7 @@ class CreateCorpus:
             logging.warning(
                 "The lab files and mp3 files do not match, correcting this now"
             )
-        clip_names, sentence_list = self.format_corpus()
+        clip_names, sentence_list = self.format_corpus(clip_amount)
         missing_clips = set(clip_names).difference(lab_files.intersection(mp3_files))
         assert (
             missing_clips == set()
@@ -348,18 +353,28 @@ class CreateCorpus:
         'client_id' : id of the client
 
         """
-       
+        
         logging.info(f"Starting to create the dataframe with multiprocessing using {num_cores} cores")
-    
-        with ProcessPoolExecutor(max_workers = num_cores) as executor:
-     
-            futures = list(tqdm((executor.submit(generate_rows, clip, sentence,self.path_to_corpus) for clip, sentence in zip(clip_list, sentence_list)), total = len(clip_list)))
-            results = [f.result() for f in futures]
+        with tqdm(total=len(clip_list)) as pbar:
+            with ProcessPoolExecutor(max_workers = num_cores) as executor:
+                
+                try:
+                    futures = list((executor.submit(generate_rows, clip, sentence,self.path_to_corpus,self.language) for clip, sentence in zip(clip_list, sentence_list)))
+                    for future in as_completed(futures):
+                        pbar.update(1)
+                    results = [f.result() for f in futures]
+            
+      
+                except KeyboardInterrupt:
+                    logging.warning("Ctrl+C detected, shutting down...")
+                
+                    executor.shutdown(wait=True, cancel_futures=True)
+                    logging.warning("All processes terminated.")
 
 
         df = pd.concat(results)
 
-        if not os.path.exists(os.path.join(self.path_to_corpus, "clips/temp_output")):
+        if os.path.exists(os.path.join(self.path_to_corpus, "clips/temp_output")):
             shutil.rmtree(os.path.join(self.path_to_corpus + "/clips/temp_output"))  # we don't need the temp_output files anymore
 
             logging.info("Removed temp_output folder,to clean up space")
@@ -519,8 +534,11 @@ class CreateCorpus:
                     .replace("(", "")
                     .replace(")", "")
                     .replace('"', "")
+                    .replace('„', "")
+                    .replace("“", "")
                     .replace("'", "")
-                )  # remove dots ( might impact pronunciation however)
+
+                )  # remove special characters  since the basic sematic meaning is not changed by them ( might impact pronunciation however)
                 lexical_words.append(lexical_word)
                 assert (
                     word.label.lower().replace("'", "") == lexical_word.lower()
@@ -733,6 +751,8 @@ if __name__ == "__main__":
         "--df_path", type=str, default=None, help="The path to the dataframe"
     )  # TODO
 
+    parser.add_argument("--clip_amount", type=int, default=0, help="0 the whole corpus shall be processed, a postivie integer if the number is limited")
+
     parser.add_argument(
         "--aligner_batch_size", type=int, default=5000, help="How many text files the aligner should process in one batch")
 
@@ -745,14 +765,15 @@ if __name__ == "__main__":
     corpus_worker = CreateCorpus(args.corpus, language=args.language)
     if args.search_df:
         pass
-    clip_list, sentence_list = corpus_worker.check_structure()
+    clip_list, sentence_list = corpus_worker.check_structure(args.clip_amount)
     if args.needs_aligner:
         mfa_workers = args.mfa_workers
         corpus_worker.run_aligner(mfa_workers, args.aligner_batch_size)
     if args.use_mp:
         if args.num_cores <= 1:
             logging.info(f" You want to use multiprocessing but the number of cores is {args.num_cores}, so the mulitprocessing function likely has no benefit")
-        corpus_worker.create_data_frame_mp( clip_list, sentence_list, args.num_cores)
+        df= corpus_worker.create_data_frame_mp( clip_list, sentence_list, args.num_cores)
+       
     else:
         df = corpus_worker.create_data_frame( clip_list, sentence_list)
     logging.info(df)

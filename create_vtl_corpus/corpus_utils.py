@@ -7,7 +7,7 @@ import re
 import subprocess
 import string
 import random
-from joblib import Parallel, delayed
+
 import pandas as pd
 import fasttext
 import fasttext.util
@@ -17,7 +17,15 @@ import soundfile as sf
 import librosa
 import numpy as np
 
+DIR = os.path.dirname(__file__)
 
+FASTTEXT_EN = fasttext.load_model(
+                os.path.join(DIR, "resources", "cc.en.300.bin")
+            )
+
+FASTTEXT_DE = fasttext.load_model(
+                os.path.join(DIR, "resources", "cc.de.300.bin")
+            )
 
 DICT = {
     "a": "a",
@@ -126,7 +134,7 @@ DICT = {
 
 
 
-def generate_rows(filename_no_extension,sentence, path_to_corpus):
+def generate_rows(filename_no_extension,sentence, path_to_corpus, language):
             """This function is used to create the matching rows from a clip
             It is used for the multiprocessing part of the code
             Parameters: filename_no_extension (str): The name of the clip
@@ -134,7 +142,13 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
 
             Returns: The rows for the dataframe as a dataframe object  (pd.DataFrame)"""
             
-            
+            if language == "en":
+                fast_text_model = FASTTEXT_EN 
+            elif language == "de":
+                fast_text_model = FASTTEXT_DE
+            else:
+                raise ValueError("The language is not supported for multiprocessing")
+
            
 
             labels = list()
@@ -167,7 +181,7 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
             try:
                 tg = textgrid.openTextgrid(
                     os.path.join(
-                        path_to_corpus + "_aligned", filename_no_extension + ".TextGrid"
+                        path_to_corpus,"clips_aligned", filename_no_extension + ".TextGrid"
                     ),
                     False,
                 )
@@ -175,17 +189,34 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
                 logging.warning(
                     f"The TextGrid file for {filename_no_extension} was not found"
                 )
-                clip_list.remove(filename_no_extension)
-                sentence_list.remove(sentence)
-                files_skiped += 1
-                return df_part
+                
+                
+                df_empty =  df_part = pd.DataFrame(columns = 
+            [
+                "file_name",
+                "label",
+                "lexical_word",
+                "word_position",
+                "sentence",
+                "wav_recording",
+                "wav_synthesized",
+                "sr_recording",
+                "sr_synthesized",
+                "sampa_phones",
+                "mfa_phones",
+                "phone_durations",
+                "cp_norm",
+                "vector",
+                "client_id",
+            ] )
+                return df_empty
                 
             text_grid_sentence = list()
             
             for word_index, word in enumerate(tg.getTier("words")):
                 text_grid_sentence.append(word.label)
-            logging.info(sentence)
-            logging.info(text_grid_sentence)
+            logging.debug(sentence)
+            logging.debug(text_grid_sentence)
             for word_index, word in enumerate(tg.getTier("words")):
 
                 phones = list()
@@ -214,7 +245,7 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
                         f"No phones found for word '{word.label}' in {filename_no_extension}, skipping this word"
                     )
                     continue
-                logging.info(
+                logging.debug(
                     f"Processing word '{word.label}' in {filename_no_extension}, resulting phones: {phones}"
                 )
                 # splicing audio
@@ -247,29 +278,25 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
                     word.label.lower().replace("'", "") == lexical_word.lower()
                 ), f"Word mismatch since '{word.label.lower() .replace("'", "")}' is not equal to '{lexical_word.lower()} in sentence '{sentence}' in {filename_no_extension}. TextGrid sentece: {text_grid_sentence}"
                 
-                labels = list()
-                word_positions = list()
-                sentences = list()
-                wavs = list()
-                wavs_sythesized = list()
-                sampling_rates = list()
-                sampling_rates_sythesized = list()
-                phone_durations_list = list()
-                sampa_phones = list()
-                cp_norms = list()
-                melspecs_norm_recorded = list()
-                melspecs_norm_synthesized = list()
-                vectors = list()
-                client_ids = list()
-                names = list()
-                mfa_phones = list()
-                lexical_words = list()
+                names.append(clip_name)
+                sampa_phones.append(phones)
+                phone_durations_list.append(phone_durations)
+                mfa_phones.append(mfa_phones_word_level)
+                wavs.append(wav_rec)
+                # adding easy to add variables to the lists
+                labels.append(word.label)
+                sampling_rates.append(sampling_rate)
+                word_positions.append(word_index)
+                fasttext_vector = fast_text_model.get_word_vector(word.label)
+                vectors.append(fasttext_vector)
+                client_ids.append(filename_no_extension)
+                sentences.append(sentence)
                 
 
                 #random id 
                 client_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
 
-                logging.info(f"Client id: {client_id}, writing seg file")
+                logging.debug(f"Client id: {client_id}, writing seg file")
                 # write seg file
                 rows = []
                 for i, phone in enumerate(phones):
@@ -373,10 +400,31 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
 
                 melspecs_norm_synthesized.append(None)
                 if len(names) != len(wavs):
-                    print(
+                    logging.warning(
                         f"The wavs are not the same length,at '{word.label}' Expected: {len(names)}) but got {len(wavs)}"
                     )
             # fill the dataframe
+
+
+            for idx, array in enumerate(
+            [
+                names,
+                labels,
+                word_positions,
+                sentences,
+                wavs,
+                sampling_rates,
+                sampa_phones,
+                phone_durations_list,
+                cp_norms,
+              
+                vectors,
+                client_ids,
+                mfa_phones,
+                lexical_words,
+            ]
+        ):
+                logging.info(f"Length of array {idx}: {len(array)}")
 
             df_part = pd.DataFrame(
             {
@@ -393,8 +441,6 @@ def generate_rows(filename_no_extension,sentence, path_to_corpus):
                 "mfa_phones": mfa_phones,
                 "phone_durations": phone_durations_list,
                 "cp_norm": cp_norms,
-                "melspec_norm_recorded": melspecs_norm_recorded,
-                "melspec_norm_synthesized": melspecs_norm_synthesized,
                 "vector": vectors,
                 "client_id": client_ids,
             })

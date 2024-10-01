@@ -1,6 +1,10 @@
 ===========
 How to use?
 ===========
+
+Many commands can be used to create a corpus with the library.
+Use the --help function of -h to get more information about the commands.
+
 This is a collection of possible use cases, which we target the library for.
 
 1. Create the vtl corpus with no pre-existing data but not all of the files, i.

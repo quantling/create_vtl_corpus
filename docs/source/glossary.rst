@@ -7,7 +7,8 @@ creation of the corpus for a vocal tract synthesis with VocalTractLab.
 
 VocalTractLab (VTL)
 ===================
-VocalTractLab (VTL) is the articulatory speech syntesizer...
+VocalTractLaboratory (VTL) is the articulatory speech syntesizer developed by Peter Birkholz.
+You can find more informaton about VTL on the `VTL website <https://www.vocaltractlab.de/>`_.
 
 
 Control Parameter Trajectories (cp-trajectories)
@@ -16,6 +17,8 @@ Control Parameter Trajectories (cp-trajectories)
 
 Montreal Forced Aligner (MFA)
 =============================
+The Montreal Forced Aligner (MFA) is a speech processing tool that aligns speech to its transcript.
+It is developed by MontrealCorpusTools at McGill university in Montreal. You can find more information about MFA on the `MFA website <https://montreal-forced-aligner.readthedocs.io/en/latest/>`_.  
 
 
 Phonetic alphabet
@@ -24,7 +27,9 @@ Phonetic alphabet
 
 SAMPA
 =====
-
+SAMPA (Speech Assessment Methods Phonetic Alphabet) is a computer-readable phonetic script using 7-bit ASCII characters.
+It is used to represent the phonemes of a language. You can find more information about SAMPA on the `SAMPA website <http://www.phon.ucl.ac.uk/home/sampa/home.htm>`_.
+It is used by VTL to synthesize.
 
 MFA alphabet
 ============
@@ -41,4 +46,5 @@ Segment-based synthesis
 PAULE synthesis
 ===============
 
-
+Predictive Articulatory speech synthesis Utilizing Lexical Embeddings (PAULE) is a python frame work to plan control parameter trajectories 
+for the VocalTractLab simulator for a target acoustics or semantic embedding developed by Tino Sering . 
