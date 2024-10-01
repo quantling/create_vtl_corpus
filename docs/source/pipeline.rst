@@ -78,112 +78,217 @@ Phonemes
 ========
 The phonemes are converted from the MFA phonemes to the SAMPA phonemes. The following table shows the conversion:
 
-====================  ==================
-Phoneme               VTL Representation
-====================  ==================
-a                     a
-aj                    aI
-aw                    aU
-aː                    a:
-b                     b
-bʲ                    b
-c                     k
-cʰ                    s
-d                     d
-dʒ                    dZ
-dʲ                    d
-e                     e
-ej                    I
-f                     f
-fʲ                    f
-h                     h
-i                     i
-iː                    i:
-j                     j
-k                     k
-kʰ                    k
-l                     l
-m                     m
-mʲ                    m
-m̩                    m
-n                     n
-n̩                    n
-o                     o
-ow                    aU
-p                     p
-pʰ                    p
-pʲ                    p
-s                     s
-t                     t
-tʃ                    tS
-tʰ                    t
-tʲ                    t
-u                     u
-uː                    u:
-v                     v
-vʲ                    v
-w                     U
-z                     z
-æ                     a
-ç                     C
-ð                     D
-ŋ                     N
-ɐ                     6
-ɑ                     o
-ɑː                    o:
-ɒ                     O
-ɒː                    O
-ɔ                     O
-ɔj                    OY
-ə                     @
-əw                    aU
-ɚ                     @
-ɛ                     E
-ɛː                    E:
-ɜ                     2
-ɜː                    2:
-ɝ                    2
-ɟ                    dZ
-ɡ                    g
-ɪ                    I
-ɫ                    l
-ɫ̩                    l
-ɱ                    m
-ɲ                    n
-ɹ                    r
-ɾ                    r
-ʃ                    S
-ʉ                    u
-ʉː                    u:
-ʊ                    U
-ʎ                    l
-ʒ                    Z
-ʔ                    ?
-θ                    T
-ʁ                    R
-eː                    e:
-x                    x
-ts                    ts
-ɔʏ                    OY
-oː                    o:
-œ                    9
-yː                    y:
-ʏ                    Y
-øː                    2:
-ø                    2
-pf                    pf
-l̩                    l
-t̪                    T
-ʈʲ                    T
-ʈ                    t
-ʋ                    v
-d̪                    d
-kʷ                    k
-cʷ                    C
-ɖ                    d
-tʷ                    t
-ɟʷ                    dZ
-====================  ==================
+.. list-table:: Phoneme to VTL Representation
+   :widths: 15 15
+   :header-rows: 1
+
+   * - Phoneme
+     - VTL Representation
+   * - a
+     - a
+   * - aj
+     - aI
+   * - aw
+     - aU
+   * - aː
+     - a:
+   * - b
+     - b
+   * - bʲ
+     - b
+   * - c
+     - k
+   * - cʰ
+     - s
+   * - d
+     - d
+   * - dʒ
+     - dZ
+   * - dʲ
+     - d
+   * - e
+     - e
+   * - ej
+     - I
+   * - f
+     - f
+   * - fʲ
+     - f
+   * - h
+     - h
+   * - i
+     - i
+   * - iː
+     - i:
+   * - j
+     - j
+   * - k
+     - k
+   * - kʰ
+     - k
+   * - l
+     - l
+   * - m
+     - m
+   * - mʲ
+     - m
+   * - m̩
+     - m
+   * - n
+     - n
+   * - n̩
+     - n
+   * - o
+     - o
+   * - ow
+     - aU
+   * - p
+     - p
+   * - pʰ
+     - p
+   * - pʲ
+     - p
+   * - s
+     - s
+   * - t
+     - t
+   * - tʃ
+     - tS
+   * - tʰ
+     - t
+   * - tʲ
+     - t
+   * - u
+     - u
+   * - uː
+     - u:
+   * - v
+     - v
+   * - vʲ
+     - v
+   * - w
+     - U
+   * - z
+     - z
+   * - æ
+     - a
+   * - ç
+     - C
+   * - ð
+     - D
+   * - ŋ
+     - N
+   * - ɐ
+     - 6
+   * - ɑ
+     - o
+   * - ɑː
+     - o:
+   * - ɒ
+     - O
+   * - ɒː
+     - O
+   * - ɔ
+     - O
+   * - ɔj
+     - OY
+   * - ə
+     - @
+   * - əw
+     - aU
+   * - ɚ
+     - @
+   * - ɛ
+     - E
+   * - ɛː
+     - E:
+   * - ɜ
+     - 2
+   * - ɜː
+     - 2:
+   * - ɝ
+     - 2
+   * - ɟ
+     - dZ
+   * - ɡ
+     - g
+   * - ɪ
+     - I
+   * - ɫ
+     - l
+   * - ɫ̩
+     - l
+   * - ɱ
+     - m
+   * - ɲ
+     - n
+   * - ɹ
+     - r
+   * - ɾ
+     - r
+   * - ʃ
+     - S
+   * - ʉ
+     - u
+   * - ʉː
+     - u:
+   * - ʊ
+     - U
+   * - ʎ
+     - l
+   * - ʒ
+     - Z
+   * - ʔ
+     - ?
+   * - θ
+     - T
+   * - ʁ
+     - R
+   * - eː
+     - e:
+   * - x
+     - x
+   * - ts
+     - ts
+   * - ɔʏ
+     - OY
+   * - oː
+     - o:
+   * - œ
+     - 9
+   * - yː
+     - y:
+   * - ʏ
+     - Y
+   * - øː
+     - 2:
+   * - ø
+     - 2
+   * - pf
+     - pf
+   * - l̩
+     - l
+   * - t̪
+     - T
+   * - ʈʲ
+     - T
+   * - ʈ
+     - t
+   * - ʋ
+     - v
+   * - d̪
+     - d
+   * - kʷ
+     - k
+   * - cʷ
+     - C
+   * - ɖ
+     - d
+   * - tʷ
+     - t
+   * - ɟʷ
+     - dZ
+
 
 
 Some phonemes are perhabs not perfectly converted, since VTL does not accept all the phonemes of the SAMPA notation. Also, the MFA phonemes are not always perfectly aligned with the SAMPA phonemes.
