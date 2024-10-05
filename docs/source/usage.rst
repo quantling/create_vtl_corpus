@@ -15,6 +15,15 @@ This is a collection of possible use cases, which we target the library for.
 3. Filter after words? Create 1000 more "post" word types.
 
 
+
+===============
+Mulitprocessing
+===============
+The library supports multiprocessing, which can be used to speed up the process and for large corpora this is absolutely necessary.
+However it is not enabled by default, to enable it use the --use_mp flag.
+For small corpora it is not recommended to use multiprocessing, since generating the melspectrograms is not possible with multiprocessing currently.
+The melspectrograms can be generated afterwards too however with the information available in the dataframe, but no solutuion is provided by the library for this yet.
+
 CreateCorpus Class
 ==========================
 
