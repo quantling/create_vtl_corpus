@@ -287,10 +287,9 @@ def generate_rows(
         split_sentence = [word for word in split_sentence if word]
 
         maximum_word_index = len(split_sentence) - 1
-        if word_index > maximum_word_index:
-            logging.warning(
-                f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this word, Sentence: {sentence} .last word: {sentence.split()[-1]}"
-            )
+        assert (
+            word_index > maximum_word_index
+        ), f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this word, Sentence: {sentence} .last word: {sentence.split()[-1]}"
 
         lexical_word = replace_special_chars(split_sentence[word_index])
 

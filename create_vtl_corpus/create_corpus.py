@@ -622,7 +622,7 @@ class CreateCorpus:
                     logging.warning(
                         f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this word, Sentence: {sentence} .last word: {sentence.split()[-1]}"
                     )
-
+                    continue
                 lexical_word = replace_special_chars(
                     split_sentence[word_index]
                 )  # remove special characters  since the basic sematic meaning is not changed by them ( might impact pronunciation however)
@@ -880,8 +880,12 @@ if __name__ == "__main__":
         help="The number of jobs the multiprocessing should use, uses maximum on default. If the number is 1 or lower, no multiprocessing is used",
     )
 
-    parser.add_argument("--save_df_path", type=str, default="corpus_as_df_mp.pkl", help="The path to save the dataframe to in relation to the corpus folder")
+    parser.add_argument("--save_df_path", type=str, default="corpus_as_df_mp", help="The path to save the dataframe to in relation to the corpus folder")
     parser.add_argument("--debug", action="store_true", default=False, help="If debug mode should be used")
+
+    parser.add_argument("--epoch_size", type=int, default=10000, help="The size of the epochs used until the dataframe is saved")
+    parser.add_argument("--start_epoch", type=int, default=0, help="The epoch to start with (inclusive)")
+    parser.add_argument("--end_epoch", type=int, default=None, help="The epoch to end with (inclusive)")
     args = parser.parse_args()
 
     if args.debug:
@@ -899,22 +903,63 @@ if __name__ == "__main__":
     if args.needs_aligner:
         mfa_workers = args.mfa_workers
         corpus_worker.run_aligner(mfa_workers, args.aligner_batch_size)
-    if args.use_mp:
-        if args.num_cores <= 1:
-            assert args.num_cores >= 0, "The number of cores cannot be negative"
-            logging.info(
-                f" You want to use multiprocessing but the number of cores is {args.num_cores}, so the mulitprocessing function likely has no benefit"
-            )
-            logging.info(f"Melspecs will not be created in multiprocessing mode")
-        df = corpus_worker.create_data_frame_mp(
-            clip_list, sentence_list, args.num_cores
-        )
 
+
+    clip_lists = [clip_list[i:i + args.epoch_size] for i in range(0, len(clip_list), args.epoch_size)]
+    sentence_lists = [sentence_list[i:i + args.epoch_size] for i in range(0, len(sentence_list), args.epoch_size)]
+    logging.info(f"Epochs: {len(clip_lists)}")
+
+    folder_path = os.path.join(args.corpus, args.save_df_path +"_folder")
+    if not os.path.exists(folder_path):
+            os.mkdir(folder_path)
+
+    for i, (clip_list, sentence_list) in enumerate(zip(clip_lists, sentence_lists)):
+        if i < args.start_epoch:
+            continue
+        if args.end_epoch is not None:
+            if i > args.end_epoch:
+                break
+        if args.use_mp:
+                if args.num_cores <= 1:
+                    assert args.num_cores >= 0, "The number of cores cannot be negative"
+                    logging.info(
+                        f" You want to use multiprocessing but the number of cores is {args.num_cores}, so the mulitprocessing function likely has no benefit"
+                    )
+                    logging.info(f"Melspecs will not be created in multiprocessing mode")
+                df = corpus_worker.create_data_frame_mp(
+                    clip_list, sentence_list, args.num_cores
+                )
+
+        else:
+            logging.info("Creating dataframe without multiprocessing")
+            df = corpus_worker.create_data_frame(clip_list, sentence_list)
+        logging.info(df)
+       
+        path_to_save_corpus = os.path.join(folder_path, args.save_df_path + f"epoch_{i}" + ".pkl") 
+        df.to_pickle(path_to_save_corpus)
+        logging.info(f"Dataframe saved to {path_to_save_corpus}")
+        logging.info(f"Epoch {i} done")
+
+
+        
+    logging.info("Merging all DataFrames into one")
+    df_list = []
+    
+    # Iterate through all files in the directory
+    for filename in os.listdir(folder_path):
+        # Only process .pkl files
+        if filename.endswith(".pkl"):
+            file_path = os.path.join(folder_path, filename)
+            # Load the .pkl file into a DataFrame and append it to the list
+            df = pd.read_pickle(file_path)
+            df_list.append(df)
+    
+    # Concatenate all DataFrames
+    if df_list:
+        concatenated_df = pd.concat(df_list, ignore_index=True)
+        concatenated_df.to_pickle(os.path.join(args.corpus, args.save_df_path + ".pkl"))
     else:
-        logging.info("Creating dataframe without multiprocessing")
-        df = corpus_worker.create_data_frame(clip_list, sentence_list)
-    logging.info(df)
-    path_to_save_corpus = os.path.join(args.corpus, args.save_df_path) 
-    df.to_pickle(path_to_save_corpus)
-
+        logging.error("No .pkl files found.")
+        
+    logging.info(concatenated_df)
     logging.info("Done! :P")
