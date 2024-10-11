@@ -17,7 +17,7 @@ This is a collection of possible use cases, which we target the library for.
 
 
 ===============
-Mulitprocessing
+Multiprocessing
 ===============
 The library supports multiprocessing, which can be used to speed up the process and for large corpora this is absolutely necessary.
 However it is not enabled by default, to enable it use the --use_mp flag.
@@ -36,6 +36,7 @@ CreateCorpus Class
 Flags
 =====
 The following flags can be used to modify the behaviour of the library.
+
 .. argparse::
    :ref: create_vtl_corpus.create_corpus.return_argument_parser
    :prog: create_corpus.py
