@@ -14,6 +14,7 @@ Welcome to CreateVTLCorpus's documentation!
    usage
    glossary
    installation
+   issues
 
 
 

@@ -31,3 +31,11 @@ CreateCorpus Class
 .. autoclass:: create_vtl_corpus.create_corpus.CreateCorpus
 
    :members:
+
+
+Flags
+=====
+The following flags can be used to modify the behaviour of the library.
+.. argparse::
+   :ref: create_vtl_corpus.create_corpus.return_argument_parser
+   :prog: create_corpus.py

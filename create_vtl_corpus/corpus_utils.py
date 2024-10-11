@@ -283,13 +283,21 @@ def generate_rows(
             int(word.start * sampling_rate) : int(word.end * sampling_rate)
         ]
         assert wav_rec is not None, "The audio is None"
-        split_sentence = re.split(r"[ -]|\.\.", sentence)
+        if language == "en":
+            split_sentence = re.split(r"[ -]|\.\.", sentence)
+        elif language == "de":
+            split_sentence = re.split(r"[ \"–-]|\.\.", sentence)
+        else:
+            logging.debug("Language not supported for splitting, going with default")
+            split_sentence = re.split(r"[ -]|\.\.", sentence)
         split_sentence = [word for word in split_sentence if word]
 
         maximum_word_index = len(split_sentence) - 1
-        assert (
-            word_index > maximum_word_index
-        ), f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this word, Sentence: {sentence} .last word: {sentence.split()[-1]}"
+        if word_index > maximum_word_index:
+            logging.warning(
+                f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this sentence"
+            )
+            return df_empty
 
         lexical_word = replace_special_chars(split_sentence[word_index])
 

@@ -5,3 +5,4 @@ seaborn>=0.11.2
 numpydoc>=1.2
 easydev>=0.9.35
 nbsphinx>=0.8.8
+sphinx-argparse>=0.2.5

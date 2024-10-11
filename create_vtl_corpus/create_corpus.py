@@ -23,7 +23,7 @@ from corpus_utils import (
     DICT,
     FASTTEXT_EN,
     FASTTEXT_DE,
-    replace_special_chars
+    replace_special_chars,
 )
 
 # Set up logging
@@ -87,6 +87,11 @@ class CreateCorpus:
             os.remove(f"cc.{language}.300.bin.gz")
 
     def __init__(self, path_to_corpus: str, *, language: str):
+        """Initializes the CreateCorpus class with the corpus path and language
+        Params:
+        path_to_corpus (str): The path to the corpus
+        language (str): The language of the corpus as an abbreviation
+        """
         self.path_to_corpus = path_to_corpus
         self.language = language
         self.fast_text_model = self.load_fasttext_model(language)
@@ -154,7 +159,7 @@ class CreateCorpus:
         assert min_word_count >= 0, "Minimum word count cannot be negative"
         if word_amount != 0:
             assert (
-                word_amount >= min_word_count 
+                word_amount >= min_word_count
             ), "The word amount cannot be smaller than the minimum word count"
         self.word_amount = word_amount
         self.min_word_count = min_word_count
@@ -211,14 +216,13 @@ class CreateCorpus:
 
         word_counts = Counter(all_words)
 
-
         logging.info(f"{word_counts} These are the word counts")
         filtered_word_counts = {
             word: count
             for word, count in word_counts.items()
             if count >= min_word_count
         }
-        
+
         if word_amount > 0:
             word_set = frozenset(
                 key.lower()
@@ -442,7 +446,7 @@ class CreateCorpus:
         logging.info(
             f"Starting to create the dataframe with multiprocessing using {num_cores} cores"
         )
-        with tqdm(total=len(clip_list)) as pbar:
+        with tqdm(total=len(clip_list), desc="files in epoch") as pbar:
             with ProcessPoolExecutor(max_workers=num_cores) as executor:
 
                 try:
@@ -537,12 +541,12 @@ class CreateCorpus:
 
         used_phonemes = set()
         files_skiped = 0
-        
+
         # remove extension for TextGrid
 
         path_to_aligned = os.path.join(self.path_to_corpus, "clips_aligned")
         for filename_no_extension, sentence in tqdm(
-            zip(clip_list, sentence_list), total=len(clip_list)
+            zip(clip_list, sentence_list), total=len(clip_list), desc="files in epoch"
         ):
 
             clip_name = filename_no_extension + ".mp3"
@@ -576,7 +580,7 @@ class CreateCorpus:
             logging.info(text_grid_sentence)
             for word_index, word in enumerate(tg.getTier("words")):
 
-                if  word.label not in self.word_set:
+                if word.label not in self.word_set:
                     logging.info(
                         f"Word '{word.label}' is not in the word set, skipping this word"
                     )
@@ -805,7 +809,9 @@ class CreateCorpus:
         return df
 
 
-if __name__ == "__main__":
+def return_argument_parser():
+    """The argument parser for the command line arguments. This is in a seperate function to allow automatic documentation of the arguments
+    Returns:  argparse.ArgumentParser: The argument parser"""
     parser = argparse.ArgumentParser(
         description="Converts a corpus to the vocaltract lab format"
     )
@@ -833,7 +839,6 @@ if __name__ == "__main__":
         default=False,
         help="If the aligner should be run",
     )
-
     parser.add_argument(
         "--use_mp",
         action="store_true",
@@ -841,18 +846,11 @@ if __name__ == "__main__":
         help="if multiprocessing should be used in the creation of the dataframe",
     )
     parser.add_argument(
-        "--search_df",
-        action="store_true",
-        default=False,
-        help=" If a already created dataframe should be searched for and then used instead of creating a new one",
-    )
-    parser.add_argument(
-        "--df_path",
+        "--append_to_df",
         type=str,
         default=None,
-        help="The path to the dataframe that should be expaned",
-    )  # TODO
-
+        help=" If a already created dataframe should be searched for and then used instead of creating a new one",
+    )
     parser.add_argument(
         "--min_word_count",
         type=int,
@@ -865,28 +863,48 @@ if __name__ == "__main__":
         default=0,
         help="0 the whole corpus shall be processed, a postivie integer if the number is limited. Since processing is sentence based, more words ( with lower word count), will also be synthesized",
     )
-
     parser.add_argument(
         "--aligner_batch_size",
         type=int,
         default=5000,
         help="How many text files the aligner should process in one batch",
     )
-
     parser.add_argument(
         "--num_cores",
         type=int,
         default=1,
         help="The number of jobs the multiprocessing should use, uses maximum on default. If the number is 1 or lower, no multiprocessing is used",
     )
+    parser.add_argument(
+        "--save_df_path",
+        type=str,
+        default="corpus_as_df_mp",
+        help="The path to save the dataframe to in relation to the corpus folder",
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        default=False,
+        help="If debug mode should be used",
+    )
+    parser.add_argument(
+        "--epoch_size",
+        type=int,
+        default=10000,
+        help="The size of the epochs used until the dataframe is saved",
+    )
+    parser.add_argument(
+        "--start_epoch", type=int, default=0, help="The epoch to start with (inclusive)"
+    )
+    parser.add_argument(
+        "--end_epoch", type=int, default=None, help="The epoch to end with (inclusive)"
+    )
+    return parser
 
-    parser.add_argument("--save_df_path", type=str, default="corpus_as_df_mp", help="The path to save the dataframe to in relation to the corpus folder")
-    parser.add_argument("--debug", action="store_true", default=False, help="If debug mode should be used")
 
-    parser.add_argument("--epoch_size", type=int, default=10000, help="The size of the epochs used until the dataframe is saved")
-    parser.add_argument("--start_epoch", type=int, default=0, help="The epoch to start with (inclusive)")
-    parser.add_argument("--end_epoch", type=int, default=None, help="The epoch to end with (inclusive)")
-    args = parser.parse_args()
+if __name__ == "__main__":
+    myparser = return_argument_parser()
+    args = myparser.parse_args()  # This parses command-line arguments
 
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
@@ -895,8 +913,7 @@ if __name__ == "__main__":
 
     CreateCorpus.setup(language=args.language)
     corpus_worker = CreateCorpus(args.corpus, language=args.language)
-    if args.search_df:
-        pass
+
     clip_list, sentence_list = corpus_worker.check_structure(
         args.word_amount, args.min_word_count
     )
@@ -904,47 +921,55 @@ if __name__ == "__main__":
         mfa_workers = args.mfa_workers
         corpus_worker.run_aligner(mfa_workers, args.aligner_batch_size)
 
-
-    clip_lists = [clip_list[i:i + args.epoch_size] for i in range(0, len(clip_list), args.epoch_size)]
-    sentence_lists = [sentence_list[i:i + args.epoch_size] for i in range(0, len(sentence_list), args.epoch_size)]
+    clip_lists = [
+        clip_list[i : i + args.epoch_size]
+        for i in range(0, len(clip_list), args.epoch_size)
+    ]
+    sentence_lists = [
+        sentence_list[i : i + args.epoch_size]
+        for i in range(0, len(sentence_list), args.epoch_size)
+    ]
     logging.info(f"Epochs: {len(clip_lists)}")
 
-    folder_path = os.path.join(args.corpus, args.save_df_path +"_folder")
+    folder_path = os.path.join(args.corpus, args.save_df_path + "_folder")
     if not os.path.exists(folder_path):
-            os.mkdir(folder_path)
+        os.mkdir(folder_path)
 
-    for i, (clip_list, sentence_list) in enumerate(zip(clip_lists, sentence_lists)):
+    for i, (clip_list, sentence_list) in tqdm(
+        enumerate(zip(clip_lists, sentence_lists)), total=len(clip_lists), desc="Epochs"
+    ):
+
         if i < args.start_epoch:
             continue
         if args.end_epoch is not None:
             if i > args.end_epoch:
                 break
         if args.use_mp:
-                if args.num_cores <= 1:
-                    assert args.num_cores >= 0, "The number of cores cannot be negative"
-                    logging.info(
-                        f" You want to use multiprocessing but the number of cores is {args.num_cores}, so the mulitprocessing function likely has no benefit"
-                    )
-                    logging.info(f"Melspecs will not be created in multiprocessing mode")
-                df = corpus_worker.create_data_frame_mp(
-                    clip_list, sentence_list, args.num_cores
+            if args.num_cores <= 1:
+                assert args.num_cores >= 0, "The number of cores cannot be negative"
+                logging.info(
+                    f" You want to use multiprocessing but the number of cores is {args.num_cores}, so the mulitprocessing function likely has no benefit"
                 )
+                logging.info(f"Melspecs will not be created in multiprocessing mode")
+            df = corpus_worker.create_data_frame_mp(
+                clip_list, sentence_list, args.num_cores
+            )
 
         else:
             logging.info("Creating dataframe without multiprocessing")
             df = corpus_worker.create_data_frame(clip_list, sentence_list)
         logging.info(df)
-       
-        path_to_save_corpus = os.path.join(folder_path, args.save_df_path + f"epoch_{i}" + ".pkl") 
+
+        path_to_save_corpus = os.path.join(
+            folder_path, args.save_df_path + f"epoch_{i}" + ".pkl"
+        )
         df.to_pickle(path_to_save_corpus)
         logging.info(f"Dataframe saved to {path_to_save_corpus}")
         logging.info(f"Epoch {i} done")
 
-
-        
     logging.info("Merging all DataFrames into one")
     df_list = []
-    
+
     # Iterate through all files in the directory
     for filename in os.listdir(folder_path):
         # Only process .pkl files
@@ -953,13 +978,19 @@ if __name__ == "__main__":
             # Load the .pkl file into a DataFrame and append it to the list
             df = pd.read_pickle(file_path)
             df_list.append(df)
-    
+
     # Concatenate all DataFrames
     if df_list:
         concatenated_df = pd.concat(df_list, ignore_index=True)
+        if args.append_to_df:
+            old_df = pd.read_pickle(os.path.join(args.append_to_df + ".pkl"))
+            logging.info(
+                f"Appending dataframe with  relative path: {old_df} to existing DataFrame"
+            )
+            concatenated_df = pd.concat([old_df, concatenated_df], ignore_index=True)
         concatenated_df.to_pickle(os.path.join(args.corpus, args.save_df_path + ".pkl"))
     else:
         logging.error("No .pkl files found.")
-        
+
     logging.info(concatenated_df)
     logging.info("Done! :P")
