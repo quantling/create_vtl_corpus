@@ -18,7 +18,7 @@ from tqdm import tqdm
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 
-from corpus_utils import (
+from .corpus_utils import (
     generate_rows,
     DICT,
     FASTTEXT_EN,
@@ -44,8 +44,8 @@ class CreateCorpus:
     ├── validated.txt          a file where the transripts are stored
     |
     ├── clips/
-    |     └──*.mp3
-    └── *.files_not_relevant_to this project
+    |     └──\*.mp3
+    └──\*.files_not_relevant_to this project
 
     Attributes:
     ---------------
@@ -897,7 +897,7 @@ def return_argument_parser():
         "--start_epoch", type=int, default=0, help="The epoch to start with (inclusive)"
     )
     parser.add_argument(
-        "--end_epoch", type=int, default=None, help="The epoch to end with (inclusive)"
+        "--end_epoch", type=int, default=100, help="The epoch to end with (inclusive)"
     )
     return parser
 
@@ -940,7 +940,9 @@ if __name__ == "__main__":
     ):
 
         if i < args.start_epoch:
+            logging.info(f"Skipping epoch {i}")
             continue
+
         if args.end_epoch is not None:
             if i > args.end_epoch:
                 break

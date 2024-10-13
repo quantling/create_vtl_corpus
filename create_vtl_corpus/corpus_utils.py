@@ -353,7 +353,9 @@ def generate_rows(
             os.mkdir(path=path)
         # delete this later?
         if not os.path.exists(os.path.join(path, "temp_output")):
-            os.mkdir(path=os.path.join(path, "temp_output"))
+
+            os.mkdir(path=os.path.join(path, "temp_output"), exist_ok=True)
+
         seg_file_name = str(
             os.path.join(
                 path, f"temp_output/target_audio_word_{word_index}_{client_id}.seg"
