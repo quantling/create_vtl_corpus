@@ -20,9 +20,18 @@ import numpy as np
 DIR = os.path.dirname(__file__)
 
 
-FASTTEXT_EN = fasttext.load_model(os.path.join(DIR, "resources", "cc.en.300.bin"))
+try:
+    FASTTEXT_EN = fasttext.load_model(os.path.join(DIR, "resources", "cc.en.300.bin"))
+except:
+    logging.warning("The FastText model for English could not be loaded")
+    FASTTEXT_EN = None
 
-FASTTEXT_DE = fasttext.load_model(os.path.join(DIR, "resources", "cc.de.300.bin"))
+try:
+
+    FASTTEXT_DE = fasttext.load_model(os.path.join(DIR, "resources", "cc.de.300.bin"))
+except:
+    logging.warning("The FastText model for German could not be loaded")
+    FASTTEXT_DE = None
 
 
 DICT = {
