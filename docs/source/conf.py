@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "createVTLcorpus"
-copyright = "2024, Konstantin Sering"
-author = "Konstantin Sering"
-release = "0.0.1"
+copyright = "2024, Konstantin Sering and Valentin Schmidt"
+author = "Konstantin Sering and Valentin Schmidt"
+release = "0.1.0"
 
 # add modules to the path
 import os
