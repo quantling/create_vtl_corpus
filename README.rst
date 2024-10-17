@@ -31,11 +31,48 @@ functions from top to bottom. The functions are supplied by the other files.
    Please use the VTL api directly.
 
 
+Minimal Example
+===============
+Given a Corpus with the following structure:
+
+ .. code:: bash
+        corpus/
+        ├── validated.tsv         a file where the transripts are stored
+        |
+        ├── clips/
+        |     └──.mp3
+        └──.files_not_relevant_to this project
+
+
+ .. code:: bash
+        corpus/
+        ├── validated.tsv         a file where the transripts are stored
+        |
+        ├── clips/
+        |     └──.mp3
+        |     └──.lab   
+        |
+        |── clips_validated/
+        |     └──.mp3
+        |     └──.lab
+        |
+        |── clips_aligned/
+        |     └──.TextGrid
+        |
+        └──.files_not_relevant_to this project
+
+
 Copyright
 =========
 As the VocalTractLabAPI.so and the JD2.speaker is under GPL v3 the rest of the code
 here is GPL  under as well.  If the code is not dependent on VTL anymore you can use
 it under MIT license.
+
+
+Citing 
+=======
+If you use this code please cite the following thesis:
+Konstantin Sering. Predictive articulatory speech synthesis utilizing lexical embeddings (PAULE). PhD thesis, Universität Tübingen, 2023.
 
 Acknowledgments
 ===============

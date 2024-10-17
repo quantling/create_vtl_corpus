@@ -43,7 +43,7 @@ class CreateCorpus:
 
     .. code:: bash
         corpus/
-        ├── validated.txt          a file where the transripts are stored
+        ├── validated.tsv         a file where the transripts are stored
         |
         ├── clips/
         |     └──.mp3
