@@ -41,8 +41,9 @@ Flags
 =====
 The following flags can be used to modify the behaviour of the library.
 .. argparse::
-   :ref: create_vtl_corpus.create_corpus.return_argument_parser
-   :prog: create_corpus.py
+:ref: create_vtl_corpus.create_corpus.return_argument_parser
+:prog: create_corpus.py
+   
 Multiprocessing
 ===============
 The library supports multiprocessing, which can be used to speed up the process
@@ -56,6 +57,7 @@ dataframe, but no solution is provided by the library for this yet.
 
 CreateCorpus Class
 ==========================
+
 .. autoclass:: create_vtl_corpus.create_corpus.CreateCorpus
    :members:
    .. automethod:: __init__, run_aligner, create_data_frame_mp, create_data_frame

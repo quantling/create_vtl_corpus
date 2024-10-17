@@ -23,7 +23,6 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinxarg.ext",
-    "sphinx.ext.autosectionlabel",
 ]
 
 templates_path = ["_templates"]
