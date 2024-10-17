@@ -42,12 +42,12 @@ class CreateCorpus:
 
 
     .. code:: bash
+
         corpus/
-        ├── validated.tsv         a file where the transripts are stored
-        |
+        ├── validated.tsv         # a file where the transcripts are stored
         ├── clips/
-        |     └──.mp3
-        └──.files_not_relevant_to this project
+        │   └── *.mp3             # audio files (mp3)
+        └── files_not_relevant_to_this_project
 
     Attributes:
     ---------------
@@ -886,10 +886,10 @@ def return_argument_parser():
         help="The number of jobs the multiprocessing should use, uses maximum on default. If the number is 1 or lower, no multiprocessing is used",
     )
     parser.add_argument(
-        "--save_df_path",
+        "--save_df_name",
         type=str,
         default="corpus_as_df_mp",
-        help="The path to save the dataframe to in relation to the corpus folder",
+        help="The name to save the dataframe to in relation to the corpus folder",
     )
     parser.add_argument(
         "--debug",

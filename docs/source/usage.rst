@@ -15,7 +15,7 @@ a pandas DataFrame to ``SAVE_DF_PATH`` run the following command:
 
 .. code:: bash
 
-    python -m create_vtl_corpus.create_corpus --corpus CORPUS --language de --needs_aligner --use_mp --min_word_count 4 --word_amount 100 --save_df_path SAVE_DF_PATH
+    python -m create_vtl_corpus.create_corpus --corpus CORPUS --language de --needs_aligner --use_mp --min_word_count 4 --word_amount 100 --save_df_name SAVE_DF_NAME
 
 Use ``--help`` or ``-h`` to get a full list of the command line options.
 

@@ -10,6 +10,10 @@ from a phonemic transcription. Furthermore, it defines helpers to improve the
 result if more information as the pitch contour is available. It is especially useful when working with 
 the `PAULE <https://github.com/quantling/paule>`__ framework.
 
+Currently the package supports the following languages:
+   - German
+   - English
+
 Version 2.0.0 and later
 -----------------------
 From version 2.0.0 we are relying on the new segment-to-gesture API introduced
@@ -33,7 +37,7 @@ functions from top to bottom. The functions are supplied by the other files.
 
 Minimal Example
 ===============
-Given a Corpus with the following structure:
+Given a german Corpus with the following structure which is what the `Mozilla Common Voice project <https://commonvoice.mozilla.org>`__ provides:
 
  .. code:: bash
 
@@ -43,6 +47,11 @@ Given a Corpus with the following structure:
     │   └── *.mp3             # audio files (mp3)
     └── files_not_relevant_to_this_project
 
+If you run the following command the package will align the audio files for you, and then create a pandas DataFrame with the synthesized audio and other information useful for the PAULE model,
+but only for the first 100 words that occur 4 times or more:
+.. code:: bash
+
+    python -m create_vtl_corpus.create_corpus --corpus CORPUS --language de --needs_aligner --use_mp --min_word_count 4 --word_amount 100 --save_df_name SAVE_DF_NAME
 
 
  .. code:: bash
@@ -70,8 +79,20 @@ it under MIT license.
 
 Citing 
 =======
-If you use this code please cite the following thesis:
+If you use this code for your research, please cite the following thesis:
+
 Konstantin Sering. Predictive articulatory speech synthesis utilizing lexical embeddings (PAULE). PhD thesis, Universität Tübingen, 2023.
+
+.. code:: bibtex
+   
+      @phdthesis{sering2023paule,
+         title={Predictive articulatory speech synthesis utilizing lexical embeddings (PAULE)},
+         author={Sering, Konstantin},
+         year={2023},
+         school={Universität Tübingen}
+      }
+
+   
 
 Acknowledgments
 ===============
