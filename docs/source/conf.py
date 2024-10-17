@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "createVTLcorpus"
-copyright = "2024, Konstantin Sering"
-author = "Konstantin Sering"
-release = "0.0.1"
+copyright = "2024, Konstantin Sering and Valentin Schmidt"
+author = "Konstantin Sering and Valentin Schmidt"
+release = "0.1.0"
 
 # add modules to the path
 import os
@@ -21,6 +21,9 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinxarg.ext",
+    "sphinx.ext.autosectionlabel",
 ]
 
 templates_path = ["_templates"]
@@ -30,5 +33,5 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "alabaster"
+html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
