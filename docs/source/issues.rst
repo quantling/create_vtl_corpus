@@ -1,5 +1,5 @@
 =====================================
-Possible issues with CreateVTLCorpus:
+Troubleshooting and known issues
 =====================================
 
 

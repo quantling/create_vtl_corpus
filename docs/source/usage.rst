@@ -17,7 +17,7 @@ a pandas DataFrame to ``SAVE_DF_PATH`` run the following command:
 
     python -m create_vtl_corpus.create_corpus --corpus CORPUS --language de --needs_aligner --use_mp --min_word_count 4 --word_amount 100 --save_df_path SAVE_DF_PATH
 
-Use the ``--help`` or ``-h`` to get a full list of the command line options.
+Use ``--help`` or ``-h`` to get a full list of the command line options.
 
 Furthermore, you can use it within Python. Here the
 ``create_vtl_corpus.create_corpus.CreateCorpus`` class is a good starting
@@ -60,8 +60,10 @@ CreateCorpus Class
 ==========================
 
 .. autoclass:: create_vtl_corpus.create_corpus.CreateCorpus
-
+  
    :members:
+   .. automethod:: __init__, run_aligner, create_data_frame_mp, create_data_frame
+   
 
 
 

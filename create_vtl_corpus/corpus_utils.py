@@ -361,9 +361,12 @@ def generate_rows(
         if not os.path.exists(path):
             os.mkdir(path=path)
         # delete this later?
-        if not os.path.exists(os.path.join(path, "temp_output")):
+        temp_path = os.path.join(path, "temp_output")
+        if not os.path.exists(temp_path):
 
-            os.mkdir(path=os.path.join(path, "temp_output"), exist_ok=True)
+            from pathlib import Path
+
+            Path(temp_path).mkdir(parents=True, exist_ok=True)
 
         seg_file_name = str(
             os.path.join(

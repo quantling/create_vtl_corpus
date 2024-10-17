@@ -40,12 +40,14 @@ class CreateCorpus:
     It's assumed that a corpus has the following shape
     as is common with Mozillas Common Voice Corpus using MFA
 
-    corpus/
-    ├── validated.txt          a file where the transripts are stored
-    |
-    ├── clips/
-    |     └──\*.mp3
-    └──\*.files_not_relevant_to this project
+
+    .. code-block :: bash
+        corpus/
+        ├── validated.txt          a file where the transripts are stored
+        |
+        ├── clips/
+        |     └──.mp3
+        └──.files_not_relevant_to this project
 
     Attributes:
     ---------------
@@ -818,7 +820,7 @@ def return_argument_parser():
     parser.add_argument(
         "--corpus",
         type=str,
-        default="../../mini_corpus/",
+        default="../mini_corpus/",
         help="The path to the corpus which should be converted to the vocaltract lab format",
     )
     parser.add_argument(
