@@ -36,30 +36,29 @@ Minimal Example
 Given a Corpus with the following structure:
 
  .. code:: bash
-        corpus/
-        ├── validated.tsv         a file where the transripts are stored
-        |
-        ├── clips/
-        |     └──.mp3
-        └──.files_not_relevant_to this project
+
+    corpus/
+    ├── validated.tsv         # a file where the transcripts are stored
+    ├── clips/
+    │   └── *.mp3             # audio files (mp3)
+    └── files_not_relevant_to_this_project
+
 
 
  .. code:: bash
-        corpus/
-        ├── validated.tsv         a file where the transripts are stored
-        |
-        ├── clips/
-        |     └──.mp3
-        |     └──.lab   
-        |
-        |── clips_validated/
-        |     └──.mp3
-        |     └──.lab
-        |
-        |── clips_aligned/
-        |     └──.TextGrid
-        |
-        └──.files_not_relevant_to this project
+
+    corpus/
+    ├── validated.tsv          # a file where the transcripts are stored
+    ├── clips/
+    │   ├── *.mp3              # mp3 files
+    │   └── *.lab              # lab files
+    ├── clips_validated/
+    │   ├── *.mp3              # validated mp3 files
+    │   └── *.lab              # validated lab files
+    ├── clips_aligned/
+    │   └── *.TextGrid         # aligned TextGrid files
+    └── files_not_relevant_to_this_project
+
 
 
 Copyright
