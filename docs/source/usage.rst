@@ -40,9 +40,11 @@ Use cases
 Flags
 =====
 The following flags can be used to modify the behaviour of the library.
+
 .. argparse::
-:ref: create_vtl_corpus.create_corpus.return_argument_parser
-:prog: create_corpus.py
+   :module: create_vtl_corpus.create_corpus
+   :func: return_argument_parser
+   :prog: fancytool
    
 Multiprocessing
 ===============
@@ -60,7 +62,12 @@ CreateCorpus Class
 
 .. autoclass:: create_vtl_corpus.create_corpus.CreateCorpus
    :members:
-   .. automethod:: __init__, run_aligner, create_data_frame_mp, create_data_frame
+   
+.. automethod:: create_vtl_corpus.create_corpus.CreateCorpus.__init__
+.. automethod:: create_vtl_corpus.create_corpus.CreateCorpus.run_aligner
+.. automethod:: create_vtl_corpus.create_corpus.CreateCorpus.create_data_frame_mp
+.. automethod:: create_vtl_corpus.create_corpus.CreateCorpus.create_data_frame
+
    
 
 

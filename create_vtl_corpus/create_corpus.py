@@ -119,7 +119,8 @@ class CreateCorpus:
             os.remove(f"cc.{language}.300.bin.gz")
 
     def __init__(self, path_to_corpus: str, *, language: str):
-        """Initializes the CreateCorpus class with the corpus path and language
+        """
+        Initializes the CreateCorpus class with the corpus path and language
         Params:
         path_to_corpus (str): The path to the corpus
         language (str): The language of the corpus as an abbreviation
@@ -278,11 +279,11 @@ class CreateCorpus:
 
     def run_aligner(self, mfa_workers: int, batch_size: int):
         """
-            Runs the Montreal Forced Aligner on the corpus
-           Params:
-           mfaworkers (int): The number of workers to use
+        Runs the Montreal Forced Aligner on the corpus
+        Params:
+        mfaworkers (int): The number of workers to use
 
-           Returns:
+        Returns:
         -
         """
         path_to_validated = os.path.join(self.path_to_corpus, "clips_validated")
@@ -451,13 +452,13 @@ class CreateCorpus:
         """
         Creates Dataframe with Vocaltract Lab data and other data with multiprocessing
         Parameters
-        ==========
+
         clip_list (list): A list of the clip names present in the corpus
         sentence_list (list): A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
         num_cores (int): The number of cores to maximaly use
 
         Returns
-        =========
+
         pd.dataframe: A dataframe with the following labels
         'file_name' : name of the clip
         'label' : the spoken word as it is in the aligned textgrid
@@ -529,12 +530,12 @@ class CreateCorpus:
     ):
         """
         Creates Dataframe with Vocaltract Lab data and other data
-        Parameters:
+        Parameters
         path_to_corpus (str): The path to the corpus
         clip_list (list): A list of the clip names present in the corpus
         sentence_list (list): A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
 
-        Returns:
+        Returns
         pd.dataframe: A dataframe with the following labels
         'file_name' : name of the clip
         'label' : the spoken wordn
@@ -844,7 +845,8 @@ class CreateCorpus:
 
 
 def return_argument_parser():
-    """The argument parser for the command line arguments. This is in a seperate function to allow automatic documentation of the arguments
+    """
+    The argument parser for the command line arguments. This is in a seperate function to allow automatic documentation of the arguments
     Returns:  argparse.ArgumentParser: The argument parser"""
     parser = argparse.ArgumentParser(
         description="Converts a corpus to the vocaltract lab format"
