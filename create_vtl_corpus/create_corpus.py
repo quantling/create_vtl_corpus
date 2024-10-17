@@ -65,7 +65,17 @@ class CreateCorpus:
     check_structure():
         Checks if the corpus has the right format and if not corrects this
     create_dataframe():
-        Extracts the SAMPA phonemes from the aligned corpus
+        Extracts the MFA phonemes from the aligned corpus and creates a dataframe with synthesized data
+    create_dataframe_mp():
+        Extracts the MFA phonemes from the aligned corpus and creates a dataframe with synthesized data using multiprocessing, no mel spectrograms are created here
+    setup():
+        Downloads the fasttext model for the given language or calls load_fasttext_model() it if it is already downloaded
+    load_fasttext_model():
+        Loads the fasttext model for the given language, from the resources folder
+    create_frozen_set():
+        Creates a frozen set of the words that should be used in the corpus and saves it as a class attribute
+
+
     """
 
     fast_text_model_english = "cc.en.300.bin"
@@ -428,7 +438,7 @@ class CreateCorpus:
         Returns:
         pd.dataframe: A dataframe with the following labels
         'file_name' : name of the clip
-        'label' : the spoken wordn
+        'label' : the spoken word as it is in the aligned textgrid
         'lexical_word' : the word as it is in the dictionary
         'word_position' : the position of the word in the sentence
         'sentence' : the sentence the word is part of
@@ -438,8 +448,6 @@ class CreateCorpus:
         "mfa_phones" : the phonemes as outputted by the aligner
         'phone_durations_lists' : the duration of each phone in the word as list
         'cp_norm' : normalized cp-trajectories
-        'melspec_norm_recorded' : normalized mel spectrogram of the audio clip
-        'melspec_norm_synthesized' : normalized mel spectrogram synthesized from the cp-trajectories
         'vector' : embedding vector of the word, based on fastText Embeddings
         'client_id' : id of the client
 
