@@ -71,6 +71,7 @@ The end product should look someting like this
    └── files_not_relevant_to_this_project
 
 The DataFrame contains the following columns
+
 .. list-table:: Dataframe Labels
    :header-rows: 1
 
