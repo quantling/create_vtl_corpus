@@ -15,3 +15,4 @@ joblib>=1.4.2
 praatio>=6.2.0
 librosa>=0.10.2.post1
 resampy>=0.4.3
+groundwork-sphinx-theme>=0.0.1

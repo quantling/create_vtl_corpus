@@ -41,7 +41,7 @@ class CreateCorpus:
     as is common with Mozillas Common Voice Corpus using MFA
 
 
-    .. code-block:: bash
+    .. code:: bash
         corpus/
         ├── validated.txt          a file where the transripts are stored
         |
