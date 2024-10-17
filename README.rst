@@ -70,7 +70,7 @@ The end product should look someting like this
    ├── corpus_as_df.pkl       # a pandas DataFrame with the information
    └── files_not_relevant_to_this_project
 
-The DataFrame contains the following columns:
+The DataFrame contains the following columns
 .. list-table:: Dataframe Labels
    :header-rows: 1
 
