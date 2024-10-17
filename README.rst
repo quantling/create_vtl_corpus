@@ -48,25 +48,27 @@ Given a german Corpus with the following structure which is what the `Mozilla Co
     └── files_not_relevant_to_this_project
 
 If you run the following command the package will align the audio files for you, and then create a pandas DataFrame with the synthesized audio and other information useful for the PAULE model,
-but only for the first 100 words that occur 4 times or more:
+but only for the first 100 words that occur 4 times or more. Since you use multiprocessing, no melspectrograms are generated.:
 .. code:: bash
 
     python -m create_vtl_corpus.create_corpus --corpus CORPUS --language de --needs_aligner --use_mp --min_word_count 4 --word_amount 100 --save_df_name SAVE_DF_NAME
 
+The end product should look someting like this
 
- .. code:: bash
+.. code:: bash
 
-    corpus/
-    ├── validated.tsv          # a file where the transcripts are stored
-    ├── clips/
-    │   ├── *.mp3              # mp3 files
-    │   └── *.lab              # lab files
-    ├── clips_validated/
-    │   ├── *.mp3              # validated mp3 files
-    │   └── *.lab              # validated lab files
-    ├── clips_aligned/
-    │   └── *.TextGrid         # aligned TextGrid files
-    └── files_not_relevant_to_this_project
+   corpus/
+   ├── validated.tsv          # a file where the transcripts are stored
+   ├── clips/
+   │   ├── *.mp3              # mp3 files
+   │   └── *.lab              # lab files
+   ├── clips_validated/
+   │   ├── *.mp3              # validated mp3 files
+   │   └── *.lab              # validated lab files
+   ├── clips_aligned/
+   │   └── *.TextGrid         # aligned TextGrid files
+   ├── corpus_as_df.pkl       # a pandas DataFrame with the information
+   └── files_not_relevant_to_this_project
 
 
 

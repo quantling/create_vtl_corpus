@@ -98,7 +98,6 @@ class CreateCorpus:
         Extracts the SAMPA phonemes from the aligned corpus
     """
 
-
     fast_text_model_english = "cc.en.300.bin"
     fast_text_model_german = "cc.de.300.bin"
 
@@ -962,7 +961,7 @@ if __name__ == "__main__":
     ]
     logging.info(f"Epochs: {len(clip_lists)}")
 
-    folder_path = os.path.join(args.corpus, args.save_df_path + "_folder")
+    folder_path = os.path.join(args.corpus, args.save_df_name + "_folder")
     if not os.path.exists(folder_path):
         os.mkdir(folder_path)
 
@@ -994,7 +993,7 @@ if __name__ == "__main__":
         logging.info(df)
 
         path_to_save_corpus = os.path.join(
-            folder_path, args.save_df_path + f"epoch_{i}" + ".pkl"
+            folder_path, args.save_df_name + f"epoch_{i}" + ".pkl"
         )
         df.to_pickle(path_to_save_corpus)
         logging.info(f"Dataframe saved to {path_to_save_corpus}")
@@ -1021,7 +1020,7 @@ if __name__ == "__main__":
                 f"Appending dataframe with  relative path: {old_df} to existing DataFrame"
             )
             concatenated_df = pd.concat([old_df, concatenated_df], ignore_index=True)
-        concatenated_df.to_pickle(os.path.join(args.corpus, args.save_df_path + ".pkl"))
+        concatenated_df.to_pickle(os.path.join(args.corpus, args.save_df_name + ".pkl"))
     else:
         logging.error("No .pkl files found.")
 
