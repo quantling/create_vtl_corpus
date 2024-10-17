@@ -7,7 +7,7 @@ import re
 import subprocess
 import string
 import random
-
+from joblib import Parallel, delayed
 import pandas as pd
 import fasttext
 import fasttext.util
@@ -16,6 +16,7 @@ from praatio import textgrid
 import soundfile as sf
 import librosa
 import numpy as np
+
 
 DIR = os.path.dirname(__file__)
 
@@ -31,7 +32,8 @@ try:
     FASTTEXT_DE = fasttext.load_model(os.path.join(DIR, "resources", "cc.de.300.bin"))
 except:
     logging.warning("The FastText model for German could not be loaded")
-    FASTTEXT_DE = None
+
+
 
 
 DICT = {

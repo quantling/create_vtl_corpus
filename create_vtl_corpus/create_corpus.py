@@ -5,7 +5,7 @@ import contextlib
 import logging
 import shutil
 import re
-import time
+
 import subprocess
 from joblib import Parallel, delayed
 import pandas as pd
@@ -15,6 +15,7 @@ from paule import util
 from praatio import textgrid
 import soundfile as sf
 from tqdm import tqdm
+
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 
@@ -39,6 +40,7 @@ class CreateCorpus:
     This class generates the vocaltract lab trajectories for a corpus.
     It's assumed that a corpus has the following shape
     as is common with Mozillas Common Voice Corpus using MFA
+
 
 
     .. code:: bash
@@ -76,7 +78,26 @@ class CreateCorpus:
         Creates a frozen set of the words that should be used in the corpus and saves it as a class attribute
 
 
+
+    Attributes:
+    ---------------
+    path_to_corpus: str
+        The path to the corpus
+    language: str
+        The language of the corpus as an abbreviation
+
+    Methods:
+    ---------------
+    format_corpus():
+        Takes the path to the corpus and formats it to the fitting form
+    run_aligner():
+        Runs the Montreal Forced Aligner on the corpus
+    check_structure():
+        Checks if the corpus has the right format and if not corrects this
+    create_dataframe():
+        Extracts the SAMPA phonemes from the aligned corpus
     """
+
 
     fast_text_model_english = "cc.en.300.bin"
     fast_text_model_german = "cc.de.300.bin"
@@ -1005,4 +1026,5 @@ if __name__ == "__main__":
         logging.error("No .pkl files found.")
 
     logging.info(concatenated_df)
+
     logging.info("Done! :P")

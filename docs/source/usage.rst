@@ -36,6 +36,7 @@ Use cases
 3. Filter after words? Create 1000 more "post" word types.
 
 
+
 Flags
 =====
 The following flags can be used to modify the behaviour of the library.
@@ -61,6 +62,7 @@ CreateCorpus Class
 
 .. autoclass:: create_vtl_corpus.create_corpus.CreateCorpus
   
+
    :members:
    .. automethod:: __init__, run_aligner, create_data_frame_mp, create_data_frame
    

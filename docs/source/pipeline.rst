@@ -7,7 +7,9 @@ parameter trajectories, splice out the single words and do the segment-based
 synthesis.
 
 Goal
+
 ====
+n
 The goal of the pipeline is to generate a corpus for a vocal tract synthesis with VocalTractLab (VTL) from the Mozilla Common Voice corpus. The corpus is specifically tailored
 for the `PAULE model <https://github.com/quantling/paule>`__  but it can be used for other purposes.
 
@@ -290,8 +292,10 @@ The phonemes are converted from the MFA phonemes to the SAMPA phonemes. The foll
      - dZ
 
 
+
 Some phonemes are perhaps not perfectly converted, since VTL does not accept all the phonemes of the SAMPA notation. Also, the MFA phonemes are not always perfectly aligned with the SAMPA phonemes.
 If VTL accepts more phonemes in the future, the conversion can be improved. Please contact the author if you have suggestions.
 The conversion should be good enough for the purpose of the corpus generation.
 A german accent in English is  noticable in English pronounciation in the synthesis.
 If other languages are added the conversion table must be adapted for new phonemes.
+
