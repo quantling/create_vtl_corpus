@@ -25,6 +25,7 @@ Phonetic alphabet
 =================
 
 
+ You can see the phonetic alphabet used by VTL here :ref:`Phonemes`
 SAMPA
 =====
 SAMPA (Speech Assessment Methods Phonetic Alphabet) is a computer-readable phonetic script using 7-bit ASCII characters.

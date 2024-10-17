@@ -70,6 +70,40 @@ The end product should look someting like this
    ├── corpus_as_df.pkl       # a pandas DataFrame with the information
    └── files_not_relevant_to_this_project
 
+The DataFrame contains the following columns:
+.. list-table:: Dataframe Labels
+   :header-rows: 1
+
+   * - Column Name
+     - Description
+   * - file_name
+     - Name of the clip
+   * - label
+     - The spoken word as it is in the aligned textgrid
+   * - lexical_word
+     - The word as it is in the dictionary
+   * - word_position
+     - The position of the word in the sentence
+   * - sentence
+     - The sentence the word is part of
+   * - wav_recording
+     - Spliced out audio as mono audio signal
+   * - sr_recording
+     - Sampling rate of the recording
+   * - sr_synthesized
+     - Sampling rates synthesized
+   * - sampa_phones
+     - The SAMPA(like) phonemes of the word
+   * - mfa_phones
+     - The phonemes as outputted by the aligner
+   * - phone_durations_lists
+     - The duration of each phone in the word as list
+   * - cp_norm
+     - Normalized CP-trajectories
+   * - vector
+     - Embedding vector of the word, based on FastText Embeddings
+   * - client_id
+     - ID of the client
 
 
 Copyright

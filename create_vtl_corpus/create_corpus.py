@@ -450,12 +450,14 @@ class CreateCorpus:
     def create_data_frame_mp(self, clip_list: list, sentence_list: list, num_cores):
         """
         Creates Dataframe with Vocaltract Lab data and other data with multiprocessing
-        Parameters:
+        Parameters
+        ==========
         clip_list (list): A list of the clip names present in the corpus
         sentence_list (list): A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
         num_cores (int): The number of cores to maximaly use
 
-        Returns:
+        Returns
+        =========
         pd.dataframe: A dataframe with the following labels
         'file_name' : name of the clip
         'label' : the spoken word as it is in the aligned textgrid
@@ -464,8 +466,9 @@ class CreateCorpus:
         'sentence' : the sentence the word is part of
         'wav_recording' : spliced out audio as mono audio signal
         'sr_recording' : sampling rate of the recording
+        'sr_synthesized': sampling_rates_sythesized,
         'sampa_phones' : the sampa(like) phonemes of the word
-        "mfa_phones" : the phonemes as outputted by the aligner
+        'mfa_phones' : the phonemes as outputted by the aligner
         'phone_durations_lists' : the duration of each phone in the word as list
         'cp_norm' : normalized cp-trajectories
         'vector' : embedding vector of the word, based on fastText Embeddings
@@ -540,6 +543,7 @@ class CreateCorpus:
         'sentence' : the sentence the word is part of
         'wav_recording' : spliced out audio as mono audio signal
         'sr_recording' : sampling rate of the recording
+        'sr_synthesized': sampling_rates_sythesized,
         'sampa_phones' : the sampa(like) phonemes of the word
         "mfa_phones" : the phonemes as outputted by the aligner
         'phone_durations_lists' : the duration of each phone in the word as list
