@@ -7,7 +7,8 @@ Readme
 
 This package supplies the necessary functions in order to synthesize speech
 from a phonemic transcription. Furthermore, it defines helpers to improve the
-result if more information as the pitch contour is available.
+result if more information as the pitch contour is available. It is especially useful when working with 
+the `PAULE <https://github.com/quantling/paule>`__ framework.
 
 Version 2.0.0 and later
 -----------------------
@@ -32,8 +33,8 @@ functions from top to bottom. The functions are supplied by the other files.
 
 Copyright
 =========
-As the VocalTractLabAPI.so and the JD2.speaker is GPL v3 the rest of the code
-here is GPL as well.  If the code is not dependent on VTL anymore you can use
+As the VocalTractLabAPI.so and the JD2.speaker is under GPL v3 the rest of the code
+here is GPL  under as well.  If the code is not dependent on VTL anymore you can use
 it under MIT license.
 
 Acknowledgments
