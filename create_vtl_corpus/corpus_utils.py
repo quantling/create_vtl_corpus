@@ -32,8 +32,7 @@ try:
     FASTTEXT_DE = fasttext.load_model(os.path.join(DIR, "resources", "cc.de.300.bin"))
 except:
     logging.warning("The FastText model for German could not be loaded")
-
-
+    FASTTEXT_DE = None
 
 
 DICT = {
