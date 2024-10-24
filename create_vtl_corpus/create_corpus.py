@@ -7,7 +7,6 @@ import shutil
 import re
 
 import subprocess
-from joblib import Parallel, delayed
 import pandas as pd
 import fasttext
 import fasttext.util
@@ -41,8 +40,6 @@ class CreateCorpus:
     It's assumed that a corpus has the following shape
     as is common with Mozillas Common Voice Corpus using MFA
 
-
-
     .. code:: bash
 
         corpus/
@@ -51,15 +48,15 @@ class CreateCorpus:
         │   └── *.mp3             # audio files (mp3)
         └── files_not_relevant_to_this_project
 
-    Attributes:
-    ---------------
+    Attributes
+    ----------
     path_to_corpus: str
         The path to the corpus
     language: str
         The language of the corpus as an abbreviation
 
-    Methods:
-    ---------------
+    Methods
+    -------
     format_corpus():
         Takes the path to the corpus and formats it to the fitting form
     run_aligner():
@@ -77,25 +74,6 @@ class CreateCorpus:
     create_frozen_set():
         Creates a frozen set of the words that should be used in the corpus and saves it as a class attribute
 
-
-
-    Attributes:
-    ---------------
-    path_to_corpus: str
-        The path to the corpus
-    language: str
-        The language of the corpus as an abbreviation
-
-    Methods:
-    ---------------
-    format_corpus():
-        Takes the path to the corpus and formats it to the fitting form
-    run_aligner():
-        Runs the Montreal Forced Aligner on the corpus
-    check_structure():
-        Checks if the corpus has the right format and if not corrects this
-    create_dataframe():
-        Extracts the SAMPA phonemes from the aligned corpus
     """
 
     fast_text_model_english = "cc.en.300.bin"
@@ -121,9 +99,12 @@ class CreateCorpus:
     def __init__(self, path_to_corpus: str, *, language: str):
         """
         Initializes the CreateCorpus class with the corpus path and language
-        Params:
-        path_to_corpus (str): The path to the corpus
-        language (str): The language of the corpus as an abbreviation
+
+        Parameters
+        ----------
+	path_to_corpus (str): The path to the corpus
+	language (str): The language of the corpus as an abbreviation
+
         """
         self.path_to_corpus = path_to_corpus
         self.language = language
@@ -134,10 +115,12 @@ class CreateCorpus:
         """
         Loads the fasttext model for the given language
 
-        Params:
+        Parameters
+        ----------
         language (str): The language of the model
 
-        Returns:
+        Returns
+        -------
         fasttext.FastText._FastText: The loaded fasttext model
         """
         if language == "en":
@@ -158,16 +141,19 @@ class CreateCorpus:
         logging.info("Fasttext model loaded")
         return model
 
+
     def format_corpus(self, word_amount, min_word_count):
         """
         Takes the path to the corpus and formats it to the fitting form
 
-        Params:
-        word_amount (int): The amount of words that should be used, if 0 all clips are used
-        word_a
+        Parameters
+        ----------
+	word_amount (int): The amount of words that should be used, if 0 all
+            clips are used word_a
 
-        Returns:
-        -
+        Returns
+        -------
+        None
         """
 
         data = pd.read_table(
@@ -237,13 +223,22 @@ class CreateCorpus:
 
     def create_frozen_set(self, validated_sentences, word_amount, min_word_count):
         """
-        Creates a frozen set of the words that should be used in the corpus and saves it as a class attribute
-        Params:
-        validated_sentences (pd.Series): The sentences from the validated.tsv file
-        word_amount (int): The amount of words that should be used, if 0 all clips are used
-        min_word_count (int): The minimum amount of words a word should have to be included in  the word amount argument
-        Returns:
-        -
+	Creates a frozen set of the words that should be used in the corpus and
+        saves it as a class attribute
+
+        Parameters
+        ----------
+	validated_sentences (pd.Series): The sentences from the validated.tsv
+            file
+	word_amount (int): The amount of words that should be used, if 0 all
+            clips are used
+	min_word_count (int): The minimum amount of words a word should have to
+            be included in  the word amount argument
+
+        Returns
+        -------
+        None
+
         """
         all_words = validated_sentences.str.split().explode().dropna()
 
@@ -277,14 +272,19 @@ class CreateCorpus:
 
         logging.info(f"{word_set} These are the words that will be used in the corpus")
 
+
     def run_aligner(self, mfa_workers: int, batch_size: int):
         """
         Runs the Montreal Forced Aligner on the corpus
-        Params:
+
+        Parameters
+        ----------
         mfaworkers (int): The number of workers to use
 
-        Returns:
-        -
+        Returns
+        -------
+	None (only side effects)
+
         """
         path_to_validated = os.path.join(self.path_to_corpus, "clips_validated")
         path_to_aligned = os.path.join(self.path_to_corpus, "clips_aligned")
@@ -401,19 +401,26 @@ class CreateCorpus:
             ), "The aligner did not run successfully for the single batch that was run"
         logging.info("The aligner ran successfully")
 
+
     def check_structure(self, word_amount, min_word_count):
         """
         Checks if the corpus has the right  and if not corrects this
 
-        Params:
-        min_word_count (int): The minimum amount of words a word should have to be included in  the word amount argument
-        word_amount (int): How many words should be processed, if 0 all words are processed, inclusion is based on the min_word_count argument
+        Parameters
+        ----------
+	min_word_count: Int
+	    The minimum amount of words a word should have to be included in
+            the word amount argument
+        word_amount: Int
+             How many words should be processed, if 0 all words are processed, inclusion is based on the min_word_count argument
 
-        Returns:
-         clipnames: List[str]
+        Returns
+        -------
+        clipnames: List[str]
             A list of the clip names
-          Sentence_list: List [str]
-          A list of  the transcriped sentences in the same order as the clips.
+        Sentence_list: List [str]
+            A list of  the transcriped sentences in the same order as the clips.
+
         """
         assert os.path.exists(
             os.path.join(self.path_to_corpus, "validated.tsv")
@@ -451,32 +458,39 @@ class CreateCorpus:
     def create_data_frame_mp(self, clip_list: list, sentence_list: list, num_cores):
         """
         Creates Dataframe with Vocaltract Lab data and other data with multiprocessing
-        Parameters
 
+        Parameters
+        ----------
         clip_list (list): A list of the clip names present in the corpus
         sentence_list (list): A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
         num_cores (int): The number of cores to maximaly use
 
         Returns
+        -------
+        pd.dataframe : A dataframe with the following labels
 
-        pd.dataframe: A dataframe with the following labels
-        'file_name' : name of the clip
-        'label' : the spoken word as it is in the aligned textgrid
-        'lexical_word' : the word as it is in the dictionary
-        'word_position' : the position of the word in the sentence
-        'sentence' : the sentence the word is part of
-        'wav_recording' : spliced out audio as mono audio signal
-        'sr_recording' : sampling rate of the recording
-        'sr_synthesized': sampling_rates_sythesized,
-        'sampa_phones' : the sampa(like) phonemes of the word
-        'mfa_phones' : the phonemes as outputted by the aligner
-        'phone_durations_lists' : the duration of each phone in the word as list
-        'cp_norm' : normalized cp-trajectories
-        'vector' : embedding vector of the word, based on fastText Embeddings
-        'client_id' : id of the client
+        .. table:: columns of the DataFrame
+
+            =======================  ===========================================================
+            label                    description
+            =======================  ===========================================================
+            'file_name'              name of the clip
+            'label'                  the spoken word as it is in the aligned textgrid
+            'lexical_word'           the word as it is in the dictionary
+            'word_position'          the position of the word in the sentence
+            'sentence'               the sentence the word is part of
+            'wav_recording'          spliced out audio as mono audio signal
+            'sr_recording'           sampling rate of the recording
+            'sr_synthesized'         sampling_rates_sythesized,
+            'sampa_phones'           the sampa(like) phonemes of the word
+            'mfa_phones'             the phonemes as outputted by the aligner
+            'phone_durations_lists'  the duration of each phone in the word as list
+            'cp_norm'                normalized cp-trajectories
+            'vector'                 embedding vector of the word, based on fastText Embeddings
+            'client_id'              id of the client
+            =======================  ===========================================================
 
         """
-
         logging.info(
             f"Starting to create the dataframe with multiprocessing using {num_cores} cores"
         )
@@ -523,6 +537,7 @@ class CreateCorpus:
 
         return df
 
+
     def create_data_frame(
         self,
         clip_list: list,
@@ -530,32 +545,38 @@ class CreateCorpus:
     ):
         """
         Creates Dataframe with Vocaltract Lab data and other data
+
         Parameters
+        ----------
         path_to_corpus (str): The path to the corpus
         clip_list (list): A list of the clip names present in the corpus
         sentence_list (list): A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
 
         Returns
-        pd.dataframe: A dataframe with the following labels
-        'file_name' : name of the clip
-        'label' : the spoken wordn
-        'lexical_word' : the word as it is in the dictionary
-        'word_position' : the position of the word in the sentence
-        'sentence' : the sentence the word is part of
-        'wav_recording' : spliced out audio as mono audio signal
-        'sr_recording' : sampling rate of the recording
-        'sr_synthesized': sampling_rates_sythesized,
-        'sampa_phones' : the sampa(like) phonemes of the word
-        "mfa_phones" : the phonemes as outputted by the aligner
-        'phone_durations_lists' : the duration of each phone in the word as list
-        'cp_norm' : normalized cp-trajectories
-        'melspec_norm_recorded' : normalized mel spectrogram of the audio clip
-        'melspec_norm_synthesized' : normalized mel spectrogram synthesized from the cp-trajectories
-        'vector' : embedding vector of the word, based on fastText Embeddings
-        'client_id' : id of the client
+        -------
+
+        ==========================  ===========================================================
+        label                       description
+        ==========================  ===========================================================
+        'file_name'                 name of the clip
+        'label'                     the spoken word as it is in the aligned textgrid
+        'lexical_word'              the word as it is in the dictionary
+        'word_position'             the position of the word in the sentence
+        'sentence'                  the sentence the word is part of
+        'wav_recording'             spliced out audio as mono audio signal
+        'sr_recording'              sampling rate of the recording
+        'sr_synthesized'            sampling_rates_sythesized,
+        'sampa_phones'              the sampa(like) phonemes of the word
+        'mfa_phones'                the phonemes as outputted by the aligner
+        'phone_durations_lists'     the duration of each phone in the word as list
+        'cp_norm'                   normalized cp-trajectories
+        'melspec_norm_recorded'     normalized mel spectrogram of the audio clip
+        'melspec_norm_synthesized'  normalized mel spectrogram synthesized from the cp-trajectories
+        'vector'                    embedding vector of the word, based on fastText Embeddings
+        'client_id'                 id of the client
+        ==========================  ===========================================================
 
         """
-
         labels = list()
         word_positions = list()
         sentences = list()
@@ -846,8 +867,14 @@ class CreateCorpus:
 
 def return_argument_parser():
     """
-    The argument parser for the command line arguments. This is in a seperate function to allow automatic documentation of the arguments
-    Returns:  argparse.ArgumentParser: The argument parser"""
+    The argument parser for the command line arguments. This is in a seperate
+    function to allow automatic documentation of the arguments
+
+    Returns
+    -------
+    argparse.ArgumentParser: The argument parser
+
+    """
     parser = argparse.ArgumentParser(
         description="Converts a corpus to the vocaltract lab format"
     )

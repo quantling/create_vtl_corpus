@@ -45,6 +45,7 @@ The following flags can be used to modify the behaviour of the library.
    :module: create_vtl_corpus.create_corpus
    :func: return_argument_parser
    :prog: fancytool
+
    
 Multiprocessing
 ===============
@@ -62,12 +63,6 @@ CreateCorpus Class
 
 .. autoclass:: create_vtl_corpus.create_corpus.CreateCorpus
    :members:
-   
-.. automethod:: create_vtl_corpus.create_corpus.CreateCorpus.__init__
-.. automethod:: create_vtl_corpus.create_corpus.CreateCorpus.run_aligner
-.. automethod:: create_vtl_corpus.create_corpus.CreateCorpus.create_data_frame_mp
-.. automethod:: create_vtl_corpus.create_corpus.CreateCorpus.create_data_frame
-
    
 
 
