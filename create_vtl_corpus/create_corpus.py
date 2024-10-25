@@ -102,8 +102,8 @@ class CreateCorpus:
 
         Parameters
         ----------
-	path_to_corpus (str): The path to the corpus
-	language (str): The language of the corpus as an abbreviation
+        path_to_corpus (str): The path to the corpus
+        language (str): The language of the corpus as an abbreviation
 
         """
         self.path_to_corpus = path_to_corpus
@@ -141,14 +141,13 @@ class CreateCorpus:
         logging.info("Fasttext model loaded")
         return model
 
-
     def format_corpus(self, word_amount, min_word_count):
         """
         Takes the path to the corpus and formats it to the fitting form
 
         Parameters
         ----------
-	word_amount (int): The amount of words that should be used, if 0 all
+        word_amount (int): The amount of words that should be used, if 0 all
             clips are used word_a
 
         Returns
@@ -223,16 +222,16 @@ class CreateCorpus:
 
     def create_frozen_set(self, validated_sentences, word_amount, min_word_count):
         """
-	Creates a frozen set of the words that should be used in the corpus and
+        Creates a frozen set of the words that should be used in the corpus and
         saves it as a class attribute
 
         Parameters
         ----------
-	validated_sentences (pd.Series): The sentences from the validated.tsv
+        validated_sentences (pd.Series): The sentences from the validated.tsv
             file
-	word_amount (int): The amount of words that should be used, if 0 all
+        word_amount (int): The amount of words that should be used, if 0 all
             clips are used
-	min_word_count (int): The minimum amount of words a word should have to
+        min_word_count (int): The minimum amount of words a word should have to
             be included in  the word amount argument
 
         Returns
@@ -272,7 +271,6 @@ class CreateCorpus:
 
         logging.info(f"{word_set} These are the words that will be used in the corpus")
 
-
     def run_aligner(self, mfa_workers: int, batch_size: int):
         """
         Runs the Montreal Forced Aligner on the corpus
@@ -283,7 +281,7 @@ class CreateCorpus:
 
         Returns
         -------
-	None (only side effects)
+        None (only side effects)
 
         """
         path_to_validated = os.path.join(self.path_to_corpus, "clips_validated")
@@ -401,24 +399,23 @@ class CreateCorpus:
             ), "The aligner did not run successfully for the single batch that was run"
         logging.info("The aligner ran successfully")
 
-
     def check_structure(self, word_amount, min_word_count):
         """
         Checks if the corpus has the right  and if not corrects this
 
         Parameters
         ----------
-	min_word_count: Int
-	    The minimum amount of words a word should have to be included in
+        min_word_count: Int
+            The minimum amount of words a word should have to be included in
             the word amount argument
         word_amount: Int
              How many words should be processed, if 0 all words are processed, inclusion is based on the min_word_count argument
 
         Returns
         -------
-        clipnames: List[str]
+        clipnames: (List[str])
             A list of the clip names
-        Sentence_list: List [str]
+        Sentence_list: (List [str])
             A list of  the transcriped sentences in the same order as the clips.
 
         """
@@ -536,7 +533,6 @@ class CreateCorpus:
             logging.info("Temp_output folder was not removed, because it was not found")
 
         return df
-
 
     def create_data_frame(
         self,
@@ -875,6 +871,7 @@ def return_argument_parser():
     argparse.ArgumentParser: The argument parser
 
     """
+    # We use this function to allow automatic documentation of the arguments, since it needs a function to return the parser
     parser = argparse.ArgumentParser(
         description="Converts a corpus to the vocaltract lab format"
     )
