@@ -11,7 +11,7 @@ Mozilla Common Voice project.
 
 To align and synthesize the first 100 words, which apear at least 4
 times, of a German speech corpus at the path ``CORPUS`` and save the results as
-a pandas DataFrame to ``SAVE_DF_PATH`` run the following command:
+a pandas DataFrame to ``SAVE_DF_PATH`` run the following command
 
 .. code:: bash
 

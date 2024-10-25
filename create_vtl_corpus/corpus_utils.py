@@ -7,7 +7,6 @@ import re
 import subprocess
 import string
 import random
-from joblib import Parallel, delayed
 import pandas as pd
 import fasttext
 import fasttext.util
@@ -16,6 +15,7 @@ from praatio import textgrid
 import soundfile as sf
 import librosa
 import numpy as np
+import csv
 
 
 DIR = os.path.dirname(__file__)
@@ -139,6 +139,8 @@ DICT = {
     "tʷ": "t",  # t_w not possible with VTL (inferring from other cases)
     "ɟʷ": "dZ",  # J_w not possible with VTL (inferring from other cases)
 }  # this dict can be made shorter with : automatically passing etc
+
+DICT = csv.DictReader("phonemes.csv")
 
 
 def replace_special_chars(word):
