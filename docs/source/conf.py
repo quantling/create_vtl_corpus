@@ -6,10 +6,20 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import tomllib  # please change this if we don't use poetry anymore
+
+# Load the TOML file
+with open("../../pyproject.toml", "rb") as file:
+    data = tomllib.load(file)
+
+# Access the version key
+version = data["tool"]["poetry"]["version"]
+
+
 project = "createVTLcorpus"
 copyright = "2024, Konstantin Sering and Valentin Schmidt"
 author = "Konstantin Sering and Valentin Schmidt"
-release = "0.1.0"
+release = version
 
 # add modules to the path
 import os

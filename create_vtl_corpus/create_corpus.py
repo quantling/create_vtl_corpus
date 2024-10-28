@@ -55,6 +55,7 @@ class CreateCorpus:
     language: str
         The language of the corpus as an abbreviation
 
+
     Methods
     -------
     format_corpus():
