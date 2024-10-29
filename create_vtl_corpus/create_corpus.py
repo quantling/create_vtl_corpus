@@ -50,9 +50,9 @@ class CreateCorpus:
 
     Attributes
     ----------
-    path_to_corpus: str
+    (str) path_to_corpus:
         The path to the corpus
-    language: str
+    (str) language:
         The language of the corpus as an abbreviation
 
 
@@ -103,8 +103,10 @@ class CreateCorpus:
 
         Parameters
         ----------
-        path_to_corpus (str): The path to the corpus
-        language (str): The language of the corpus as an abbreviation
+        (str) path_to_corpus:
+            The path to the corpus
+        (str) language:
+            The language of the corpus as an abbreviation
 
         """
         self.path_to_corpus = path_to_corpus
@@ -118,11 +120,13 @@ class CreateCorpus:
 
         Parameters
         ----------
-        language (str): The language of the model
+        (string) language:
+            The language of the model
 
         Returns
         -------
-        fasttext.FastText._FastText: The loaded fasttext model
+        fasttext.FastText._FastText:
+            The loaded fasttext model
         """
         if language == "en":
             global FASTTEXT_EN
@@ -148,8 +152,8 @@ class CreateCorpus:
 
         Parameters
         ----------
-        word_amount (int): The amount of words that should be used, if 0 all
-            clips are used word_a
+        (int) word_amount:
+            The amount of words that should be used, if 0 all clips are used word_a
 
         Returns
         -------
@@ -228,12 +232,12 @@ class CreateCorpus:
 
         Parameters
         ----------
-        validated_sentences (pd.Series): The sentences from the validated.tsv
-            file
-        word_amount (int): The amount of words that should be used, if 0 all
-            clips are used
-        min_word_count (int): The minimum amount of words a word should have to
-            be included in  the word amount argument
+        (pd.Series) validated_sentences:
+            The sentences from the validated.tsv file
+        (int) word_amount :
+            The amount of words that should be used, if 0 all clips are used
+        (int) min_word_count:
+            The minimum amount of words a word should have to be included in  the word amount argument
 
         Returns
         -------
@@ -278,7 +282,8 @@ class CreateCorpus:
 
         Parameters
         ----------
-        mfaworkers (int): The number of workers to use
+        (int) mfaworkers :
+            The number of workers to use
 
         Returns
         -------
@@ -406,17 +411,16 @@ class CreateCorpus:
 
         Parameters
         ----------
-        min_word_count: Int
-            The minimum amount of words a word should have to be included in
-            the word amount argument
-        word_amount: Int
+        min_word_count: (int)
+            The minimum amount of words a word should have to be included in the word amount argument
+        word_amount: (int)
              How many words should be processed, if 0 all words are processed, inclusion is based on the min_word_count argument
 
         Returns
         -------
-        clipnames: (List[str])
+        (list) clipnames:
             A list of the clip names
-        Sentence_list: (List [str])
+        (list) Sentence_list:
             A list of  the transcriped sentences in the same order as the clips.
 
         """
@@ -459,9 +463,12 @@ class CreateCorpus:
 
         Parameters
         ----------
-        clip_list (list): A list of the clip names present in the corpus
-        sentence_list (list): A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
-        num_cores (int): The number of cores to maximaly use
+        (list) clip_list:
+            A list of the clip names present in the corpus
+        (list) sentence_list:
+            A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
+        (int) num_cores:
+            The number of cores to maximaly use
 
         Returns
         -------
@@ -545,9 +552,12 @@ class CreateCorpus:
 
         Parameters
         ----------
-        path_to_corpus (str): The path to the corpus
-        clip_list (list): A list of the clip names present in the corpus
-        sentence_list (list): A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
+        (str) path_to_corpus:
+            The path to the corpus
+        (list) clip_list:
+            A list of the clip names present in the corpus
+        (list) sentence_list:
+            A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
 
         Returns
         -------
