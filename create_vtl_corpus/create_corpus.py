@@ -561,27 +561,27 @@ class CreateCorpus:
 
         Returns
         -------
-
-        ==========================  ===========================================================
-        label                       description
-        ==========================  ===========================================================
-        'file_name'                 name of the clip
-        'label'                     the spoken word as it is in the aligned textgrid
-        'lexical_word'              the word as it is in the dictionary
-        'word_position'             the position of the word in the sentence
-        'sentence'                  the sentence the word is part of
-        'wav_recording'             spliced out audio as mono audio signal
-        'sr_recording'              sampling rate of the recording
-        'sr_synthesized'            sampling_rates_sythesized,
-        'sampa_phones'              the sampa(like) phonemes of the word
-        'mfa_phones'                the phonemes as outputted by the aligner
-        'phone_durations_lists'     the duration of each phone in the word as list
-        'cp_norm'                   normalized cp-trajectories
-        'melspec_norm_recorded'     normalized mel spectrogram of the audio clip
-        'melspec_norm_synthesized'  normalized mel spectrogram synthesized from the cp-trajectories
-        'vector'                    embedding vector of the word, based on fastText Embeddings
-        'client_id'                 id of the client
-        ==========================  ===========================================================
+        .. table::
+            ==========================  ===========================================================
+            label                       description
+            ==========================  ===========================================================
+            'file_name'                 name of the clip
+            'label'                     the spoken word as it is in the aligned textgrid
+            'lexical_word'              the word as it is in the dictionary
+            'word_position'             the position of the word in the sentence
+            'sentence'                  the sentence the word is part of
+            'wav_recording'             spliced out audio as mono audio signal
+            'sr_recording'              sampling rate of the recording
+            'sr_synthesized'            sampling_rates_sythesized,
+            'sampa_phones'              the sampa(like) phonemes of the word
+            'mfa_phones'                the phonemes as outputted by the aligner
+            'phone_durations_lists'     the duration of each phone in the word as list
+            'cp_norm'                   normalized cp-trajectories
+            'melspec_norm_recorded'     normalized mel spectrogram of the audio clip
+            'melspec_norm_synthesized'  normalized mel spectrogram synthesized from the cp-trajectories
+            'vector'                    embedding vector of the word, based on fastText Embeddings
+            'client_id'                 id of the client
+            ==========================  ===========================================================
 
         """
         labels = list()

@@ -21,3 +21,9 @@ currently, at least for multiprocessing we also do not check if the words in the
 While they align in the majority of cases expect some fringe cases where they do not align.
 Furthermore,when words in the whole corpus are counted for words and then put in a frozen set 
 
+
+Further issues
+==============
+If you encounter any other issues, please open an issue on the github page of the project  `here <https://github.com/quantling/create_vtl_corpus/issues/new/choose>`__ . 
+Please provide a detailed description of the issue and if possible a minimal example to reproduce the issue.
+"""
