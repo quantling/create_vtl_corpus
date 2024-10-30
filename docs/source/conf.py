@@ -55,4 +55,6 @@ html_theme_options = {
     ]
 }
 html_static_path = ["_static"]
-html_sidebars = {"**": []}
+html_sidebars = {
+    "**": []
+}  # this turns of the left sidebar off, should the docs get more complex, we might want to change this

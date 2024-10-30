@@ -54,7 +54,16 @@ class CreateCorpus:
         The path to the corpus
     str language:
         The language of the corpus as an abbreviation
-
+    frozen_set word_set:
+        A frozen set of the words that should be used in the corpus
+    fasttext.FastText._FastText fast_text_model:
+        The loaded fasttext model
+    dict mfa_to_sampa_dict:
+        A dictionary that maps the MFA phonemes to the SAMPA phonemes
+    int word_amount:
+        The amount of words that should be used, if 0 all clips are used
+    int min_word_count:
+        The minimum amount of words a word should have to be included in the word amount argument
 
     Methods
     -------
