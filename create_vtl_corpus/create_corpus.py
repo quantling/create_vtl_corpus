@@ -50,9 +50,9 @@ class CreateCorpus:
 
     Attributes
     ----------
-    (str) path_to_corpus:
+    str path_to_corpus:
         The path to the corpus
-    (str) language:
+    str language:
         The language of the corpus as an abbreviation
 
 
@@ -103,9 +103,9 @@ class CreateCorpus:
 
         Parameters
         ----------
-        (str) path_to_corpus:
+        str path_to_corpus:
             The path to the corpus
-        (str) language:
+        str language:
             The language of the corpus as an abbreviation
 
         """
@@ -120,7 +120,7 @@ class CreateCorpus:
 
         Parameters
         ----------
-        (string) language:
+        string language:
             The language of the model
 
         Returns
@@ -152,7 +152,7 @@ class CreateCorpus:
 
         Parameters
         ----------
-        (int) word_amount:
+        int word_amount:
             The amount of words that should be used, if 0 all clips are used word_a
 
         Returns
@@ -232,11 +232,11 @@ class CreateCorpus:
 
         Parameters
         ----------
-        (pd.Series) validated_sentences:
+        pd.Series validated_sentences:
             The sentences from the validated.tsv file
-        (int) word_amount :
+        int word_amount :
             The amount of words that should be used, if 0 all clips are used
-        (int) min_word_count:
+        int min_word_count:
             The minimum amount of words a word should have to be included in  the word amount argument
 
         Returns
@@ -282,7 +282,7 @@ class CreateCorpus:
 
         Parameters
         ----------
-        (int) mfaworkers :
+        int mfaworkers :
             The number of workers to use
 
         Returns
@@ -411,16 +411,16 @@ class CreateCorpus:
 
         Parameters
         ----------
-        min_word_count: (int)
+        int min_word_count:
             The minimum amount of words a word should have to be included in the word amount argument
-        word_amount: (int)
+        int word_amount:
              How many words should be processed, if 0 all words are processed, inclusion is based on the min_word_count argument
 
         Returns
         -------
-        (list) clipnames:
+        list clipnames:
             A list of the clip names
-        (list) Sentence_list:
+        list Sentence_list:
             A list of  the transcriped sentences in the same order as the clips.
 
         """
@@ -463,18 +463,16 @@ class CreateCorpus:
 
         Parameters
         ----------
-        (list) clip_list:
+        list clip_list:
             A list of the clip names present in the corpus
-        (list) sentence_list:
+        list sentence_list:
             A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
-        (int) num_cores:
+        int num_cores:
             The number of cores to maximaly use
 
         Returns
         -------
-        pd.dataframe : A dataframe with the following labels
-
-        .. table:: columns of the DataFrame
+        .. table::
             =======================  ===========================================================
             label                    description
             =======================  ===========================================================
@@ -551,11 +549,11 @@ class CreateCorpus:
 
         Parameters
         ----------
-        (str) path_to_corpus:
+        str path_to_corpus:
             The path to the corpus
-        (list) clip_list:
+        list clip_list:
             A list of the clip names present in the corpus
-        (list) sentence_list:
+        list sentence_list:
             A list of the sentences present in the corpus in the same order as the clip_list , so they fit together
 
         Returns
