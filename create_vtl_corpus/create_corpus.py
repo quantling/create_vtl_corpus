@@ -475,7 +475,6 @@ class CreateCorpus:
         pd.dataframe : A dataframe with the following labels
 
         .. table:: columns of the DataFrame
-
             =======================  ===========================================================
             label                    description
             =======================  ===========================================================
