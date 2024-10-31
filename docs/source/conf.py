@@ -6,10 +6,20 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import tomllib  # please change this if we don't use poetry anymore
+
+# Load the TOML file
+with open("../../pyproject.toml", "rb") as file:
+    data = tomllib.load(file)
+
+# Access the version key
+version = data["tool"]["poetry"]["version"]
+
+
 project = "createVTLcorpus"
-copyright = "2024, Konstantin Sering"
-author = "Konstantin Sering"
-release = "0.0.1"
+copyright = "2024, Konstantin Sering and Valentin Schmidt"
+author = "Konstantin Sering and Valentin Schmidt"
+release = version
 
 # add modules to the path
 import os
@@ -21,6 +31,9 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinxarg.ext",
+    "sphinx.ext.autosectionlabel",
 ]
 
 templates_path = ["_templates"]
@@ -30,5 +43,18 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "alabaster"
+html_theme = "pydata_sphinx_theme"
+html_theme_options = {
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/quantling/create_vtl_corpus",  # required
+            "icon": "fa-brands fa-square-github",
+            "type": "fontawesome",
+        }
+    ]
+}
 html_static_path = ["_static"]
+html_sidebars = {
+    "**": []
+}  # this turns of the left sidebar off, should the docs get more complex, we might want to change this
