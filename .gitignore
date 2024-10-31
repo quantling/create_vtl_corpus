@@ -7,4 +7,4 @@ create_vtl_corpus/manual_tests/
 tests/clips/
 *.wav
 *.swp
-
+poetry.lock
