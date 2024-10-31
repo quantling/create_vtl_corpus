@@ -129,7 +129,7 @@ class CreateCorpus:
 
         Parameters
         ----------
-        string language:
+        str language:
             The language of the model
 
         Returns
@@ -293,6 +293,8 @@ class CreateCorpus:
         ----------
         int mfaworkers :
             The number of workers to use
+        int batch_size:
+            The size of the batches
 
         Returns
         -------
