@@ -1,7 +1,7 @@
 {
     "title": "create_vtl_corpus: Synthesizing a speech corpus with VocalTractLab",
     "license": {
-      "id": "GLP-3"
+      "id": "gpl-3.0-or-later"
     },
     "creators": [
         {
@@ -9,10 +9,10 @@
             "name": "Konstantin Sering"
         },
         {
-            "name": "Niels Stehwien"
+            "name": "Schmidt Valentin"
         },
         {
-            "name": "Schmidt Valentin"
+            "name": "Niels Stehwien"
         },
         {
             "name": "Yingming Gao"
