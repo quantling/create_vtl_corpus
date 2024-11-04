@@ -23,6 +23,7 @@ from .corpus_utils import (
     DICT,
     FASTTEXT_EN,
     FASTTEXT_DE,
+    WORD_TYPES,
     replace_special_chars,
 )
 
@@ -611,7 +612,8 @@ class CreateCorpus:
         lexical_words = list()
 
         used_phonemes = set()
-        files_skiped = 0
+        lost_words = 0  # this is here to estimate how many words are lost
+        total_words = 0  # this is here to estimate how many words are processed
 
         # remove extension for TextGrid
 
@@ -640,6 +642,11 @@ class CreateCorpus:
                 )
                 clip_list.remove(filename_no_extension)
                 sentence_list.remove(sentence)
+                lost_words += (
+                    sentence.split().__len__() / 1,
+                    2,
+                )  # adjusted since we don't know the exact  count of word that occured 4 times
+                total_words += sentence.split().__len__() / 1, 2
                 files_skiped += 1
                 continue
 
@@ -655,7 +662,7 @@ class CreateCorpus:
                     logging.info(
                         f"Word '{word.label}' is not in the word set, skipping this word"
                     )
-                    continue
+                    continue  # we don't add anything to lost words here since we want to skip the word
                 phones = list()
                 mfa_phones_word_level = list()
 
@@ -682,6 +689,8 @@ class CreateCorpus:
                     logging.warning(
                         f"No phones found for word '{word.label}' in {filename_no_extension}, skipping this word"
                     )
+                    lost_words += 1
+                    total_words += 1
                     continue
                 logging.info(
                     f"Processing word '{word.label}' in {filename_no_extension}, resulting phones: {phones}"
@@ -697,6 +706,8 @@ class CreateCorpus:
                     logging.warning(
                         f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this word, Sentence: {sentence} .last word: {sentence.split()[-1]}"
                     )
+                    lost_words += 1
+                    total_words += 1
                     continue
                 lexical_word = replace_special_chars(
                     split_sentence[word_index]
@@ -783,6 +794,8 @@ class CreateCorpus:
 
                 melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
                 melspecs_norm_synthesized.append(melspec_norm_syn)
+                total_words += 1
+                WORD_TYPES[word.label] += 1
 
                 # this is for manual testing only
                 if word.label == "chocolate":
@@ -877,7 +890,7 @@ class CreateCorpus:
                 os.path.join(self.path_to_corpus + "/clips/temp_output")
             )  # we don't need the temp_output files anymore
         logging.info(f"Files skipped: {files_skiped}")
-        return df
+        return df, lost_words, total_words
 
 
 def return_argument_parser():
@@ -961,6 +974,11 @@ def return_argument_parser():
         help="The name to save the dataframe to in relation to the corpus folder",
     )
     parser.add_argument(
+        "--df_save_path",
+        type=str,
+        default="/mnt/Restricted/Corpora/CommonVoiceVTL/",
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         default=False,
@@ -988,8 +1006,13 @@ if __name__ == "__main__":
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    assert os.path.isdir(args.corpus), "The provided path is not a directory"
-
+    assert os.path.isdir(args.corpus), "The provided corpus path is not a directory"
+    if args.df_save_path is not None:
+        assert os.path.isdir(
+            args.df_save_path
+        ), "The provided saving path is not a directory"
+    else:
+        args.df_save_path = args.corpus
     CreateCorpus.setup(language=args.language)
     corpus_worker = CreateCorpus(args.corpus, language=args.language)
 
@@ -1010,10 +1033,11 @@ if __name__ == "__main__":
     ]
     logging.info(f"Epochs: {len(clip_lists)}")
 
-    folder_path = os.path.join(args.corpus, args.save_df_name + "_folder")
+    folder_path = os.path.join(args.df_save_path, args.save_df_name + "_folder_" + args.language)
     if not os.path.exists(folder_path):
         os.mkdir(folder_path)
-
+    total_words_sum = 0
+    lost_words_sum = 0
     for i, (clip_list, sentence_list) in tqdm(
         enumerate(zip(clip_lists, sentence_lists)), total=len(clip_lists), desc="Epochs"
     ):
@@ -1038,41 +1062,31 @@ if __name__ == "__main__":
 
         else:
             logging.info("Creating dataframe without multiprocessing")
-            df = corpus_worker.create_data_frame(clip_list, sentence_list)
+            df, lost_words, total_words = corpus_worker.create_data_frame(
+                clip_list, sentence_list
+            )
         logging.info(df)
+        total_words_sum += total_words
+        lost_words_sum += lost_words
 
+        logging.info(f"Total words in epoch {i}: {total_words}")
+        logging.info(f"Lost words in epoch {i}: {lost_words}")
+        logging.info(
+            f"Percentage of lost word in epoch {i}: {lost_words/total_words*100}%"
+        )
         path_to_save_corpus = os.path.join(
-            folder_path, args.save_df_name + f"epoch_{i}" + ".pkl"
+            folder_path, args.save_df_name + f"_epoch_{i}_" + args.language + ".pkl"
         )
         df.to_pickle(path_to_save_corpus)
         logging.info(f"Dataframe saved to {path_to_save_corpus}")
         logging.info(f"Epoch {i} done")
 
-    logging.info("Merging all DataFrames into one")
-    df_list = []
-
-    # Iterate through all files in the directory
-    for filename in os.listdir(folder_path):
-        # Only process .pkl files
-        if filename.endswith(".pkl"):
-            file_path = os.path.join(folder_path, filename)
-            # Load the .pkl file into a DataFrame and append it to the list
-            df = pd.read_pickle(file_path)
-            df_list.append(df)
-
-    # Concatenate all DataFrames
-    if df_list:
-        concatenated_df = pd.concat(df_list, ignore_index=True)
-        if args.append_to_df:
-            old_df = pd.read_pickle(os.path.join(args.append_to_df + ".pkl"))
-            logging.info(
-                f"Appending dataframe with  relative path: {old_df} to existing DataFrame"
-            )
-            concatenated_df = pd.concat([old_df, concatenated_df], ignore_index=True)
-        concatenated_df.to_pickle(os.path.join(args.corpus, args.save_df_name + ".pkl"))
-    else:
-        logging.error("No .pkl files found.")
-
-    logging.info(concatenated_df)
+    logging.info(f"Total words: {total_words_sum}")
+    logging.info(f"Lost words: {lost_words_sum}")
+    logging.info(f"Percentage of lost words: {lost_words_sum/total_words_sum*100}%")
+    with open(os.path.join(folder_path, "report.txt", "w")) as file:
+        file.write(
+            f"Words processed: {total_words} \n Lost words: {lost_words_sum}\nLost words rate in percent: {lost_words_sum/total_words_sum*100}%\n Word types: {len(WORD_TYPES)}"
+        )
 
     logging.info("Done! :P")

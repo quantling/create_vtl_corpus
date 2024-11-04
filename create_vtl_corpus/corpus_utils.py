@@ -16,6 +16,7 @@ import soundfile as sf
 import librosa
 import numpy as np
 import csv
+import collections
 
 
 DIR = os.path.dirname(__file__)
@@ -137,10 +138,13 @@ DICT = {
     "cʷ": "C",  # c_w not possible with VTL ( and maybe not correct phoneme as well)
     "ɖ": "d",  # d` not possible with VTL ( and maybe not correct phoneme as well)
     "tʷ": "t",  # t_w not possible with VTL (inferring from other cases)
-    "ɟʷ": "dZ",  # J_w not possible with VTL (inferring from other cases)
+    "ɟʷ": "dZ", # J_w not possible with VTL (inferring from other cases)
+    "ʈʷ": "T",  # t`_w not possible with VTL (inferring from other cases)
 }  # this dict can be made shorter with : automatically passing etc
 
-DICT = csv.DictReader("phonemes.csv")
+# DICT = csv.DictReader("phonemes.csv") #TODO: correctly read Ditc from csv file
+
+WORD_TYPES = collections.Counter()
 
 
 def replace_special_chars(word):
