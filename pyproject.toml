@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "create-vtl-corpus"
-version = "3.0.1"
+version = "3.0.2"
 description = "Python scripts to create and synthesize a speech corpus with and for VocalTractLab."
-authors = ["Konstanin Sering", "Valentin Schmidt"]
+authors = ["Konstanin Sering", "Valentin Schmidt", "Niels Stehwien", "Yingming Gao"]
 license = "GNU General Public License Version 3"
 readme = "README.rst"
 
