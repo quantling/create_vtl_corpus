@@ -548,8 +548,9 @@ class CreateCorpus:
             logging.info("Removed temp_output folder,to clean up space")
         else:
             logging.info("Temp_output folder was not removed, because it was not found")
-
-        return df
+        total_words = 0
+        lost_words = 0  # TODO implement this for multiprocessing
+        return df, total_words, lost_words
 
     def create_data_frame(
         self,
@@ -1033,7 +1034,9 @@ if __name__ == "__main__":
     ]
     logging.info(f"Epochs: {len(clip_lists)}")
 
-    folder_path = os.path.join(args.df_save_path, args.save_df_name + "_folder_" + args.language)
+    folder_path = os.path.join(
+        args.df_save_path, args.save_df_name + "_folder_" + args.language
+    )
     if not os.path.exists(folder_path):
         os.mkdir(folder_path)
     total_words_sum = 0
@@ -1056,7 +1059,7 @@ if __name__ == "__main__":
                     f" You want to use multiprocessing but the number of cores is {args.num_cores}, so the mulitprocessing function likely has no benefit"
                 )
                 logging.info(f"Melspecs will not be created in multiprocessing mode")
-            df = corpus_worker.create_data_frame_mp(
+            df, total_words, lost_words = corpus_worker.create_data_frame_mp(
                 clip_list, sentence_list, args.num_cores
             )
 
@@ -1071,9 +1074,10 @@ if __name__ == "__main__":
 
         logging.info(f"Total words in epoch {i}: {total_words}")
         logging.info(f"Lost words in epoch {i}: {lost_words}")
-        logging.info(
-            f"Percentage of lost word in epoch {i}: {lost_words/total_words*100}%"
-        )
+        if total_words > 0:
+            logging.info(
+                f"Percentage of lost word in epoch {i}: {lost_words/total_words*100}%"
+            )
         path_to_save_corpus = os.path.join(
             folder_path, args.save_df_name + f"_epoch_{i}_" + args.language + ".pkl"
         )
@@ -1086,7 +1090,7 @@ if __name__ == "__main__":
     logging.info(f"Percentage of lost words: {lost_words_sum/total_words_sum*100}%")
     with open(os.path.join(folder_path, "report.txt", "w")) as file:
         file.write(
-            f"Words processed: {total_words} \n Lost words: {lost_words_sum}\nLost words rate in percent: {lost_words_sum/total_words_sum*100}%\n Word types: {len(WORD_TYPES)}"
+            f"Words processed: {total_words} \n Lost words: {lost_words_sum}\nLost words rate in percent: {(lost_words_sum / total_words_sum * 100) if total_words_sum > 0 else None}%\n Word types: {len(WORD_TYPES)}"
         )
 
     logging.info("Done! :P")

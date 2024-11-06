@@ -138,8 +138,9 @@ DICT = {
     "cʷ": "C",  # c_w not possible with VTL ( and maybe not correct phoneme as well)
     "ɖ": "d",  # d` not possible with VTL ( and maybe not correct phoneme as well)
     "tʷ": "t",  # t_w not possible with VTL (inferring from other cases)
-    "ɟʷ": "dZ", # J_w not possible with VTL (inferring from other cases)
+    "ɟʷ": "dZ",  # J_w not possible with VTL (inferring from other cases)
     "ʈʷ": "T",  # t`_w not possible with VTL (inferring from other cases)
+    "ɡʷ": "g",  # g_w not possible with VTL (inferring from other cases)
 }  # this dict can be made shorter with : automatically passing etc
 
 # DICT = csv.DictReader("phonemes.csv") #TODO: correctly read Ditc from csv file
@@ -248,7 +249,11 @@ def generate_rows(
         )
     except FileNotFoundError:
         logging.warning(f"The TextGrid file for {filename_no_extension} was not found")
-
+        lost_words += (
+            sentence.split().__len__() / 1,
+            2,
+        )  # adjusted since we don't know the exact  count of word that occured 4 times
+        total_words += sentence.split().__len__() / 1, 2
         return df_empty
 
     text_grid_sentence = list()
