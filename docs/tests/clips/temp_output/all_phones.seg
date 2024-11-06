@@ -98,3 +98,7 @@ name = d; duration_s = 0.100000;
 name = k; duration_s = 0.100000;
 name = C; duration_s = 0.100000;
 name = d; duration_s = 0.100000;
+name = t; duration_s = 0.100000;
+name = dZ; duration_s = 0.100000;
+name = T; duration_s = 0.100000;
+name = g; duration_s = 0.100000;
