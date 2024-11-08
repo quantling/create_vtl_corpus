@@ -139,8 +139,9 @@ DICT = {
     "ɖ": "d",  # d` not possible with VTL ( and maybe not correct phoneme as well)
     "tʷ": "t",  # t_w not possible with VTL (inferring from other cases)
     "ɟʷ": "dZ",  # J_w not possible with VTL (inferring from other cases)
-    "ʈʷ": "T",  # t`_w not possible with VTL (inferring from other cases)
-    "ɡʷ": "g",  # g_w not possible with VTL (inferring from other cases)
+    "ʈʷ": "T",  # t`_w not possible with VTL (inferring pronunciation from other cases)
+    "ɡʷ": "g",  # g_w not possible with VTL  (inferring pronunciation from other cases)
+    "pʷ": "p",  # p_w not possible with VTL (inferring pronunciation from other cases)
 }  # this dict can be made shorter with : automatically passing etc
 
 # DICT = csv.DictReader("phonemes.csv") #TODO: correctly read Ditc from csv file

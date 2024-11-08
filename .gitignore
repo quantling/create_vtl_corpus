@@ -6,8 +6,8 @@ create_vtl_corpus/resources/*bin
 create_vtl_corpus/manual_tests/
 create_vtl_corpus/create_corpus_old.py
 tests/clips/
-tests/no_phonemes_sr.pkl
-tests/no_phoneme.pkl
+docs/tests/no_phoneme_sr.pkl
+docs/tests/no_phoneme.pkl
 *.wav
 *.swp
 poetry.lock
