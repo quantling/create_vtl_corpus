@@ -148,6 +148,7 @@ DICT = {
 
 WORD_TYPES = collections.Counter()
 
+error_factor = 1.001
 
 def replace_special_chars(word):
     """This function is used to replace special characters in a word. It is in this file so that characters for both multiprocessing and single processing are the same"""
@@ -213,6 +214,8 @@ def generate_rows(
     names = list()
     mfa_phones = list()
     lexical_words = list()
+    lost_words = 0
+    total_words = 0
 
     clip_name = filename_no_extension + ".mp3"
 
@@ -250,12 +253,10 @@ def generate_rows(
         )
     except FileNotFoundError:
         logging.warning(f"The TextGrid file for {filename_no_extension} was not found")
-        lost_words += (
-            sentence.split().__len__() / 1,
-            2,
-        )  # adjusted since we don't know the exact  count of word that occured 4 times
-        total_words += sentence.split().__len__() / 1, 2
-        return df_empty
+        lost_words += sentence.split().__len__() / 1.2
+        # adjusted since we don't know the exact  count of word that occured 4 times
+        total_words += sentence.split().__len__() / 1.2
+        return (df_empty, lost_words, total_words)
 
     text_grid_sentence = list()
 
@@ -296,6 +297,7 @@ def generate_rows(
             logging.warning(
                 f"No phones found for word '{word.label}' in {filename_no_extension}, skipping this word"
             )
+            lost_words += 1
             continue
         logging.debug(
             f"Processing word '{word.label}' in {filename_no_extension}, resulting phones: {phones}"
@@ -313,13 +315,15 @@ def generate_rows(
             logging.debug("Language not supported for splitting, going with default")
             split_sentence = re.split(r"[ -]|\.\.", sentence)
         split_sentence = [word for word in split_sentence if word]
-
         maximum_word_index = len(split_sentence) - 1
         if word_index > maximum_word_index:
             logging.warning(
                 f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this sentence"
             )
-            return df_empty
+           
+            lost_words += sentence.split().__len__() / error_factor
+            total_words += sentence.split().__len__() / error_factor
+            return (df_empty, lost_words, total_words)
 
         lexical_word = replace_special_chars(split_sentence[word_index])
 
@@ -519,4 +523,5 @@ def generate_rows(
             "client_id": client_ids,
         }
     )
-    return df_part
+    total_words += len(labels)
+    return (df_part, lost_words, total_words)

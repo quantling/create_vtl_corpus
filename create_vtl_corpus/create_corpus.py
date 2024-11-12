@@ -25,6 +25,7 @@ from .corpus_utils import (
     FASTTEXT_DE,
     WORD_TYPES,
     replace_special_chars,
+    error_factor
 )
 
 # Set up logging
@@ -508,6 +509,8 @@ class CreateCorpus:
         logging.info(
             f"Starting to create the dataframe with multiprocessing using {num_cores} cores"
         )
+        total_words = 0
+        lost_words = 0  # TODO implement this for multiprocessing
         with tqdm(total=len(clip_list), desc="files in epoch") as pbar:
             with ProcessPoolExecutor(max_workers=num_cores) as executor:
 
@@ -537,8 +540,13 @@ class CreateCorpus:
                     logging.warning("All processes terminated.")
 
         logging.info("All processes terminated. Now concatenating the results")
+        df_results = list()
+        for df, lost, total in results:
+            lost_words += lost
+            total_words += total
+            df_results.append(df)
 
-        df = pd.concat(results)
+        df = pd.concat(df_results)
 
         if os.path.exists(os.path.join(self.path_to_corpus, "clips/temp_output")):
             shutil.rmtree(
@@ -548,8 +556,7 @@ class CreateCorpus:
             logging.info("Removed temp_output folder,to clean up space")
         else:
             logging.info("Temp_output folder was not removed, because it was not found")
-        total_words = 0
-        lost_words = 0  # TODO implement this for multiprocessing
+
         return df, total_words, lost_words
 
     def create_data_frame(
@@ -644,10 +651,9 @@ class CreateCorpus:
                 clip_list.remove(filename_no_extension)
                 sentence_list.remove(sentence)
                 lost_words += (
-                    sentence.split().__len__() / 1,
-                    2,
+                    sentence.split().__len__() / error_factor
                 )  # adjusted since we don't know the exact  count of word that occured 4 times
-                total_words += sentence.split().__len__() / 1, 2
+                total_words += sentence.split().__len__() / error_factor
                 files_skiped += 1
                 continue
 
@@ -891,6 +897,7 @@ class CreateCorpus:
                 os.path.join(self.path_to_corpus + "/clips/temp_output")
             )  # we don't need the temp_output files anymore
         logging.info(f"Files skipped: {files_skiped}")
+        total_words += len(labels)
         return df, lost_words, total_words
 
 
@@ -997,13 +1004,14 @@ def return_argument_parser():
     parser.add_argument(
         "--end_epoch", type=int, default=100, help="The epoch to end with (inclusive)"
     )
+    parser.add_argument(
+        "--error_factor",type=float,default=None,help="How likely you estimate a word to occur less then your min word count in the corpus") #TODO: Implement this so it can be changed
     return parser
 
 
 if __name__ == "__main__":
     myparser = return_argument_parser()
     args = myparser.parse_args()  # This parses command-line arguments
-
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
@@ -1065,7 +1073,7 @@ if __name__ == "__main__":
 
         else:
             logging.info("Creating dataframe without multiprocessing")
-            df, lost_words, total_words = corpus_worker.create_data_frame(
+            df, total_words, lost_words = corpus_worker.create_data_frame(
                 clip_list, sentence_list
             )
         logging.info(df)
@@ -1088,7 +1096,7 @@ if __name__ == "__main__":
     logging.info(f"Total words: {total_words_sum}")
     logging.info(f"Lost words: {lost_words_sum}")
     logging.info(f"Percentage of lost words: {lost_words_sum/total_words_sum*100}%")
-    with open(os.path.join(folder_path, "report.txt", "w")) as file:
+    with open(os.path.join(folder_path, "report.txt"), "w") as file:
         file.write(
             f"Words processed: {total_words} \n Lost words: {lost_words_sum}\nLost words rate in percent: {(lost_words_sum / total_words_sum * 100) if total_words_sum > 0 else None}%\n Word types: {len(WORD_TYPES)}"
         )
