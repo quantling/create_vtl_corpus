@@ -25,7 +25,7 @@ Phonetic alphabet
 =================
 
 
- You can see the phonetic alphabet used by VTL here :ref:`Phonemes`
+ You can see the phonetic alphabet used by VTL here :ref:`Phonemes` .
 SAMPA
 =====
 SAMPA (Speech Assessment Methods Phonetic Alphabet) is a computer-readable phonetic script using 7-bit ASCII characters.
@@ -49,3 +49,21 @@ PAULE synthesis
 
 Predictive Articulatory speech synthesis Utilizing Lexical Embeddings (PAULE) is a python frame work to plan control parameter trajectories 
 for the VocalTractLab simulator for a target acoustics or semantic embedding developed by Tino Sering . 
+
+
+Melspectrograms
+===============
+A mel spectrogram is a spectrogram where the frequencies are converted to the mel scale. The mel scale is a perceptual scale of pitches that is based on the human ear's response to different frequencies.
+We call this function imported from PAULE to create melspectrograms from the wav files and the synthesized audio.
+
+We first resample then create the melspectrogram and then create the melspectrogram in decibels.
+.. code :: python
+    
+    def librosa_melspec(wav, sample_rate):
+    wav = librosa.resample(wav, orig_sr=sample_rate, target_sr=44100,
+            res_type='kaiser_best', fix=True, scale=False)
+    melspec = librosa.feature.melspectrogram(y=wav, n_fft=1024, hop_length=220, n_mels=60, sr=44100, power=1.0, fmin=10, fmax=12000)
+    melspec_db = librosa.amplitude_to_db(melspec, ref=0.15)
+    return np.array(melspec_db.T, order='C', dtype=np.float64)
+
+

@@ -87,8 +87,8 @@ DICT = {
     "ɐ": "6",
     "ɑ": "o",  # open back unrounded vowel not possible with VTL, Close-mid back rounded vowel
     "ɑː": "o:",
-    "ɒ": "O",  # acutal sampa Q
-    "ɒː": "O",  # acutal  x sampa Q:
+    "ɒ": "O",  # actual sampa Q
+    "ɒː": "O",  # actusal  x sampa Q:
     "ɔ": "O",
     "ɔj": "OY",
     "ə": "@",

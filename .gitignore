@@ -13,7 +13,7 @@ docs/tests/no_phoneme.pkl
 poetry.lock
 *seg
 *ges
-
+manually_add_mels.py
 
 
 # Byte-compiled / optimized / DLL files

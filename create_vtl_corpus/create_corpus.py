@@ -5,6 +5,7 @@ import contextlib
 import logging
 import shutil
 import re
+import time
 
 import subprocess
 import pandas as pd
@@ -25,7 +26,7 @@ from .corpus_utils import (
     FASTTEXT_DE,
     WORD_TYPES,
     replace_special_chars,
-    error_factor
+    error_factor,
 )
 
 # Set up logging
@@ -446,6 +447,7 @@ class CreateCorpus:
         mp3_files = set()
 
         # Traverse the directory and collect the file names
+        logging.info("Checking the structure of the corpus, this might take a while")
         for file in os.listdir(with_clips):
             if file.endswith(".lab"):
 
@@ -802,7 +804,7 @@ class CreateCorpus:
                 melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
                 melspecs_norm_synthesized.append(melspec_norm_syn)
                 total_words += 1
-                WORD_TYPES[word.label] += 1
+                WORD_TYPES[word.label] += 1 
 
                 # this is for manual testing only
                 if word.label == "chocolate":
@@ -979,12 +981,13 @@ def return_argument_parser():
         "--save_df_name",
         type=str,
         default="corpus_as_df_mp",
-        help="The name to save the dataframe to in relation to the corpus folder",
+        help="The name to save the dataframe under, language will be added automatically",
     )
     parser.add_argument(
         "--df_save_path",
         type=str,
         default="/mnt/Restricted/Corpora/CommonVoiceVTL/",
+        help="The path to save the dataframe to",
     )
     parser.add_argument(
         "--debug",
@@ -1005,7 +1008,17 @@ def return_argument_parser():
         "--end_epoch", type=int, default=100, help="The epoch to end with (inclusive)"
     )
     parser.add_argument(
-        "--error_factor",type=float,default=None,help="How likely you estimate a word to occur less then your min word count in the corpus") #TODO: Implement this so it can be changed
+        "--error_factor",
+        type=float,
+        default=None,
+        help="How likely you estimate a word to occur less then your min word count in the corpus",
+    )  # TODO: Implement this so it can be changed
+    parser.add_argument(
+        "--add_melspec",
+        action="store_true",
+        default=False,
+        help="If mel spectrograms should be added to the dataframe if you use multiprocessing. If you don't use multiprocessing, mel spectrograms are always added",
+    )
     return parser
 
 
@@ -1024,7 +1037,10 @@ if __name__ == "__main__":
         args.df_save_path = args.corpus
     CreateCorpus.setup(language=args.language)
     corpus_worker = CreateCorpus(args.corpus, language=args.language)
-
+    if args.add_melspec and not args.use_mp:
+        logging.warning(
+            "You want to add mel spectrograms but you don't use multiprocessing, so mel spectrograms will be added anyway, so don't worry"
+        )
     clip_list, sentence_list = corpus_worker.check_structure(
         args.word_amount, args.min_word_count
     )
@@ -1066,7 +1082,9 @@ if __name__ == "__main__":
                 logging.info(
                     f" You want to use multiprocessing but the number of cores is {args.num_cores}, so the mulitprocessing function likely has no benefit"
                 )
-                logging.info(f"Melspecs will not be created in multiprocessing mode")
+                if not args.add_melspec:
+                    logging.info(f"Melspecs will not be created for multiprocessing ")
+
             df, total_words, lost_words = corpus_worker.create_data_frame_mp(
                 clip_list, sentence_list, args.num_cores
             )
@@ -1086,6 +1104,26 @@ if __name__ == "__main__":
             logging.info(
                 f"Percentage of lost word in epoch {i}: {lost_words/total_words*100}%"
             )
+        if args.add_melspec and args.use_mp:
+
+            start = time.time()
+            logging.info("Adding mel spectrograms to the dataframe")
+            df["melspec_norm_recorded"] = df["melspec_norm_recorded"] = df.apply(
+                lambda row: util.normalize_mel_librosa(
+                    util.librosa_melspec(row["wav_recording"], row["sr_recording"])
+                ),
+                axis=1,
+            )
+            df["melspec_norm_synthesized"] = df.apply(
+                lambda row: util.normalize_mel_librosa(
+                    util.librosa_melspec(row["wav_synthesized"], row["sr_synthesized"])
+                ),
+                axis=1,
+            )
+
+            logging.info(
+                f"Mel spectrograms added in {time.time()-start} seconds. This does not use multiprocessing"
+            )
         path_to_save_corpus = os.path.join(
             folder_path, args.save_df_name + f"_epoch_{i}_" + args.language + ".pkl"
         )
@@ -1098,7 +1136,7 @@ if __name__ == "__main__":
     logging.info(f"Percentage of lost words: {lost_words_sum/total_words_sum*100}%")
     with open(os.path.join(folder_path, "report.txt"), "w") as file:
         file.write(
-            f"Words processed: {total_words} \n Lost words: {lost_words_sum}\nLost words rate in percent: {(lost_words_sum / total_words_sum * 100) if total_words_sum > 0 else None}%\n Word types: {len(WORD_TYPES)}"
+            f"Words processed: {total_words} \nLost words: {lost_words_sum}\nLost words rate in percent: {(lost_words_sum / total_words_sum * 100) if total_words_sum > 0 else None}%\n[Word types: {len(WORD_TYPES)}"
         )
 
     logging.info("Done! :P")
