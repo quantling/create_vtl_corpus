@@ -59,6 +59,7 @@ We call this function imported from PAULE to create melspectrograms from the wav
 We first resample then create the melspectrogram and then create the melspectrogram in decibels
 
 .. code :: python
+
     def librosa_melspec(wav, sample_rate):
     wav = librosa.resample(wav, orig_sr=sample_rate, target_sr=44100,
             res_type='kaiser_best', fix=True, scale=False)

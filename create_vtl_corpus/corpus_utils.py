@@ -2,9 +2,7 @@ import os
 import ctypes
 import contextlib
 import logging
-import shutil
 import re
-import subprocess
 import string
 import random
 import pandas as pd
@@ -13,8 +11,6 @@ import fasttext.util
 from paule import util
 from praatio import textgrid
 import soundfile as sf
-import librosa
-import numpy as np
 import csv
 import collections
 
@@ -24,14 +20,14 @@ DIR = os.path.dirname(__file__)
 
 try:
     FASTTEXT_EN = fasttext.load_model(os.path.join(DIR, "resources", "cc.en.300.bin"))
-except:
+except FileNotFoundError:
     logging.warning("The FastText model for English could not be loaded")
     FASTTEXT_EN = None
 
 try:
 
     FASTTEXT_DE = fasttext.load_model(os.path.join(DIR, "resources", "cc.de.300.bin"))
-except:
+except FileNotFoundError:
     logging.warning("The FastText model for German could not be loaded")
     FASTTEXT_DE = None
 
@@ -149,6 +145,7 @@ DICT = {
 WORD_TYPES = collections.Counter()
 
 error_factor = 1.001
+
 
 def replace_special_chars(word):
     """This function is used to replace special characters in a word. It is in this file so that characters for both multiprocessing and single processing are the same"""
@@ -320,7 +317,7 @@ def generate_rows(
             logging.warning(
                 f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this sentence"
             )
-           
+
             lost_words += sentence.split().__len__() / error_factor
             total_words += sentence.split().__len__() / error_factor
             return (df_empty, lost_words, total_words)

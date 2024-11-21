@@ -17,7 +17,7 @@ import soundfile as sf
 from tqdm import tqdm
 
 from collections import Counter
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 from .corpus_utils import (
     generate_rows,
@@ -804,7 +804,7 @@ class CreateCorpus:
                 melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
                 melspecs_norm_synthesized.append(melspec_norm_syn)
                 total_words += 1
-                WORD_TYPES[word.label] += 1 
+                WORD_TYPES[word.label] += 1
 
                 # this is for manual testing only
                 if word.label == "chocolate":
