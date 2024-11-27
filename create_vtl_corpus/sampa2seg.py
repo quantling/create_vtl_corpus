@@ -1,4 +1,3 @@
-import os
 
 def sampa_to_seg(utt_name, seg_dir):
 

@@ -618,7 +618,7 @@ class CreateCorpus:
         total_words = 0  # this is here to estimate how many words are processed
 
         # remove extension for TextGrid
-    	files_skiped = 0
+        files_skiped = 0
         path_to_aligned = os.path.join(self.path_to_corpus, "clips_aligned")
         for filename_no_extension, sentence in tqdm(
             zip(clip_list, sentence_list), total=len(clip_list), desc="files in epoch"

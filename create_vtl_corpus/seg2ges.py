@@ -1,6 +1,4 @@
 import ctypes
-import sys
-import shutil
 import os
 
 VTL = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + '/vocaltractlab_api/VocalTractLabApi.so')
