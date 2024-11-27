@@ -24,7 +24,6 @@ from .corpus_utils import (
     DICT,
     FASTTEXT_EN,
     FASTTEXT_DE,
-    WORD_TYPES,
     replace_special_chars,
     error_factor,
 )
@@ -141,16 +140,8 @@ class CreateCorpus:
             The loaded fasttext model
         """
         if language == "en":
-            global FASTTEXT_EN
-            FASTTEXT_EN = fasttext.load_model(
-                os.path.join(DIR, "resources", "cc.en.300.bin")
-            )
             model = FASTTEXT_EN
         elif language == "de":
-            global FASTTEXT_DE
-            FASTTEXT_DE = fasttext.load_model(
-                os.path.join(DIR, "resources", "cc.de.300.bin")
-            )
             model = FASTTEXT_DE
 
         else:
@@ -360,7 +351,7 @@ class CreateCorpus:
 
                 if self.language == "en":
                     logging.info("aligning corpus in english")
-                    command = "conda run -n aligner mfa  align".split() + [
+                    command = "conda run -n english_aligner mfa  align".split() + [
                         batch_folder,
                         "english_mfa",
                         "english_mfa",
@@ -393,7 +384,7 @@ class CreateCorpus:
         else:
             if self.language == "en":
                 logging.info("aligning corpus in english")
-                command = "conda run -n aligner mfa  align".split() + [
+                command = "conda run -n english_aligner mfa  align".split() + [
                     path_to_validated,
                     "english_mfa",
                     "english_mfa",
@@ -603,6 +594,7 @@ class CreateCorpus:
             ==========================  ===========================================================
 
         """
+        from .corpus_utils import WORD_TYPES
         labels = list()
         word_positions = list()
         sentences = list()
@@ -626,7 +618,7 @@ class CreateCorpus:
         total_words = 0  # this is here to estimate how many words are processed
 
         # remove extension for TextGrid
-
+    	files_skiped = 0
         path_to_aligned = os.path.join(self.path_to_corpus, "clips_aligned")
         for filename_no_extension, sentence in tqdm(
             zip(clip_list, sentence_list), total=len(clip_list), desc="files in epoch"
@@ -1134,6 +1126,9 @@ if __name__ == "__main__":
     logging.info(f"Total words: {total_words_sum}")
     logging.info(f"Lost words: {lost_words_sum}")
     logging.info(f"Percentage of lost words: {lost_words_sum/total_words_sum*100}%")
+    if args.use_mp:
+        from .corpus_utils import WORD_TYPES
+        logging.info(f"Word types: {len(WORD_TYPES)}")
     with open(os.path.join(folder_path, "report.txt"), "w") as file:
         file.write(
             f"Words processed: {total_words} \nLost words: {lost_words_sum}\nLost words rate in percent: {(lost_words_sum / total_words_sum * 100) if total_words_sum > 0 else None}%\n[Word types: {len(WORD_TYPES)}"

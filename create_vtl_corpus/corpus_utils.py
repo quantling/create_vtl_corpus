@@ -11,7 +11,6 @@ import fasttext.util
 from paule import util
 from praatio import textgrid
 import soundfile as sf
-import csv
 import collections
 
 
@@ -464,6 +463,7 @@ def generate_rows(
         wav_syn, wav_syn_sr = util.speak(cps)
         wavs_sythesized.append(wav_syn)
         sampling_rates_sythesized.append(wav_syn_sr)
+        WORD_TYPES[word.label] += 1
 
         """
                     melspec_norm_syn = util.normalize_mel_librosa(
