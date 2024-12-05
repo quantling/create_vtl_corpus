@@ -6,6 +6,7 @@ import logging
 import shutil
 import re
 import time
+import random
 
 import subprocess
 import pandas as pd
@@ -15,7 +16,7 @@ from paule import util
 from praatio import textgrid
 import soundfile as sf
 from tqdm import tqdm
-
+import numpy as np
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
@@ -252,18 +253,29 @@ class CreateCorpus:
         word_counts = Counter(all_words)
 
         logging.info(f"{word_counts} These are the word counts")
-        filtered_word_counts = {
-            word: count
-            for word, count in word_counts.items()
-            if count >= min_word_count
-        }
+        filtered_word_counts = word_counts.copy()
+        for key, cnts in word_counts.items():   # list is important here
+            if cnts < min_word_count:
+                del filtered_word_counts[key]
 
+        logging.info(f"{filtered_word_counts.total()} words are left after filtering")
+        max_word_amount = min(word_amount, filtered_word_counts.total())
         if word_amount > 0:
-            word_set = frozenset(
-                key.lower()
-                for key, _ in list(filtered_word_counts.items())[:word_amount]
-                if isinstance(key, str)
-            )
+            word_set = set()
+            for  i in range(max_word_amount):
+                #we need to recompute the weights since the filtered word counts change every iteration
+                elements = list(filtered_word_counts.keys())
+                weights = np.array(list(filtered_word_counts.values()), dtype=float)
+                
+                # Normalize weights to sum to 1
+                weights /= weights.sum()
+
+                # Sample one word each iteration to prioritize common words based on their counts
+                sampled_string = random.choices(elements, weights=weights, k=1)[0] #returns a list
+                word_set.add(sampled_string)
+                logging.debug(f"Sampled string: {sampled_string}")
+                del filtered_word_counts[sampled_string]
+            word_set = frozenset(word_set)
         else:
             word_set = frozenset(
                 key.lower()
@@ -271,18 +283,19 @@ class CreateCorpus:
                 if isinstance(key, str)
             )
 
+        logging.info(f"{word_set} These are the words that will be used in the corpus")
+
+    
         assert len(word_set) > 0, "The word set is empty, no words were found"
         assert (
-            len(word_set) == word_amount or word_amount == 0
-        ), f"The word set has {len(word_set)} words, but the word amount is {word_amount}"
+           ( len(word_set) == max_word_amount) or word_amount == 0) , f"The word set has {len(word_set)} words, but the maximum word amount with given {word_amount} is {max_word_amount} "
+        
         self.word_set = word_set
 
-        logging.info(f"{word_set} These are the words that will be used in the corpus")
 
     def run_aligner(self, mfa_workers: int, batch_size: int):
         """
         Runs the Montreal Forced Aligner on the corpus
-
         Parameters
         ----------
         int mfaworkers :
@@ -595,6 +608,7 @@ class CreateCorpus:
 
         """
         from .corpus_utils import WORD_TYPES
+
         labels = list()
         word_positions = list()
         sentences = list()
@@ -997,7 +1011,7 @@ def return_argument_parser():
         "--start_epoch", type=int, default=0, help="The epoch to start with (inclusive)"
     )
     parser.add_argument(
-        "--end_epoch", type=int, default=100, help="The epoch to end with (inclusive)"
+        "--end_epoch", type=int, default=1000, help="The epoch to end with (inclusive)"
     )
     parser.add_argument(
         "--error_factor",
@@ -1128,6 +1142,7 @@ if __name__ == "__main__":
     logging.info(f"Percentage of lost words: {lost_words_sum/total_words_sum*100}%")
     if args.use_mp:
         from .corpus_utils import WORD_TYPES
+
         logging.info(f"Word types: {len(WORD_TYPES)}")
     with open(os.path.join(folder_path, "report.txt"), "w") as file:
         file.write(

@@ -139,7 +139,16 @@ DICT = {
     "pʷ": "p",  # p_w not possible with VTL (inferring pronunciation from other cases)
 }  # this dict can be made shorter with : automatically passing etc
 
-# DICT = csv.DictReader("phonemes.csv") #TODO: correctly read Ditc from csv file
+CSV_PATH = os.path.join(DIR, "resources", "phonemes.csv")
+if not os.path.exists(CSV_PATH):
+    import csv
+
+    logging.info("Creating phonemes.csv")
+    with open(CSV_PATH, "w") as csv_file:
+        writer = csv.writer(csv_file)
+        for key, value in DICT.items():
+            writer.writerow([key, value])
+
 
 WORD_TYPES = collections.Counter()
 
