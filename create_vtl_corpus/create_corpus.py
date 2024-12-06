@@ -254,7 +254,7 @@ class CreateCorpus:
 
         logging.info(f"{word_counts} These are the word counts")
         filtered_word_counts = word_counts.copy()
-        for key, cnts in word_counts.items():   # list is important here
+        for key, cnts in word_counts.items():  # list is important here
             if cnts < min_word_count:
                 del filtered_word_counts[key]
 
@@ -262,16 +262,18 @@ class CreateCorpus:
         max_word_amount = min(word_amount, filtered_word_counts.total())
         if word_amount > 0:
             word_set = set()
-            for  i in range(max_word_amount):
-                #we need to recompute the weights since the filtered word counts change every iteration
+            for i in range(max_word_amount):
+                # we need to recompute the weights since the filtered word counts change every iteration
                 elements = list(filtered_word_counts.keys())
                 weights = np.array(list(filtered_word_counts.values()), dtype=float)
-                
+
                 # Normalize weights to sum to 1
                 weights /= weights.sum()
 
                 # Sample one word each iteration to prioritize common words based on their counts
-                sampled_string = random.choices(elements, weights=weights, k=1)[0] #returns a list
+                sampled_string = random.choices(elements, weights=weights, k=1)[
+                    0
+                ]  # returns a list
                 word_set.add(sampled_string)
                 logging.debug(f"Sampled string: {sampled_string}")
                 del filtered_word_counts[sampled_string]
@@ -285,13 +287,12 @@ class CreateCorpus:
 
         logging.info(f"{word_set} These are the words that will be used in the corpus")
 
-    
         assert len(word_set) > 0, "The word set is empty, no words were found"
         assert (
-           ( len(word_set) == max_word_amount) or word_amount == 0) , f"The word set has {len(word_set)} words, but the maximum word amount with given {word_amount} is {max_word_amount} "
-        
-        self.word_set = word_set
+            len(word_set) == max_word_amount
+        ) or word_amount == 0, f"The word set has {len(word_set)} words, but the maximum word amount with given {word_amount} is {max_word_amount} "
 
+        self.word_set = word_set
 
     def run_aligner(self, mfa_workers: int, batch_size: int):
         """
@@ -811,19 +812,6 @@ class CreateCorpus:
                 melspecs_norm_synthesized.append(melspec_norm_syn)
                 total_words += 1
                 WORD_TYPES[word.label] += 1
-
-                # this is for manual testing only
-                if word.label == "chocolate":
-                    sf.write("manual_tests/chocolate.wav", wav_rec, sampling_rate)
-                    import matplotlib.pyplot as plt
-
-                    util.librosa.display.specshow(melspec_norm_rec, x_axis="time")
-                    plt.colorbar()
-                    plt.savefig("manual_tests/chocolate.png")
-                    with open(
-                        "manual_tests/chocolate_updated_again.seg", "w"
-                    ) as text_file:
-                        text_file.write(text)
 
                 if len(names) != len(wavs):
                     print(
