@@ -77,16 +77,13 @@ Phonemes
 ========
 The phonemes are converted from the MFA phonemes to the SAMPA phonemes. The following table shows the conversion:
 
-.. csv-table:: Table Title
-   :file: ../../create_vtl_corpus/resources/phoneme.csv
-   :widths: 30, 70
+.. csv-table:: Phoneme Conversion Table
+   :file: phonemes.csv
+   :widths: 50, 50
    :header-rows: 1
-
-
 
 Some phonemes are perhaps not perfectly converted, since VTL does not accept all the phonemes of the SAMPA notation. Also, the MFA phonemes are not always perfectly aligned with the SAMPA phonemes.
 If VTL accepts more phonemes in the future, the conversion can be improved. Please contact the author if you have suggestions.
 The conversion should be good enough for the purpose of the corpus generation.
 A german accent in English is  noticable in English pronounciation in the synthesis.
 If other languages are added the conversion table must be adapted for new phonemes.
-

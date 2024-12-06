@@ -139,7 +139,7 @@ DICT = {
     "pʷ": "p",  # p_w not possible with VTL (inferring pronunciation from other cases)
 }  # this dict can be made shorter with : automatically passing etc
 
-CSV_PATH = os.path.join(DIR, "resources", "phonemes.csv")
+CSV_PATH = os.path.join(DIR, "..", "docs", "source", "phonemes.csv")
 if not os.path.exists(CSV_PATH):
     import csv
 

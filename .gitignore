@@ -14,8 +14,6 @@ poetry.lock
 *seg
 *ges
 manually_add_mels.py
-*csv
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
