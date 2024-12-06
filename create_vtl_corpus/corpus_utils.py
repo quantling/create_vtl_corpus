@@ -19,14 +19,14 @@ DIR = os.path.dirname(__file__)
 
 try:
     FASTTEXT_EN = fasttext.load_model(os.path.join(DIR, "resources", "cc.en.300.bin"))
-except FileNotFoundError:
+except ValueError:
     logging.warning("The FastText model for English could not be loaded")
     FASTTEXT_EN = None
 
 try:
 
     FASTTEXT_DE = fasttext.load_model(os.path.join(DIR, "resources", "cc.de.300.bin"))
-except FileNotFoundError:
+except ValueError:
     logging.warning("The FastText model for German could not be loaded")
     FASTTEXT_DE = None
 
@@ -140,14 +140,18 @@ DICT = {
 }  # this dict can be made shorter with : automatically passing etc
 
 CSV_PATH = os.path.join(DIR, "..", "docs", "source", "phonemes.csv")
-if not os.path.exists(CSV_PATH):
-    import csv
 
-    logging.info("Creating phonemes.csv")
-    with open(CSV_PATH, "w") as csv_file:
-        writer = csv.writer(csv_file)
-        for key, value in DICT.items():
-            writer.writerow([key, value])
+def get_phoneme_dict():
+    if not os.path.exists(CSV_PATH):
+        import csv
+
+        logging.info("Creating phonemes.csv")
+        with open(CSV_PATH, "w") as csv_file:
+            writer = csv.writer(csv_file)
+            for key, value in DICT.items():
+                writer.writerow([key, value])
+
+get_phoneme_dict()
 
 
 WORD_TYPES = collections.Counter()
