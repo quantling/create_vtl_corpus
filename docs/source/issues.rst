@@ -29,6 +29,11 @@ some of the words in a sentence might not occur 4 times or more, so we would hav
 minimum word count that is different from our standard 4 times or more.
 For other secenarios the words are counted and  we follow the word seperation done by the aligner. 
 
+Estimation of total word types
+==============================
+
+We estimate the total word counts based on the lexical words. Keep this in mind when using the library.
+
 
 Further issues
 ==============

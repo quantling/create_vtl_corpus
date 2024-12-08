@@ -518,6 +518,7 @@ class CreateCorpus:
         )
         total_words = 0
         lost_words = 0  # TODO implement this for multiprocessing
+        self.word_types = set()
         with tqdm(total=len(clip_list), desc="files in epoch") as pbar:
             with ProcessPoolExecutor(max_workers=num_cores) as executor:
 
@@ -548,9 +549,11 @@ class CreateCorpus:
 
         logging.info("All processes terminated. Now concatenating the results")
         df_results = list()
-        for df, lost, total in results:
+        for df, lost, total, returned_word_type in results:
             lost_words += lost
             total_words += total
+            self.word_types = self.word_types.union(returned_word_type)
+            print(f"Returned word types: {returned_word_type}")
             df_results.append(df)
 
         df = pd.concat(df_results)
@@ -608,7 +611,7 @@ class CreateCorpus:
             ==========================  ===========================================================
 
         """
-        from .corpus_utils import WORD_TYPES
+        self.word_types = set()
 
         labels = list()
         word_positions = list()
@@ -810,8 +813,7 @@ class CreateCorpus:
 
                 melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
                 melspecs_norm_synthesized.append(melspec_norm_syn)
-                total_words += 1
-                WORD_TYPES[word.label] += 1
+                self.word_types.add(lexical_word)
 
                 if len(names) != len(wavs):
                     print(
@@ -894,7 +896,7 @@ class CreateCorpus:
             )  # we don't need the temp_output files anymore
         logging.info(f"Files skipped: {files_skiped}")
         total_words += len(labels)
-        return df, lost_words, total_words
+        return df,total_words, lost_words, 
 
 
 def return_argument_parser():
@@ -1128,13 +1130,10 @@ if __name__ == "__main__":
     logging.info(f"Total words: {total_words_sum}")
     logging.info(f"Lost words: {lost_words_sum}")
     logging.info(f"Percentage of lost words: {lost_words_sum/total_words_sum*100}%")
-    if args.use_mp:
-        from .corpus_utils import WORD_TYPES
-
-        logging.info(f"Word types: {len(WORD_TYPES)}")
+    logging.info(f"word types: {len(corpus_worker.word_types)}")
     with open(os.path.join(folder_path, "report.txt"), "w") as file:
         file.write(
-            f"Words processed: {total_words} \nLost words: {lost_words_sum}\nLost words rate in percent: {(lost_words_sum / total_words_sum * 100) if total_words_sum > 0 else None}%\n[Word types: {len(WORD_TYPES)}"
+            f"Words processed: {total_words} \nLost words: {lost_words_sum}\nLost words rate in percent: {(lost_words_sum / total_words_sum * 100) if total_words_sum > 0 else None}%\n[Word types: {len(corpus_worker.word_types)}]\n"
         )
 
     logging.info("Done! :P")

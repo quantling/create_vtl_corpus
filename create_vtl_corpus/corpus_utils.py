@@ -154,7 +154,6 @@ def get_phoneme_dict():
 get_phoneme_dict()
 
 
-WORD_TYPES = collections.Counter()
 
 error_factor = 1.001
 
@@ -225,6 +224,8 @@ def generate_rows(
     lexical_words = list()
     lost_words = 0
     total_words = 0
+    word_types = set()
+   
 
     clip_name = filename_no_extension + ".mp3"
 
@@ -307,6 +308,7 @@ def generate_rows(
                 f"No phones found for word '{word.label}' in {filename_no_extension}, skipping this word"
             )
             lost_words += 1
+            total_words += 1
             continue
         logging.debug(
             f"Processing word '{word.label}' in {filename_no_extension}, resulting phones: {phones}"
@@ -476,7 +478,7 @@ def generate_rows(
         wav_syn, wav_syn_sr = util.speak(cps)
         wavs_sythesized.append(wav_syn)
         sampling_rates_sythesized.append(wav_syn_sr)
-        WORD_TYPES[word.label] += 1
+        word_types.add(lexical_word)
 
         """
                     melspec_norm_syn = util.normalize_mel_librosa(
@@ -534,4 +536,4 @@ def generate_rows(
         }
     )
     total_words += len(labels)
-    return (df_part, lost_words, total_words)
+    return (df_part, lost_words, total_words, word_types)
