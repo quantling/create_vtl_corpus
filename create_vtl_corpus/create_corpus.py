@@ -169,7 +169,7 @@ class CreateCorpus:
         )
         clip_names = list()
         sentences = list()
-        senteces_that_are_not_strings = 0
+        sentences_that_are_not_strings = 0
         if not os.path.exists(os.path.join(self.path_to_corpus, "clips_validated")):
             os.mkdir(os.path.join(self.path_to_corpus, "clips_validated"))
             need_new_clips = True
@@ -217,13 +217,13 @@ class CreateCorpus:
                         logging.debug(
                             f"Transcript for {clip_name} is not a string, skipping this clip"
                         )
-                        senteces_that_are_not_strings += 1
+                        sentences_that_are_not_strings += 1
                         continue
                     lab_file.write(transcript)
 
-        if senteces_that_are_not_strings > 0:
+        if sentences_that_are_not_strings > 0:
             logging.warning(
-                f"{senteces_that_are_not_strings} sentences were not strings and were skipped. Thats {senteces_that_are_not_strings/len(clip_names)*100}% of the sentences"
+                f"{sentences_that_are_not_strings} sentences were not strings and were skipped. Thats {sentences_that_are_not_strings/len(clip_names)*100}% of the sentences"
             )
         else:
             logging.info("All sentences were strings")
@@ -460,16 +460,6 @@ class CreateCorpus:
             elif file.endswith(".mp3"):
                 mp3_files.add(os.path.splitext(file)[0])
 
-        if mp3_files == lab_files:
-
-            clip_names = lab_files
-            logging.info("The lab files and mp3 files match")
-            # TODO: Implent this correctly
-        ## Find a way to use the sentences from the validated.tsv file
-        else:
-            logging.warning(
-                "The lab files and mp3 files do not match, correcting this now"
-            )
         clip_names, sentence_list = self.format_corpus(word_amount, min_word_count)
         missing_clips = set(clip_names).difference(lab_files.intersection(mp3_files))
         assert (
@@ -531,7 +521,6 @@ class CreateCorpus:
                                 sentence,
                                 self.path_to_corpus,
                                 self.language,
-                                self.word_amount,
                                 self.word_set,
                             )
                             for clip, sentence in zip(clip_list, sentence_list)
@@ -1040,6 +1029,7 @@ if __name__ == "__main__":
     clip_list, sentence_list = corpus_worker.check_structure(
         args.word_amount, args.min_word_count
     )
+    #we trust the user to know he has to use the aligner or not
     if args.needs_aligner:
         mfa_workers = args.mfa_workers
         corpus_worker.run_aligner(mfa_workers, args.aligner_batch_size)
@@ -1061,6 +1051,8 @@ if __name__ == "__main__":
         os.mkdir(folder_path)
     total_words_sum = 0
     lost_words_sum = 0
+
+    #this is the main loop that creates the dataframe
     for i, (clip_list, sentence_list) in tqdm(
         enumerate(zip(clip_lists, sentence_lists)), total=len(clip_lists), desc="Epochs"
     ):
@@ -1079,7 +1071,7 @@ if __name__ == "__main__":
                     f" You want to use multiprocessing but the number of cores is {args.num_cores}, so the mulitprocessing function likely has no benefit"
                 )
                 if not args.add_melspec:
-                    logging.info(f"Melspecs will not be created for multiprocessing ")
+                    logging.info("Melspecs will not be created for multiprocessing ")
 
             df, total_words, lost_words = corpus_worker.create_data_frame_mp(
                 clip_list, sentence_list, args.num_cores
@@ -1100,7 +1092,7 @@ if __name__ == "__main__":
             logging.info(
                 f"Percentage of lost word in epoch {i}: {lost_words/total_words*100}%"
             )
-        if args.add_melspec and args.use_mp:
+        if args.add_melspec and args.use_mp: #if we don't use multiprocessing, mel spectrograms are always added 
 
             start = time.time()
             logging.info("Adding mel spectrograms to the dataframe")

@@ -11,7 +11,6 @@ import fasttext.util
 from paule import util
 from praatio import textgrid
 import soundfile as sf
-import collections
 
 
 DIR = os.path.dirname(__file__)
@@ -187,7 +186,7 @@ def replace_special_chars(word):
 
 
 def generate_rows(
-    filename_no_extension, sentence, path_to_corpus, language, word_amount, word_set
+    filename_no_extension, sentence, path_to_corpus, language, word_set
 ):
     """This function is used to create the matching rows from a clip
     It is used for the multiprocessing part of the code
@@ -262,11 +261,11 @@ def generate_rows(
             False,
         )
     except FileNotFoundError:
-        logging.warning(f"The TextGrid file for {filename_no_extension} was not found")
+        logging.warning(f"The TextGrid file for {filename_no_extension} was not found. Have you run the aligner?")
         lost_words += sentence.split().__len__() / 1.2
         # adjusted since we don't know the exact  count of word that occured 4 times
         total_words += sentence.split().__len__() / 1.2
-        return (df_empty, lost_words, total_words)
+        return (df_empty, lost_words, total_words,word_types)
 
     text_grid_sentence = list()
 
@@ -334,7 +333,7 @@ def generate_rows(
 
             lost_words += sentence.split().__len__() / error_factor
             total_words += sentence.split().__len__() / error_factor
-            return (df_empty, lost_words, total_words)
+            return (df_empty, lost_words, total_words,word_types)
 
         lexical_word = replace_special_chars(split_sentence[word_index])
 
@@ -450,28 +449,6 @@ def generate_rows(
         cp_norms.append(cp_norm)
         logging.debug(f"Client id: {client_id}, writing melspec for word: {word.label}")
 
-        # resample and extract melspec but it needs to be skipped for now since it is hanging the process
-        """
-                    logging.info(f"Client id: {client_id}, commencing resampling for word: {word.label} (Andres bet)")
-                    wav = librosa.resample(wav_rec, orig_sr=sampling_rate, target_sr=44100,
-                                res_type='kaiser_best', fix=True, scale=False)
-                    logging.info(f"Client id: {client_id}, commencing feature extraction for word: {word.label} (Tinos bet)")
-                    melspec = librosa.feature.melspectrogram(y=wav, n_fft=1024, hop_length=220, n_mels=60, sr=44100, power=1.0, fmin=10, fmax=12000)
-                    logging.info(f"Client id: {client_id}, commencing amplitdue thing for word: {word.label} ")
-                    melspec_db = librosa.amplitude_to_db(melspec, ref=0.15)
-                    logging.info(f"Client id: {client_id}, converting melspec for word: {word.label}")
-                    melspec_rec = np.array(melspec_db.T, order='C', dtype=np.float64)
-
-
-                    
-                    logging.info(f"Client id: {client_id}, normalizing melspec for word: {word.label}")
-                    melspec_norm_rec = util.normalize_mel_librosa(
-                    melspec_rec
-                    )
-                    loggin.info(f"Completed melspec for word: {word.label}, client_id: {client_id}")
-
-                    melspecs_norm_recorded.append(melspec_norm_rec)
-                    """
 
         melspecs_norm_recorded.append(None)
         logging.debug(f"Starting synthesis for {word.label} on  client_id {client_id}")
