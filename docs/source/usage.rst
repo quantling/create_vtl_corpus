@@ -36,7 +36,6 @@ Use cases
 3. Filter after words? Create 1000 more "post" word types.
 
 
-
 Flags
 =====
 The following flags can be used to modify the behaviour of the library.
@@ -55,7 +54,6 @@ by default, to enable it use the ``--use_mp`` flag. For multiprocessing melspect
 if necessary and if you need our kind of melspectrogram :ref:`Melspectrograms`. 
 Melspectrograms can begenerated afterwards too however with the information available in the
 dataframe.
-
 
 CreateCorpus Class
 ==========================

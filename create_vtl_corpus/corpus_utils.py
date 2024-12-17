@@ -11,6 +11,10 @@ import fasttext.util
 from paule import util
 from praatio import textgrid
 import soundfile as sf
+import librosa
+import numpy as np
+import csv
+
 
 
 DIR = os.path.dirname(__file__)
@@ -18,6 +22,7 @@ DIR = os.path.dirname(__file__)
 
 try:
     FASTTEXT_EN = fasttext.load_model(os.path.join(DIR, "resources", "cc.en.300.bin"))
+
 except ValueError:
     logging.warning("The FastText model for English could not be loaded")
     FASTTEXT_EN = None
@@ -26,6 +31,7 @@ try:
 
     FASTTEXT_DE = fasttext.load_model(os.path.join(DIR, "resources", "cc.de.300.bin"))
 except ValueError:
+
     logging.warning("The FastText model for German could not be loaded")
     FASTTEXT_DE = None
 
@@ -138,6 +144,7 @@ DICT = {
     "pʷ": "p",  # p_w not possible with VTL (inferring pronunciation from other cases)
 }  # this dict can be made shorter with : automatically passing etc
 
+
 CSV_PATH = os.path.join(DIR, "..", "docs", "source", "phonemes.csv")
 
 def get_phoneme_dict():
@@ -155,6 +162,7 @@ get_phoneme_dict()
 
 
 error_factor = 1.001
+
 
 
 def replace_special_chars(word):
@@ -187,6 +195,7 @@ def replace_special_chars(word):
 
 def generate_rows(
     filename_no_extension, sentence, path_to_corpus, language, word_set
+
 ):
     """This function is used to create the matching rows from a clip
     It is used for the multiprocessing part of the code
@@ -221,10 +230,12 @@ def generate_rows(
     names = list()
     mfa_phones = list()
     lexical_words = list()
+
     lost_words = 0
     total_words = 0
     word_types = set()
    
+
 
     clip_name = filename_no_extension + ".mp3"
 
@@ -261,11 +272,13 @@ def generate_rows(
             False,
         )
     except FileNotFoundError:
+
         logging.warning(f"The TextGrid file for {filename_no_extension} was not found. Have you run the aligner?")
         lost_words += sentence.split().__len__() / 1.2
         # adjusted since we don't know the exact  count of word that occured 4 times
         total_words += sentence.split().__len__() / 1.2
         return (df_empty, lost_words, total_words,word_types)
+
 
     text_grid_sentence = list()
 
@@ -472,6 +485,7 @@ def generate_rows(
                 f"The wavs are not the same length,at '{word.label}' Expected: {len(names)}) but got {len(wavs)}"
             )
 
+
     # fill the dataframe
 
     for idx, array in enumerate(
@@ -512,5 +526,7 @@ def generate_rows(
             "client_id": client_ids,
         }
     )
+
     total_words += len(labels)
     return (df_part, lost_words, total_words, word_types)
+

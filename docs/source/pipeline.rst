@@ -8,6 +8,7 @@ synthesis.
 
 Goal
 ====
+
 The goal of the pipeline is to generate a corpus for a vocal tract synthesis with VocalTractLab (VTL) from the Mozilla Common Voice corpus. The corpus is specifically tailored
 for the `PAULE model <https://github.com/quantling/paule>`__  but it can be used for other purposes.
 
@@ -72,7 +73,6 @@ The following resources are used:
 * `fastText word embedding model <https://fasttext.cc/>`__
 
 
-
 Phonemes 
 ========
 The phonemes are converted from the MFA phonemes to the SAMPA phonemes. The following table shows the conversion:
@@ -81,6 +81,7 @@ The phonemes are converted from the MFA phonemes to the SAMPA phonemes. The foll
    :file: phonemes.csv
    :widths: 50, 50
    :header-rows: 1
+
 
 Some phonemes are perhaps not perfectly converted, since VTL does not accept all the phonemes of the SAMPA notation. Also, the MFA phonemes are not always perfectly aligned with the SAMPA phonemes.
 If VTL accepts more phonemes in the future, the conversion can be improved. Please contact the author if you have suggestions.

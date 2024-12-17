@@ -58,4 +58,5 @@ We first resample then create the melspectrogram and then create the melspectrog
     melspec_db = librosa.amplitude_to_db(melspec, ref=0.15)
     return np.array(melspec_db.T, order='C', dtype=np.float64)
 
-
+Predictive Articulatory speech synthesis Utilizing Lexical Embeddings (PAULE) is a python frame work to plan control parameter trajectories 
+for the VocalTractLab simulator for a target acoustics or semantic embedding developed by Tino Sering . 

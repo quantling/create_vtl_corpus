@@ -2,7 +2,10 @@ __pycache__/
 bin/targetoptimizer
 vtl_corpus1.0/
 
+
 ## resources can be downloaded separately
+docs/_build/
+
 create_vtl_corpus/resources/*bin
 create_vtl_corpus/manual_tests/
 create_vtl_corpus/create_corpus_old.py
@@ -13,6 +16,7 @@ docs/tests/no_phoneme_sr.pkl
 docs/tests/no_phoneme.pkl
 *.wav
 *.swp
+
 *seg
 *ges
 
@@ -22,4 +26,4 @@ docs/tests/no_phoneme.pkl
 documentation
 docs/_build/
 
-manually_add_mels.py
+

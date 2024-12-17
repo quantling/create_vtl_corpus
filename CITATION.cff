@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+title: create_vtl_corpus
+message: Synthesizing a speech corpus with VocalTractLab
+type: software
+authors:
+  - given-names: Konstantin
+    family-names: Sering
+    affiliation: University of Tübingen
+    orcid: 'https://orcid.org/0000-0002-1178-7932'
+  - given-names: Valentin
+    family-names: Schmidt
+    affiliation: University of Tübingen
+    orcid: 'https://orcid.org/0009-0006-4691-706X'
+  - given-names: Niels
+    family-names: Stehwien
+  - given-names: Yingming
+    family-names: Gao
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.2548894
+repository-code: 'https://github.com/quantling/create_vtl_corpus'
+keywords:
+  - speech corpus
+  - speech synthesis
+  - vocal tract lab
+  - linguistics
+  - python
+  - cognitive science
+  - machine learning
+license: GPL-3.0+
+

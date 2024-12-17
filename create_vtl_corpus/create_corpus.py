@@ -8,6 +8,7 @@ import re
 import time
 import random
 
+
 import subprocess
 import pandas as pd
 import fasttext
@@ -20,6 +21,7 @@ import numpy as np
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
+
 from .corpus_utils import (
     generate_rows,
     DICT,
@@ -27,6 +29,7 @@ from .corpus_utils import (
     FASTTEXT_DE,
     replace_special_chars,
     error_factor,
+
 )
 
 # Set up logging
@@ -50,6 +53,7 @@ class CreateCorpus:
         ├── clips/
         │   └── *.mp3             # audio files (mp3)
         └── files_not_relevant_to_this_project
+
 
     Attributes
     ----------
@@ -141,8 +145,10 @@ class CreateCorpus:
             The loaded fasttext model
         """
         if language == "en":
+
             model = FASTTEXT_EN
         elif language == "de":
+
             model = FASTTEXT_DE
 
         else:
@@ -253,6 +259,7 @@ class CreateCorpus:
         word_counts = Counter(all_words)
 
         logging.info(f"{word_counts} These are the word counts")
+
         filtered_word_counts = word_counts.copy()
         for key, cnts in word_counts.items():  # list is important here
             if cnts < min_word_count:
@@ -278,12 +285,14 @@ class CreateCorpus:
                 logging.debug(f"Sampled string: {sampled_string}")
                 del filtered_word_counts[sampled_string]
             word_set = frozenset(word_set)
+
         else:
             word_set = frozenset(
                 key.lower()
                 for key, _ in filtered_word_counts.items()
                 if isinstance(key, str)
             )
+
 
         logging.info(f"{word_set} These are the words that will be used in the corpus")
 
@@ -297,6 +306,7 @@ class CreateCorpus:
     def run_aligner(self, mfa_workers: int, batch_size: int):
         """
         Runs the Montreal Forced Aligner on the corpus
+
         Parameters
         ----------
         int mfaworkers :
@@ -365,7 +375,9 @@ class CreateCorpus:
 
                 if self.language == "en":
                     logging.info("aligning corpus in english")
+
                     command = "conda run -n english_aligner mfa  align".split() + [
+
                         batch_folder,
                         "english_mfa",
                         "english_mfa",
@@ -506,9 +518,11 @@ class CreateCorpus:
         logging.info(
             f"Starting to create the dataframe with multiprocessing using {num_cores} cores"
         )
+
         total_words = 0
         lost_words = 0  # TODO implement this for multiprocessing
         self.word_types = set()
+
         with tqdm(total=len(clip_list), desc="files in epoch") as pbar:
             with ProcessPoolExecutor(max_workers=num_cores) as executor:
 
@@ -521,6 +535,7 @@ class CreateCorpus:
                                 sentence,
                                 self.path_to_corpus,
                                 self.language,
+
                                 self.word_set,
                             )
                             for clip, sentence in zip(clip_list, sentence_list)
@@ -530,8 +545,10 @@ class CreateCorpus:
                         pbar.update(1)
                     results = [f.result() for f in futures]
 
+
                 except KeyboardInterrupt:
                     logging.warning("Ctrl+C detected, shutting down...")
+
 
                     executor.shutdown(wait=True, cancel_futures=True)
                     logging.warning("All processes terminated.")
@@ -547,6 +564,7 @@ class CreateCorpus:
 
         df = pd.concat(df_results)
 
+
         if os.path.exists(os.path.join(self.path_to_corpus, "clips/temp_output")):
             shutil.rmtree(
                 os.path.join(self.path_to_corpus + "/clips/temp_output")
@@ -556,7 +574,9 @@ class CreateCorpus:
         else:
             logging.info("Temp_output folder was not removed, because it was not found")
 
+
         return df, total_words, lost_words
+
 
     def create_data_frame(
         self,
@@ -565,6 +585,7 @@ class CreateCorpus:
     ):
         """
         Creates Dataframe with Vocaltract Lab data and other data
+
 
         Parameters
         ----------
@@ -602,6 +623,8 @@ class CreateCorpus:
         """
         self.word_types = set()
 
+
+        """
         labels = list()
         word_positions = list()
         sentences = list()
@@ -621,11 +644,13 @@ class CreateCorpus:
         lexical_words = list()
 
         used_phonemes = set()
+
         lost_words = 0  # this is here to estimate how many words are lost
         total_words = 0  # this is here to estimate how many words are processed
 
         # remove extension for TextGrid
         files_skiped = 0
+
         path_to_aligned = os.path.join(self.path_to_corpus, "clips_aligned")
         for filename_no_extension, sentence in tqdm(
             zip(clip_list, sentence_list), total=len(clip_list), desc="files in epoch"
@@ -670,7 +695,9 @@ class CreateCorpus:
                     logging.info(
                         f"Word '{word.label}' is not in the word set, skipping this word"
                     )
+
                     continue  # we don't add anything to lost words here since we want to skip the word
+
                 phones = list()
                 mfa_phones_word_level = list()
 
@@ -714,8 +741,10 @@ class CreateCorpus:
                     logging.warning(
                         f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this word, Sentence: {sentence} .last word: {sentence.split()[-1]}"
                     )
+
                     lost_words += 1
                     total_words += 1
+
                     continue
                 lexical_word = replace_special_chars(
                     split_sentence[word_index]
@@ -802,7 +831,9 @@ class CreateCorpus:
 
                 melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
                 melspecs_norm_synthesized.append(melspec_norm_syn)
+
                 self.word_types.add(lexical_word)
+
 
                 if len(names) != len(wavs):
                     print(
@@ -955,6 +986,7 @@ def return_argument_parser():
         type=int,
         default=5000,
         help="How many text files the aligner should process in one batch",
+
     )
     parser.add_argument(
         "--num_cores",
@@ -973,6 +1005,7 @@ def return_argument_parser():
         type=str,
         default="/mnt/Restricted/Corpora/CommonVoiceVTL/",
         help="The path to save the dataframe to",
+
     )
     parser.add_argument(
         "--debug",
@@ -989,6 +1022,7 @@ def return_argument_parser():
     parser.add_argument(
         "--start_epoch", type=int, default=0, help="The epoch to start with (inclusive)"
     )
+
     parser.add_argument(
         "--end_epoch", type=int, default=1000, help="The epoch to end with (inclusive)"
     )
@@ -1030,6 +1064,7 @@ if __name__ == "__main__":
         args.word_amount, args.min_word_count
     )
     #we trust the user to know he has to use the aligner or not
+
     if args.needs_aligner:
         mfa_workers = args.mfa_workers
         corpus_worker.run_aligner(mfa_workers, args.aligner_batch_size)
@@ -1044,6 +1079,7 @@ if __name__ == "__main__":
     ]
     logging.info(f"Epochs: {len(clip_lists)}")
 
+
     folder_path = os.path.join(
         args.df_save_path, args.save_df_name + "_folder_" + args.language
     )
@@ -1053,6 +1089,7 @@ if __name__ == "__main__":
     lost_words_sum = 0
 
     #this is the main loop that creates the dataframe
+
     for i, (clip_list, sentence_list) in tqdm(
         enumerate(zip(clip_lists, sentence_lists)), total=len(clip_lists), desc="Epochs"
     ):
@@ -1070,10 +1107,12 @@ if __name__ == "__main__":
                 logging.info(
                     f" You want to use multiprocessing but the number of cores is {args.num_cores}, so the mulitprocessing function likely has no benefit"
                 )
+
                 if not args.add_melspec:
                     logging.info("Melspecs will not be created for multiprocessing ")
 
             df, total_words, lost_words = corpus_worker.create_data_frame_mp(
+
                 clip_list, sentence_list, args.num_cores
             )
 
@@ -1114,10 +1153,12 @@ if __name__ == "__main__":
             )
         path_to_save_corpus = os.path.join(
             folder_path, args.save_df_name + f"_epoch_{i}_" + args.language + ".pkl"
+
         )
         df.to_pickle(path_to_save_corpus)
         logging.info(f"Dataframe saved to {path_to_save_corpus}")
         logging.info(f"Epoch {i} done")
+
 
     logging.info(f"Total words: {total_words_sum}")
     logging.info(f"Lost words: {lost_words_sum}")
@@ -1127,5 +1168,6 @@ if __name__ == "__main__":
         file.write(
             f"Words processed: {total_words} \nLost words: {lost_words_sum}\nLost words rate in percent: {(lost_words_sum / total_words_sum * 100) if total_words_sum > 0 else None}%\n[Word types: {len(corpus_worker.word_types)}]\n"
         )
+
 
     logging.info("Done! :P")

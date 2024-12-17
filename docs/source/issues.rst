@@ -32,6 +32,7 @@ Estimation of total word types
 We estimate the total word counts based on the lexical words.
 Keep this in mind when using the library.
 
+
 Further issues
 ==============
 If you encounter any other issues, please open an issue on the github page of the project  `here <https://github.com/quantling/create_vtl_corpus/issues/new/choose>`__ . 
