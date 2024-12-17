@@ -40,6 +40,5 @@ Check that alignement works by testing it on a small dataset. Importantly, do no
 
 fastText
 ===========
-
 fastText Models are downloaded for you by the create_vtl_corpus package. 
 If you want to use a custom model rename it to  "cc.{language_it_is_for}.300.bin" and place it in the "create_vtl_corpus/create_vtl_corpus/resources directory

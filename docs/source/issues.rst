@@ -2,8 +2,6 @@
 Troubleshooting and known issues
 =====================================
 
-
-
 Problems with the aligner
 ==========================
 Sometimes the aligner will not generate phonemes for the whole sentence in our setup.
@@ -31,9 +29,8 @@ For other secenarios the words are counted and  we follow the word seperation do
 
 Estimation of total word types
 ==============================
-
-We estimate the total word counts based on the lexical words. Keep this in mind when using the library.
-
+We estimate the total word counts based on the lexical words.
+Keep this in mind when using the library.
 
 Further issues
 ==============

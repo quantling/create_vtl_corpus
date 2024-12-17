@@ -49,6 +49,7 @@ Given a german Corpus with the following structure which is what the `Mozilla Co
 
 If you run the following command the package will align the audio files for you, and then create a pandas DataFrame with the synthesized audio and other information useful for the PAULE model,
 but only for the first 100 words that occur 4 times or more. Since you use multiprocessing, no melspectrograms are generated.:
+
 .. code:: bash
 
     python -m create_vtl_corpus.create_corpus --corpus CORPUS --language de --needs_aligner --use_mp --min_word_count 4 --word_amount 100 --save_df_name SAVE_DF_NAME

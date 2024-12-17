@@ -18,7 +18,8 @@ vtl_worker = create_corpus.CreateCorpus("", language="de")
 
 def test_mfa_to_sampa():
     """
-    This test checks if the mfa_to_sampa_dict is working and produces a phoneme. It does not check if the phoneme is acutally accepted by VTL
+    This test checks if the mfa_to_sampa_dict is working and produces a phoneme.
+    It does not check if the phoneme is acutally accepted by VTL
     """
     VTL = create_corpus.util.VTL
     mfa_to_sampa_dict = vtl_worker.mfa_to_sampa_dict
@@ -65,7 +66,8 @@ def test_mfa_to_sampa():
 
 def test_each_phone():
     """
-    This test checks if each phoneme in the mfa_to_sampa_dict is actually a phoneme and not just silent noise since VTL will not give an error if the phoneme is not a phoneme
+    This test checks if each phoneme in the mfa_to_sampa_dict is actually a phoneme
+    and not just silent noise since VTL will not give an error if the phoneme is not a phoneme
     """
 
     def create_phoneme(phone, duration, phones_folder_path, VTL):
