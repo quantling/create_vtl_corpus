@@ -5,9 +5,6 @@ import contextlib
 import logging
 import shutil
 import re
-import time
-import random
-
 
 import subprocess
 import pandas as pd
@@ -17,10 +14,9 @@ from paule import util
 from praatio import textgrid
 import soundfile as sf
 from tqdm import tqdm
-import numpy as np
-from collections import Counter
-from concurrent.futures import ProcessPoolExecutor, as_completed
 
+from collections import Counter
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 
 from .corpus_utils import (
     generate_rows,
@@ -28,8 +24,6 @@ from .corpus_utils import (
     FASTTEXT_EN,
     FASTTEXT_DE,
     replace_special_chars,
-    error_factor,
-
 )
 
 # Set up logging
@@ -53,7 +47,6 @@ class CreateCorpus:
         ├── clips/
         │   └── *.mp3             # audio files (mp3)
         └── files_not_relevant_to_this_project
-
 
     Attributes
     ----------
@@ -145,10 +138,16 @@ class CreateCorpus:
             The loaded fasttext model
         """
         if language == "en":
-
+            global FASTTEXT_EN
+            FASTTEXT_EN = fasttext.load_model(
+                os.path.join(DIR, "resources", "cc.en.300.bin")
+            )
             model = FASTTEXT_EN
         elif language == "de":
-
+            global FASTTEXT_DE
+            FASTTEXT_DE = fasttext.load_model(
+                os.path.join(DIR, "resources", "cc.de.300.bin")
+            )
             model = FASTTEXT_DE
 
         else:
@@ -175,7 +174,7 @@ class CreateCorpus:
         )
         clip_names = list()
         sentences = list()
-        sentences_that_are_not_strings = 0
+        senteces_that_are_not_strings = 0
         if not os.path.exists(os.path.join(self.path_to_corpus, "clips_validated")):
             os.mkdir(os.path.join(self.path_to_corpus, "clips_validated"))
             need_new_clips = True
@@ -223,13 +222,13 @@ class CreateCorpus:
                         logging.debug(
                             f"Transcript for {clip_name} is not a string, skipping this clip"
                         )
-                        sentences_that_are_not_strings += 1
+                        senteces_that_are_not_strings += 1
                         continue
                     lab_file.write(transcript)
 
-        if sentences_that_are_not_strings > 0:
+        if senteces_that_are_not_strings > 0:
             logging.warning(
-                f"{sentences_that_are_not_strings} sentences were not strings and were skipped. Thats {sentences_that_are_not_strings/len(clip_names)*100}% of the sentences"
+                f"{senteces_that_are_not_strings} sentences were not strings and were skipped. Thats {senteces_that_are_not_strings/len(clip_names)*100}% of the sentences"
             )
         else:
             logging.info("All sentences were strings")
@@ -259,33 +258,18 @@ class CreateCorpus:
         word_counts = Counter(all_words)
 
         logging.info(f"{word_counts} These are the word counts")
+        filtered_word_counts = {
+            word: count
+            for word, count in word_counts.items()
+            if count >= min_word_count
+        }
 
-        filtered_word_counts = word_counts.copy()
-        for key, cnts in word_counts.items():  # list is important here
-            if cnts < min_word_count:
-                del filtered_word_counts[key]
-
-        logging.info(f"{filtered_word_counts.total()} words are left after filtering")
-        max_word_amount = min(word_amount, filtered_word_counts.total())
         if word_amount > 0:
-            word_set = set()
-            for i in range(max_word_amount):
-                # we need to recompute the weights since the filtered word counts change every iteration
-                elements = list(filtered_word_counts.keys())
-                weights = np.array(list(filtered_word_counts.values()), dtype=float)
-
-                # Normalize weights to sum to 1
-                weights /= weights.sum()
-
-                # Sample one word each iteration to prioritize common words based on their counts
-                sampled_string = random.choices(elements, weights=weights, k=1)[
-                    0
-                ]  # returns a list
-                word_set.add(sampled_string)
-                logging.debug(f"Sampled string: {sampled_string}")
-                del filtered_word_counts[sampled_string]
-            word_set = frozenset(word_set)
-
+            word_set = frozenset(
+                key.lower()
+                for key, _ in list(filtered_word_counts.items())[:word_amount]
+                if isinstance(key, str)
+            )
         else:
             word_set = frozenset(
                 key.lower()
@@ -293,15 +277,13 @@ class CreateCorpus:
                 if isinstance(key, str)
             )
 
-
-        logging.info(f"{word_set} These are the words that will be used in the corpus")
-
         assert len(word_set) > 0, "The word set is empty, no words were found"
         assert (
-            len(word_set) == max_word_amount
-        ) or word_amount == 0, f"The word set has {len(word_set)} words, but the maximum word amount with given {word_amount} is {max_word_amount} "
-
+            len(word_set) == word_amount or word_amount == 0
+        ), f"The word set has {len(word_set)} words, but the word amount is {word_amount}"
         self.word_set = word_set
+
+        logging.info(f"{word_set} These are the words that will be used in the corpus")
 
     def run_aligner(self, mfa_workers: int, batch_size: int):
         """
@@ -375,9 +357,7 @@ class CreateCorpus:
 
                 if self.language == "en":
                     logging.info("aligning corpus in english")
-
-                    command = "conda run -n english_aligner mfa  align".split() + [
-
+                    command = "conda run -n aligner mfa  align".split() + [
                         batch_folder,
                         "english_mfa",
                         "english_mfa",
@@ -410,7 +390,7 @@ class CreateCorpus:
         else:
             if self.language == "en":
                 logging.info("aligning corpus in english")
-                command = "conda run -n english_aligner mfa  align".split() + [
+                command = "conda run -n aligner mfa  align".split() + [
                     path_to_validated,
                     "english_mfa",
                     "english_mfa",
@@ -464,7 +444,6 @@ class CreateCorpus:
         mp3_files = set()
 
         # Traverse the directory and collect the file names
-        logging.info("Checking the structure of the corpus, this might take a while")
         for file in os.listdir(with_clips):
             if file.endswith(".lab"):
 
@@ -472,6 +451,16 @@ class CreateCorpus:
             elif file.endswith(".mp3"):
                 mp3_files.add(os.path.splitext(file)[0])
 
+        if mp3_files == lab_files:
+
+            clip_names = lab_files
+            logging.info("The lab files and mp3 files match")
+            # TODO: Implent this correctly
+        ## Find a way to use the sentences from the validated.tsv file
+        else:
+            logging.warning(
+                "The lab files and mp3 files do not match, correcting this now"
+            )
         clip_names, sentence_list = self.format_corpus(word_amount, min_word_count)
         missing_clips = set(clip_names).difference(lab_files.intersection(mp3_files))
         assert (
@@ -518,11 +507,6 @@ class CreateCorpus:
         logging.info(
             f"Starting to create the dataframe with multiprocessing using {num_cores} cores"
         )
-
-        total_words = 0
-        lost_words = 0  # TODO implement this for multiprocessing
-        self.word_types = set()
-
         with tqdm(total=len(clip_list), desc="files in epoch") as pbar:
             with ProcessPoolExecutor(max_workers=num_cores) as executor:
 
@@ -535,7 +519,7 @@ class CreateCorpus:
                                 sentence,
                                 self.path_to_corpus,
                                 self.language,
-
+                                self.word_amount,
                                 self.word_set,
                             )
                             for clip, sentence in zip(clip_list, sentence_list)
@@ -545,25 +529,15 @@ class CreateCorpus:
                         pbar.update(1)
                     results = [f.result() for f in futures]
 
-
                 except KeyboardInterrupt:
                     logging.warning("Ctrl+C detected, shutting down...")
-
 
                     executor.shutdown(wait=True, cancel_futures=True)
                     logging.warning("All processes terminated.")
 
         logging.info("All processes terminated. Now concatenating the results")
-        df_results = list()
-        for df, lost, total, returned_word_type in results:
-            lost_words += lost
-            total_words += total
-            self.word_types = self.word_types.union(returned_word_type)
-            print(f"Returned word types: {returned_word_type}")
-            df_results.append(df)
 
-        df = pd.concat(df_results)
-
+        df = pd.concat(results)
 
         if os.path.exists(os.path.join(self.path_to_corpus, "clips/temp_output")):
             shutil.rmtree(
@@ -574,9 +548,7 @@ class CreateCorpus:
         else:
             logging.info("Temp_output folder was not removed, because it was not found")
 
-
-        return df, total_words, lost_words
-
+        return df
 
     def create_data_frame(
         self,
@@ -585,7 +557,6 @@ class CreateCorpus:
     ):
         """
         Creates Dataframe with Vocaltract Lab data and other data
-
 
         Parameters
         ----------
@@ -621,10 +592,6 @@ class CreateCorpus:
             ==========================  ===========================================================
 
         """
-        self.word_types = set()
-
-
-        """
         labels = list()
         word_positions = list()
         sentences = list()
@@ -644,12 +611,9 @@ class CreateCorpus:
         lexical_words = list()
 
         used_phonemes = set()
-
-        lost_words = 0  # this is here to estimate how many words are lost
-        total_words = 0  # this is here to estimate how many words are processed
+        files_skiped = 0
 
         # remove extension for TextGrid
-        files_skiped = 0
 
         path_to_aligned = os.path.join(self.path_to_corpus, "clips_aligned")
         for filename_no_extension, sentence in tqdm(
@@ -676,10 +640,6 @@ class CreateCorpus:
                 )
                 clip_list.remove(filename_no_extension)
                 sentence_list.remove(sentence)
-                lost_words += (
-                    sentence.split().__len__() / error_factor
-                )  # adjusted since we don't know the exact  count of word that occured 4 times
-                total_words += sentence.split().__len__() / error_factor
                 files_skiped += 1
                 continue
 
@@ -695,9 +655,7 @@ class CreateCorpus:
                     logging.info(
                         f"Word '{word.label}' is not in the word set, skipping this word"
                     )
-
-                    continue  # we don't add anything to lost words here since we want to skip the word
-
+                    continue
                 phones = list()
                 mfa_phones_word_level = list()
 
@@ -724,8 +682,6 @@ class CreateCorpus:
                     logging.warning(
                         f"No phones found for word '{word.label}' in {filename_no_extension}, skipping this word"
                     )
-                    lost_words += 1
-                    total_words += 1
                     continue
                 logging.info(
                     f"Processing word '{word.label}' in {filename_no_extension}, resulting phones: {phones}"
@@ -741,10 +697,6 @@ class CreateCorpus:
                     logging.warning(
                         f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this word, Sentence: {sentence} .last word: {sentence.split()[-1]}"
                     )
-
-                    lost_words += 1
-                    total_words += 1
-
                     continue
                 lexical_word = replace_special_chars(
                     split_sentence[word_index]
@@ -832,8 +784,18 @@ class CreateCorpus:
                 melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
                 melspecs_norm_synthesized.append(melspec_norm_syn)
 
-                self.word_types.add(lexical_word)
+                # this is for manual testing only
+                if word.label == "chocolate":
+                    sf.write("manual_tests/chocolate.wav", wav_rec, sampling_rate)
+                    import matplotlib.pyplot as plt
 
+                    util.librosa.display.specshow(melspec_norm_rec, x_axis="time")
+                    plt.colorbar()
+                    plt.savefig("manual_tests/chocolate.png")
+                    with open(
+                        "manual_tests/chocolate_updated_again.seg", "w"
+                    ) as text_file:
+                        text_file.write(text)
 
                 if len(names) != len(wavs):
                     print(
@@ -915,8 +877,7 @@ class CreateCorpus:
                 os.path.join(self.path_to_corpus + "/clips/temp_output")
             )  # we don't need the temp_output files anymore
         logging.info(f"Files skipped: {files_skiped}")
-        total_words += len(labels)
-        return df,total_words, lost_words, 
+        return df
 
 
 def return_argument_parser():
@@ -986,7 +947,6 @@ def return_argument_parser():
         type=int,
         default=5000,
         help="How many text files the aligner should process in one batch",
-
     )
     parser.add_argument(
         "--num_cores",
@@ -998,14 +958,7 @@ def return_argument_parser():
         "--save_df_name",
         type=str,
         default="corpus_as_df_mp",
-        help="The name to save the dataframe under, language will be added automatically",
-    )
-    parser.add_argument(
-        "--df_save_path",
-        type=str,
-        default="/mnt/Restricted/Corpora/CommonVoiceVTL/",
-        help="The path to save the dataframe to",
-
+        help="The name to save the dataframe to in relation to the corpus folder",
     )
     parser.add_argument(
         "--debug",
@@ -1022,21 +975,8 @@ def return_argument_parser():
     parser.add_argument(
         "--start_epoch", type=int, default=0, help="The epoch to start with (inclusive)"
     )
-
     parser.add_argument(
-        "--end_epoch", type=int, default=1000, help="The epoch to end with (inclusive)"
-    )
-    parser.add_argument(
-        "--error_factor",
-        type=float,
-        default=None,
-        help="How likely you estimate a word to occur less then your min word count in the corpus",
-    )  # TODO: Implement this so it can be changed
-    parser.add_argument(
-        "--add_melspec",
-        action="store_true",
-        default=False,
-        help="If mel spectrograms should be added to the dataframe if you use multiprocessing. If you don't use multiprocessing, mel spectrograms are always added",
+        "--end_epoch", type=int, default=100, help="The epoch to end with (inclusive)"
     )
     return parser
 
@@ -1044,27 +984,18 @@ def return_argument_parser():
 if __name__ == "__main__":
     myparser = return_argument_parser()
     args = myparser.parse_args()  # This parses command-line arguments
+
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    assert os.path.isdir(args.corpus), "The provided corpus path is not a directory"
-    if args.df_save_path is not None:
-        assert os.path.isdir(
-            args.df_save_path
-        ), "The provided saving path is not a directory"
-    else:
-        args.df_save_path = args.corpus
+    assert os.path.isdir(args.corpus), "The provided path is not a directory"
+
     CreateCorpus.setup(language=args.language)
     corpus_worker = CreateCorpus(args.corpus, language=args.language)
-    if args.add_melspec and not args.use_mp:
-        logging.warning(
-            "You want to add mel spectrograms but you don't use multiprocessing, so mel spectrograms will be added anyway, so don't worry"
-        )
+
     clip_list, sentence_list = corpus_worker.check_structure(
         args.word_amount, args.min_word_count
     )
-    #we trust the user to know he has to use the aligner or not
-
     if args.needs_aligner:
         mfa_workers = args.mfa_workers
         corpus_worker.run_aligner(mfa_workers, args.aligner_batch_size)
@@ -1079,16 +1010,9 @@ if __name__ == "__main__":
     ]
     logging.info(f"Epochs: {len(clip_lists)}")
 
-
-    folder_path = os.path.join(
-        args.df_save_path, args.save_df_name + "_folder_" + args.language
-    )
+    folder_path = os.path.join(args.corpus, args.save_df_name + "_folder")
     if not os.path.exists(folder_path):
         os.mkdir(folder_path)
-    total_words_sum = 0
-    lost_words_sum = 0
-
-    #this is the main loop that creates the dataframe
 
     for i, (clip_list, sentence_list) in tqdm(
         enumerate(zip(clip_lists, sentence_lists)), total=len(clip_lists), desc="Epochs"
@@ -1107,67 +1031,48 @@ if __name__ == "__main__":
                 logging.info(
                     f" You want to use multiprocessing but the number of cores is {args.num_cores}, so the mulitprocessing function likely has no benefit"
                 )
-
-                if not args.add_melspec:
-                    logging.info("Melspecs will not be created for multiprocessing ")
-
-            df, total_words, lost_words = corpus_worker.create_data_frame_mp(
-
+                logging.info(f"Melspecs will not be created in multiprocessing mode")
+            df = corpus_worker.create_data_frame_mp(
                 clip_list, sentence_list, args.num_cores
             )
 
         else:
             logging.info("Creating dataframe without multiprocessing")
-            df, total_words, lost_words = corpus_worker.create_data_frame(
-                clip_list, sentence_list
-            )
+            df = corpus_worker.create_data_frame(clip_list, sentence_list)
         logging.info(df)
-        total_words_sum += total_words
-        lost_words_sum += lost_words
 
-        logging.info(f"Total words in epoch {i}: {total_words}")
-        logging.info(f"Lost words in epoch {i}: {lost_words}")
-        if total_words > 0:
-            logging.info(
-                f"Percentage of lost word in epoch {i}: {lost_words/total_words*100}%"
-            )
-        if args.add_melspec and args.use_mp: #if we don't use multiprocessing, mel spectrograms are always added 
-
-            start = time.time()
-            logging.info("Adding mel spectrograms to the dataframe")
-            df["melspec_norm_recorded"] = df["melspec_norm_recorded"] = df.apply(
-                lambda row: util.normalize_mel_librosa(
-                    util.librosa_melspec(row["wav_recording"], row["sr_recording"])
-                ),
-                axis=1,
-            )
-            df["melspec_norm_synthesized"] = df.apply(
-                lambda row: util.normalize_mel_librosa(
-                    util.librosa_melspec(row["wav_synthesized"], row["sr_synthesized"])
-                ),
-                axis=1,
-            )
-
-            logging.info(
-                f"Mel spectrograms added in {time.time()-start} seconds. This does not use multiprocessing"
-            )
         path_to_save_corpus = os.path.join(
-            folder_path, args.save_df_name + f"_epoch_{i}_" + args.language + ".pkl"
-
+            folder_path, args.save_df_name + f"epoch_{i}" + ".pkl"
         )
         df.to_pickle(path_to_save_corpus)
         logging.info(f"Dataframe saved to {path_to_save_corpus}")
         logging.info(f"Epoch {i} done")
 
+    logging.info("Merging all DataFrames into one")
+    df_list = []
 
-    logging.info(f"Total words: {total_words_sum}")
-    logging.info(f"Lost words: {lost_words_sum}")
-    logging.info(f"Percentage of lost words: {lost_words_sum/total_words_sum*100}%")
-    logging.info(f"word types: {len(corpus_worker.word_types)}")
-    with open(os.path.join(folder_path, "report.txt"), "w") as file:
-        file.write(
-            f"Words processed: {total_words} \nLost words: {lost_words_sum}\nLost words rate in percent: {(lost_words_sum / total_words_sum * 100) if total_words_sum > 0 else None}%\n[Word types: {len(corpus_worker.word_types)}]\n"
-        )
+    # Iterate through all files in the directory
+    for filename in os.listdir(folder_path):
+        # Only process .pkl files
+        if filename.endswith(".pkl"):
+            file_path = os.path.join(folder_path, filename)
+            # Load the .pkl file into a DataFrame and append it to the list
+            df = pd.read_pickle(file_path)
+            df_list.append(df)
 
+    # Concatenate all DataFrames
+    if df_list:
+        concatenated_df = pd.concat(df_list, ignore_index=True)
+        if args.append_to_df:
+            old_df = pd.read_pickle(os.path.join(args.append_to_df + ".pkl"))
+            logging.info(
+                f"Appending dataframe with  relative path: {old_df} to existing DataFrame"
+            )
+            concatenated_df = pd.concat([old_df, concatenated_df], ignore_index=True)
+        concatenated_df.to_pickle(os.path.join(args.corpus, args.save_df_name + ".pkl"))
+    else:
+        logging.error("No .pkl files found.")
+
+    logging.info(concatenated_df)
 
     logging.info("Done! :P")

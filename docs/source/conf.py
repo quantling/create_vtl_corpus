@@ -29,10 +29,6 @@ sys.path.insert(0, os.path.abspath("../.."))
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-from create_vtl_corpus.corpus_utils import get_phoneme_dict
-
-get_phoneme_dict()
-
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
