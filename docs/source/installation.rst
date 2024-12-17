@@ -15,7 +15,7 @@ code-block:: bash
     conda create -n {language}_aligner -c conda-forge montreal-forced-aligner
 
 should work. 
-We expect you  to create environments for each language you want to use. This makes running the aligner in parrallel easier.
+We expect you to create environments for each language you want to use. This makes running the aligner in parrallel easier.
 
 We used the MFA version 3.1.3 for this project. 
 code-block:: bash
@@ -23,7 +23,7 @@ code-block:: bash
 
 This should downgrade the MFA to the correct version.
 Then download the correct dictorary and language model for your language, they must be those for the MFA phoneme set. Currently we only support English and German.
-Do this by running the following commands:
+Do this by running the following commands.
 code-block:: bash
     mfa model download dictionary german_mfa
     mfa model download acoustic german_mfa
