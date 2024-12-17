@@ -216,7 +216,7 @@ def generate_gestural_score(ges_name, sampa, durations=None, *, phone_attributes
         # just filling an empty gesture in case of aborting in API call,
         # but this is not mandatory for initializing purpose
         ges_file.write('  <gesture_sequence type="velic-gestures" unit="">\n')
-        ges_file.write(f'    <gesture value="0.500000" slope="0.000000" duration_s="0.010000" time_constant_s="0.015000" neutral="1" />\n')
+        ges_file.write('    <gesture value="0.500000" slope="0.000000" duration_s="0.010000" time_constant_s="0.015000" neutral="1" />\n')
         ges_file.write('  </gesture_sequence>\n')
 
 

@@ -85,7 +85,6 @@ For each tier:
 
 # needs more cleanup, subclassing, epydoc docstrings
 
-import sys
 import re
 
 TEXTTIER = "TextTier"
@@ -368,7 +367,7 @@ class Tier(object):
         self.nameid = self.tier_info[1]
         self.xmin = float(self.tier_info[2])
         self.xmax = float(self.tier_info[3])
-        if self.size != None:
+        if self.size is not None:
             self.size = int(self.tier_info[4])
         self.transcript = self.tier_info[-1]
             

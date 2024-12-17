@@ -1,8 +1,6 @@
 from math import floor
-import os
 
 from scipy.io import wavfile
-from praatio import tgio
 
 from .textgrid import TextGrid
 

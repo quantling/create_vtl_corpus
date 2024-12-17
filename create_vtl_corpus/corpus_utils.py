@@ -2,9 +2,7 @@ import os
 import ctypes
 import contextlib
 import logging
-import shutil
 import re
-import subprocess
 import string
 import random
 import pandas as pd
@@ -18,19 +16,22 @@ import numpy as np
 import csv
 
 
+
 DIR = os.path.dirname(__file__)
 
 
 try:
     FASTTEXT_EN = fasttext.load_model(os.path.join(DIR, "resources", "cc.en.300.bin"))
-except:
+
+except ValueError:
     logging.warning("The FastText model for English could not be loaded")
     FASTTEXT_EN = None
 
 try:
 
     FASTTEXT_DE = fasttext.load_model(os.path.join(DIR, "resources", "cc.de.300.bin"))
-except:
+except ValueError:
+
     logging.warning("The FastText model for German could not be loaded")
     FASTTEXT_DE = None
 
@@ -86,8 +87,8 @@ DICT = {
     "ɐ": "6",
     "ɑ": "o",  # open back unrounded vowel not possible with VTL, Close-mid back rounded vowel
     "ɑː": "o:",
-    "ɒ": "O",  # acutal sampa Q
-    "ɒː": "O",  # acutal  x sampa Q:
+    "ɒ": "O",  # actual sampa Q
+    "ɒː": "O",  # actusal  x sampa Q:
     "ɔ": "O",
     "ɔj": "OY",
     "ə": "@",
@@ -138,9 +139,30 @@ DICT = {
     "ɖ": "d",  # d` not possible with VTL ( and maybe not correct phoneme as well)
     "tʷ": "t",  # t_w not possible with VTL (inferring from other cases)
     "ɟʷ": "dZ",  # J_w not possible with VTL (inferring from other cases)
+    "ʈʷ": "T",  # t`_w not possible with VTL (inferring pronunciation from other cases)
+    "ɡʷ": "g",  # g_w not possible with VTL  (inferring pronunciation from other cases)
+    "pʷ": "p",  # p_w not possible with VTL (inferring pronunciation from other cases)
 }  # this dict can be made shorter with : automatically passing etc
 
-DICT = csv.DictReader("phonemes.csv")
+
+CSV_PATH = os.path.join(DIR, "..", "docs", "source", "phonemes.csv")
+
+def get_phoneme_dict():
+    if not os.path.exists(CSV_PATH):
+        import csv
+
+        logging.info("Creating phonemes.csv")
+        with open(CSV_PATH, "w") as csv_file:
+            writer = csv.writer(csv_file)
+            for key, value in DICT.items():
+                writer.writerow([key, value])
+
+get_phoneme_dict()
+
+
+
+error_factor = 1.001
+
 
 
 def replace_special_chars(word):
@@ -172,7 +194,8 @@ def replace_special_chars(word):
 
 
 def generate_rows(
-    filename_no_extension, sentence, path_to_corpus, language, word_amount, word_set
+    filename_no_extension, sentence, path_to_corpus, language, word_set
+
 ):
     """This function is used to create the matching rows from a clip
     It is used for the multiprocessing part of the code
@@ -207,6 +230,12 @@ def generate_rows(
     names = list()
     mfa_phones = list()
     lexical_words = list()
+
+    lost_words = 0
+    total_words = 0
+    word_types = set()
+   
+
 
     clip_name = filename_no_extension + ".mp3"
 
@@ -243,9 +272,13 @@ def generate_rows(
             False,
         )
     except FileNotFoundError:
-        logging.warning(f"The TextGrid file for {filename_no_extension} was not found")
 
-        return df_empty
+        logging.warning(f"The TextGrid file for {filename_no_extension} was not found. Have you run the aligner?")
+        lost_words += sentence.split().__len__() / 1.2
+        # adjusted since we don't know the exact  count of word that occured 4 times
+        total_words += sentence.split().__len__() / 1.2
+        return (df_empty, lost_words, total_words,word_types)
+
 
     text_grid_sentence = list()
 
@@ -286,6 +319,8 @@ def generate_rows(
             logging.warning(
                 f"No phones found for word '{word.label}' in {filename_no_extension}, skipping this word"
             )
+            lost_words += 1
+            total_words += 1
             continue
         logging.debug(
             f"Processing word '{word.label}' in {filename_no_extension}, resulting phones: {phones}"
@@ -303,13 +338,15 @@ def generate_rows(
             logging.debug("Language not supported for splitting, going with default")
             split_sentence = re.split(r"[ -]|\.\.", sentence)
         split_sentence = [word for word in split_sentence if word]
-
         maximum_word_index = len(split_sentence) - 1
         if word_index > maximum_word_index:
             logging.warning(
                 f"Word index {word_index} is greater than the maximum index {maximum_word_index} of the sentence in {filename_no_extension}, skipping this sentence"
             )
-            return df_empty
+
+            lost_words += sentence.split().__len__() / error_factor
+            total_words += sentence.split().__len__() / error_factor
+            return (df_empty, lost_words, total_words,word_types)
 
         lexical_word = replace_special_chars(split_sentence[word_index])
 
@@ -425,34 +462,13 @@ def generate_rows(
         cp_norms.append(cp_norm)
         logging.debug(f"Client id: {client_id}, writing melspec for word: {word.label}")
 
-        # resample and extract melspec but it needs to be skipped for now since it is hanging the process
-        """
-                    logging.info(f"Client id: {client_id}, commencing resampling for word: {word.label} (Andres bet)")
-                    wav = librosa.resample(wav_rec, orig_sr=sampling_rate, target_sr=44100,
-                                res_type='kaiser_best', fix=True, scale=False)
-                    logging.info(f"Client id: {client_id}, commencing feature extraction for word: {word.label} (Tinos bet)")
-                    melspec = librosa.feature.melspectrogram(y=wav, n_fft=1024, hop_length=220, n_mels=60, sr=44100, power=1.0, fmin=10, fmax=12000)
-                    logging.info(f"Client id: {client_id}, commencing amplitdue thing for word: {word.label} ")
-                    melspec_db = librosa.amplitude_to_db(melspec, ref=0.15)
-                    logging.info(f"Client id: {client_id}, converting melspec for word: {word.label}")
-                    melspec_rec = np.array(melspec_db.T, order='C', dtype=np.float64)
-
-
-                    
-                    logging.info(f"Client id: {client_id}, normalizing melspec for word: {word.label}")
-                    melspec_norm_rec = util.normalize_mel_librosa(
-                    melspec_rec
-                    )
-                    loggin.info(f"Completed melspec for word: {word.label}, client_id: {client_id}")
-
-                    melspecs_norm_recorded.append(melspec_norm_rec)
-                    """
 
         melspecs_norm_recorded.append(None)
         logging.debug(f"Starting synthesis for {word.label} on  client_id {client_id}")
         wav_syn, wav_syn_sr = util.speak(cps)
         wavs_sythesized.append(wav_syn)
         sampling_rates_sythesized.append(wav_syn_sr)
+        word_types.add(lexical_word)
 
         """
                     melspec_norm_syn = util.normalize_mel_librosa(
@@ -468,6 +484,7 @@ def generate_rows(
             logging.warning(
                 f"The wavs are not the same length,at '{word.label}' Expected: {len(names)}) but got {len(wavs)}"
             )
+
 
     # fill the dataframe
 
@@ -509,4 +526,7 @@ def generate_rows(
             "client_id": client_ids,
         }
     )
-    return df_part
+
+    total_words += len(labels)
+    return (df_part, lost_words, total_words, word_types)
+

@@ -1,4 +1,3 @@
-import os
 
 from .generate_gestural_score import generate_gestural_score
 

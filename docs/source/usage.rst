@@ -36,7 +36,6 @@ Use cases
 3. Filter after words? Create 1000 more "post" word types.
 
 
-
 Flags
 =====
 The following flags can be used to modify the behaviour of the library.
@@ -51,12 +50,10 @@ Multiprocessing
 ===============
 The library supports multiprocessing, which can be used to speed up the process
 and for large corpora this is absolutely necessary.  However it is not enabled
-by default, to enable it use the ``--use_mp`` flag.  For small corpora it is
-not recommended to use multiprocessing, since generating the melspectrograms is
-not possible with multiprocessing currently.  The melspectrograms can be
-generated afterwards too however with the information available in the
-dataframe, but no solution is provided by the library for this yet.
-
+by default, to enable it use the ``--use_mp`` flag. For multiprocessing melspectrograms are added to the  dataframe afterwards without multiprocessing. This however can take some time so only do it 
+if necessary and if you need our kind of melspectrogram :ref:`Melspectrograms`. 
+Melspectrograms can begenerated afterwards too however with the information available in the
+dataframe.
 
 CreateCorpus Class
 ==========================
