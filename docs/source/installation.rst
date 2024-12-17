@@ -24,7 +24,6 @@ code-block:: bash
 This should downgrade the MFA to the correct version.
 Then download the correct dictorary and language model for your language, they must be those for the MFA phoneme set. Currently we only support English and German.
 Do this by running the following commands:
-
 code-block:: bash
     mfa model download dictionary german_mfa
     mfa model download acoustic german_mfa
