@@ -623,8 +623,6 @@ class CreateCorpus:
         """
         self.word_types = set()
 
-
-        """
         labels = list()
         word_positions = list()
         sentences = list()
@@ -929,7 +927,7 @@ def return_argument_parser():
     argparse.ArgumentParser: The argument parser
 
     """
-    # We use this function to allow automatic documentation of the arguments, since it needs a function to return the parser
+    # We use this function to allow automatic documentation of the arguments, since it needs a function to return the parser""
     parser = argparse.ArgumentParser(
         description="Converts a corpus to the vocaltract lab format"
     )
