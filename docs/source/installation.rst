@@ -8,23 +8,23 @@ Installing MFA
 ==============
 Go to `MFA's website <https://montreal-forced-aligner.readthedocs.io/en/latest/getting_started.html>`__ and follow the instructions there. Depending on your architecture, you may need to install the version without CUDA support.
 
-In general, the following command should work
+In general, the following command should work:
 
-.. code-block:: bash
+.. code-block :: bash
 
    conda create -n {language}_aligner -c conda-forge montreal-forced-aligner
 
 We expect you to create environments for each language you want to use. This makes running the aligner in parallel easier.
 
-We used MFA version 3.1.3 for this project. To downgrade MFA to the correct version, run
+We used MFA version 3.1.3 for this project. To downgrade MFA to the correct version, run:
 
-.. code-block:: bash
+.. code-block :: bash
 
    conda install montreal-forced-aligner=3.1.3
 
-Then download the correct dictionary and language model for your language. They must be those for the MFA phoneme set. Currently, we only support English and German. Do this by running the following commands
+Then download the correct dictionary and language model for your language. They must be those for the MFA phoneme set. Currently, we only support English and German. Do this by running the following commands:
 
-.. code-block:: bash
+.. code-block :: bash
 
    mfa model download dictionary german_mfa
    mfa model download acoustic german_mfa
