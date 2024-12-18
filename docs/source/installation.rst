@@ -10,27 +10,27 @@ Go to `MFA's website <https://montreal-forced-aligner.readthedocs.io/en/latest/g
 
 In general, the following command should work:
 
-```bash
-conda create -n {language}_aligner -c conda-forge montreal-forced-aligner
-```
+.. code-block:: bash
+
+   conda create -n {language}_aligner -c conda-forge montreal-forced-aligner
 
 We expect you to create environments for each language you want to use. This makes running the aligner in parallel easier.
 
 We used MFA version 3.1.3 for this project. To downgrade MFA to the correct version, run:
 
-```bash
-conda install montreal-forced-aligner=3.1.3
-```
+.. code-block:: bash
+
+   conda install montreal-forced-aligner=3.1.3
 
 Then download the correct dictionary and language model for your language. They must be those for the MFA phoneme set. Currently, we only support English and German. Do this by running the following commands:
 
-```bash
-mfa model download dictionary german_mfa
-mfa model download acoustic german_mfa
-# or for English
-mfa model download acoustic english_mfa
-mfa model download dictionary english_mfa
-```
+.. code-block:: bash
+
+   mfa model download dictionary german_mfa
+   mfa model download acoustic german_mfa
+   # or for English
+   mfa model download acoustic english_mfa
+   mfa model download dictionary english_mfa
 
 Check that alignment works by testing it on a small dataset. Importantly, do not activate the conda environment before running `create_vtl_corpus`, since the code does that for you, keeping both installations separate.
 
