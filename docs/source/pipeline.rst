@@ -18,22 +18,25 @@ Output Format
 As the final output create_vtl_corpus generates a pandas.DataFrame with the following columns:
 
 * ``file_name`` : name of the mp3 file in the common voice corpus
-* ``word_type`` : word type, i. e. type of the word in terms of graphemic transcription
+* ``label`` : word type, i. e. type of the word in terms of graphemic transcription
+* ``lexical_word`` : word as it was writen in the transcript
 * ``word_position`` : postion of the word type in the sentence
 * ``sentence`` : transcription of the full sentence
 * ``wav_recording`` : spliced out audio as mono audio signal
 * ``sr_recording`` : sampling rate of the recording
 * ``sampa_phones`` : list of phones in sampa notation
+* ``mfa_phones`` : list of phones in MFA notation
 * ``phone_durations`` : list of durations of the phones
 * ``vector`` : fastText vector embedding for the word_type
-* ``cp_segment`` : cp-trajectories of the segment-based synthesis
+* ``cp_norm`` : cp-trajectories of the segment-based synthesis
+* ``client_id`` : client_ids of multiple workers in multiprocessing
 
 The following columns are added, even if they can be generated out of the entries we already have for convenience:
 
-* ``wav_segment`` : wave form as mono audio from the segment-based synthesis
-* ``sr_segment`` : sampling rate for the mono audio from the segment-based synthesis
-* ``melspec_recording`` : acoustic representation of human recording of the common voice corpus (log-mel spectrogram)
-* ``melspec_segment`` : acoustic representation of the segment-based approach (log-mel spectrogram)
+* ``wav_synthesized`` : wave form as mono audio from the segment-based synthesis
+* ``sr_synthesized`` : sampling rate for the mono audio from the segment-based synthesis
+* ``melspec_norm_recording`` : acoustic representation of human recording of the common voice corpus (log-mel spectrogram)
+* ``melspec_norm_synthesized`` : acoustic representation of the segment-based approach (log-mel spectrogram)
 
 
 Pipeline
