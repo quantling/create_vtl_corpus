@@ -1,5 +1,5 @@
 ======
-Readme
+CreateVTLCorpus
 ======
 
 .. image:: https://zenodo.org/badge/167427297.svg
@@ -9,6 +9,10 @@ This package supplies the necessary functions in order to synthesize speech
 from a phonemic transcription. Furthermore, it defines helpers to improve the
 result if more information as the pitch contour is available. It is especially useful when working with 
 the `PAULE <https://github.com/quantling/paule>`__ framework.
+
+.. image:: https://raw.githubusercontent.com/quantling/paule/main/docs/figure/vtl_3d_vtl_midsagittal_cps_audio.png
+  :width: 800
+  :alt: A 3d vocal tract shape, a midsagittal slice, control parameter trajectories and a wave form.
 
 Currently the package supports the following languages:
    - German
