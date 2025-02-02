@@ -32,6 +32,16 @@ Estimation of total word types
 We estimate the total word counts based on the lexical words.
 Keep this in mind when using the library.
 
+Outputs folder is empty
+=======================
+
+This can happen when the  kaldi version is not installed correctly. Please make sure that you have installed the correct version of kaldi.
+
+This sometimes can be fixed with the following command:
+
+.. code-block:: bash
+
+    conda create -n aligner -c conda-forge montreal-forced-aligner=2.2.17 openfst=1.8.2 kaldi=5.5.1068
 
 Further issues
 ==============
