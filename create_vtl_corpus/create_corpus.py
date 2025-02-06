@@ -499,7 +499,7 @@ class CreateCorpus:
             label                    description
             =======================  ===========================================================
             'file_name'              name of the clip
-            'label'                  the spoken word as it is in the aligned textgrid
+            'mfa_word'               the spoken word as it is in the aligned textgrid
             'lexical_word'           the word as it is in the dictionary
             'word_position'          the position of the word in the sentence
             'sentence'               the sentence the word is part of
@@ -603,7 +603,7 @@ class CreateCorpus:
             label                       description
             ==========================  ===========================================================
             'file_name'                 name of the clip
-            'label'                     the spoken word as it is in the aligned textgrid
+            'mfa_word'                     the spoken word as it is in the aligned textgrid
             'lexical_word'              the word as it is in the dictionary
             'word_position'             the position of the word in the sentence
             'sentence'                  the sentence the word is part of
@@ -760,7 +760,7 @@ class CreateCorpus:
                 labels.append(word.label)
                 sampling_rates.append(sampling_rate)
                 word_positions.append(word_index)
-                fasttext_vector = self.fast_text_model.get_word_vector(word.label)
+                fasttext_vector = self.fast_text_model.get_word_vector(lexical_word)
                 vectors.append(fasttext_vector)
                 client_ids.append(filename_no_extension)
                 sentences.append(sentence)
@@ -886,7 +886,7 @@ class CreateCorpus:
         df = pd.DataFrame(
             {
                 "file_name": names,
-                "label": labels,
+                "mfa_word": labels,
                 "lexical_word": lexical_words,
                 "word_position": word_positions,
                 "sentence": sentences,
@@ -971,7 +971,7 @@ def return_argument_parser():
         "--min_word_count",
         type=int,
         default=0,
-        help="The minimum amount of words a word should have to be included in  the word amount argument",
+        help="The minimum amount of words a word should have to be included in  the word amount argument. This is based a approximate lexical word count",
     )
     parser.add_argument(
         "--word_amount",

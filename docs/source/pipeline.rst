@@ -18,7 +18,7 @@ Output Format
 As the final output create_vtl_corpus generates a pandas.DataFrame with the following columns:
 
 * ``file_name`` : name of the mp3 file in the common voice corpus
-* ``label`` : word type, i. e. type of the word in terms of graphemic transcription
+* ``mfa_word`` : word type, i. e. type of the word in terms of graphemic transcription
 * ``lexical_word`` : word as it was writen in the transcript
 * ``word_position`` : postion of the word type in the sentence
 * ``sentence`` : transcription of the full sentence

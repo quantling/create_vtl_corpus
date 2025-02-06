@@ -242,7 +242,7 @@ def generate_rows(
     df_empty = df_part = pd.DataFrame(
         columns=[
             "file_name",
-            "label",
+            "mfa_word",
             "lexical_word",
             "word_position",
             "sentence",
@@ -352,11 +352,7 @@ def generate_rows(
 
         # remove dots ( might impact pronunciation however)
         lexical_words.append(lexical_word)
-        """"
-            assert (
-                word.label.lower().replace("'", "") == lexical_word.lower()
-            ), f"Word mismatch since word_label : '{word.label.lower().replace("'", "")}' is not equal to lexical word: '{lexical_word.lower()}' in sentence '{sentence}' in {filename_no_extension}. TextGrid sentence: {text_grid_sentence}"
-            """
+       
 
         logging.debug("Appended lexical word and completed word check")
 
@@ -373,12 +369,12 @@ def generate_rows(
         logging.debug("Appended word positions")
         try:
             assert fast_text_model is not None, "The FastText model is None"
-            fasttext_vector = fast_text_model.get_word_vector(word.label)
+            fasttext_vector = fast_text_model.get_word_vector(lexical_word)
             if fasttext_vector is None:
-                raise ValueError(f"FastText vector for word '{word.label}' is None.")
+                raise ValueError(f"FastText vector for word '{lexical_word}' is None.")
             logging.debug("Loaded FastText vector")
         except Exception as e:
-            logging.error(f"Error processing word '{word.label}': {e}")
+            logging.error(f"Error processing word '{lexical_word}': {e}")
             raise
         logging.debug("Loaded fasttext vector")
         vectors.append(fasttext_vector)
@@ -470,14 +466,6 @@ def generate_rows(
         sampling_rates_sythesized.append(wav_syn_sr)
         word_types.add(lexical_word)
 
-        """
-                    melspec_norm_syn = util.normalize_mel_librosa(
-                        util.librosa_melspec(wav_syn, wav_syn_sr)
-                    )
-
-                    melspec_norm_syn = util.pad_same_to_even_seq_length(melspec_norm_syn)
-                    melspecs_norm_synthesized.append(melspec_norm_syn)
-                    """
 
         melspecs_norm_synthesized.append(None)
         if len(names) != len(wavs):
@@ -510,7 +498,7 @@ def generate_rows(
     df_part = pd.DataFrame(
         {
             "file_name": names,
-            "label": labels,
+            "mfa_word": labels,
             "lexical_word": lexical_words,
             "word_position": word_positions,
             "sentence": sentences,
