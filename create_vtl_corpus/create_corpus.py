@@ -376,7 +376,7 @@ class CreateCorpus:
                 if self.language == "en":
                     logging.info("aligning corpus in english")
 
-                    command = "conda run -n english_aligner mfa  align".split() + [
+                    command = "conda run -n en_aligner mfa  align".split() + [
 
                         batch_folder,
                         "english_mfa",
@@ -388,7 +388,7 @@ class CreateCorpus:
 
                 if self.language == "de":
                     logging.info("aligning corpus in german")
-                    command = "conda run -n aligner mfa  align".split() + [
+                    command = "conda run -n de_aligner mfa  align".split() + [
                         batch_folder,
                         "german_mfa",
                         "german_mfa",
@@ -934,7 +934,7 @@ def return_argument_parser():
     parser.add_argument(
         "--corpus",
         type=str,
-        default="../mini_corpus/",
+        required=True,
         help="The path to the corpus which should be converted to the vocaltract lab format",
     )
     parser.add_argument(
@@ -977,7 +977,7 @@ def return_argument_parser():
         "--word_amount",
         type=int,
         default=0,
-        help="0 the whole corpus shall be processed, a postivie integer if the number is limited. Since processing is sentence based, more words ( with lower word count), will also be synthesized",
+        help="0 the whole corpus shall be processed, a postive integer if the number is limited. Since processing is sentence based, more words ( with lower word count), will also be synthesized",
     )
     parser.add_argument(
         "--aligner_batch_size",

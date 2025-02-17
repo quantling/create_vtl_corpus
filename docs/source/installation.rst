@@ -4,6 +4,16 @@ This guide is written under the assumption that you use some kind of Debian-base
 
 First, install conda or mamba and create a conda environment with the dependencies given in the `environment.yml` file.
 
+.. code-block :: bash
+
+   conda env create -f environment.yml
+
+Then activate the environment: 
+
+.. code-block :: bash
+
+   conda activate vtl_corpus
+
 Installing MFA
 ==============
 Go to `MFA's website <https://montreal-forced-aligner.readthedocs.io/en/latest/getting_started.html>`__ and follow the instructions there. Depending on your architecture, you may need to install the version without CUDA support.
