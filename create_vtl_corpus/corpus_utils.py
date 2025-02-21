@@ -274,12 +274,16 @@ def generate_rows(
     except FileNotFoundError:
 
         logging.warning(f"The TextGrid file for {filename_no_extension} was not found. Have you run the aligner?")
-        lost_words += sentence.split().__len__() / 1.2
+        if isinstance(sentence, str):
+
+            lost_words += sentence.split().__len__() / 1.2
+        else:
+            logging.warning(f"The sentence for {filename_no_extension} is not a string", sentence)
         # adjusted since we don't know the exact  count of word that occured 4 times
         total_words += sentence.split().__len__() / 1.2
         return (df_empty, lost_words, total_words,word_types)
 
-
+   
     text_grid_sentence = list()
 
     for word_index, word in enumerate(tg.getTier("words")):

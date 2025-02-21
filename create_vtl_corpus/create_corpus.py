@@ -204,7 +204,11 @@ class CreateCorpus:
             transcript = row["sentence"]
             clip_name = row["path"].removesuffix(".mp3")
             clip_names.append(clip_name)
-            sentences.append(transcript)
+            if isinstance(transcript,str):
+                sentences.append(transcript) 
+            else:
+                sentences_that_are_not_strings += 1
+                continue
             if need_new_clips:
                 shutil.copy(
                     os.path.join(self.path_to_corpus, "clips", clip_name + ".mp3"),
@@ -1015,7 +1019,7 @@ def return_argument_parser():
         "--epoch_size",
         type=int,
         default=10000,
-        help="The size of the epochs used until the dataframe is saved",
+        help="The ampount of clips processed in one epoch and until the dataframe is saved",
     )
     parser.add_argument(
         "--start_epoch", type=int, default=0, help="The epoch to start with (inclusive)"
@@ -1133,7 +1137,7 @@ if __name__ == "__main__":
 
             start = time.time()
             logging.info("Adding mel spectrograms to the dataframe")
-            df["melspec_norm_recorded"] = df["melspec_norm_recorded"] = df.apply(
+            df["melspec_norm_recorded"]  = df.apply(
                 lambda row: util.normalize_mel_librosa(
                     util.librosa_melspec(row["wav_recording"], row["sr_recording"])
                 ),

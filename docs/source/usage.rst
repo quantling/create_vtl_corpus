@@ -15,7 +15,7 @@ a pandas DataFrame to ``SAVE_DF_PATH`` run the following command
 
 .. code:: bash
 
-    python -m create_vtl_corpus.create_corpus --corpus CORPUS --language de --needs_aligner --use_mp --min_word_count 4 --word_amount 100 --save_df_name SAVE_DF_NAME
+    python -m create_vtl_corpus.create_corpus --corpus CORPUS --language de --needs_aligner --use_mp --min_word_count 4 --word_amount 100 --save_df_name SAVE_DF_NAME --num_cores 4[
 
 Use ``--help`` or ``-h`` to get a full list of the command line options.
 
@@ -52,7 +52,7 @@ The library supports multiprocessing, which can be used to speed up the process
 and for large corpora this is absolutely necessary.  However it is not enabled
 by default, to enable it use the ``--use_mp`` flag. For multiprocessing melspectrograms are added to the  dataframe afterwards without multiprocessing. This however can take some time so only do it 
 if necessary and if you need our kind of melspectrogram :ref:`Melspectrograms`. 
-Melspectrograms can begenerated afterwards too however with the information available in the
+Melspectrograms can be generated afterwards too however with the information available in the
 dataframe.
 
 CreateCorpus Class
