@@ -1018,7 +1018,7 @@ def return_argument_parser():
     parser.add_argument(
         "--epoch_size",
         type=int,
-        default=10000,
+        default=5000,
         help="The ampount of clips processed in one epoch and until the dataframe is saved",
     )
     parser.add_argument(
