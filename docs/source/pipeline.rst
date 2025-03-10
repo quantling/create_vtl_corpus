@@ -35,7 +35,7 @@ The following columns are added, even if they can be generated out of the entrie
 
 * ``wav_synthesized`` : wave form as mono audio from the segment-based synthesis
 * ``sr_synthesized`` : sampling rate for the mono audio from the segment-based synthesis
-* ``melspec_norm_recording`` : acoustic representation of human recording of the common voice corpus (log-mel spectrogram)
+* ``melspec_norm_recorded`` : acoustic representation of human recording of the common voice corpus (log-mel spectrogram)
 * ``melspec_norm_synthesized`` : acoustic representation of the segment-based approach (log-mel spectrogram)
 
 
