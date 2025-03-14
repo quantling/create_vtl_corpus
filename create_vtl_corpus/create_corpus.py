@@ -567,6 +567,7 @@ class CreateCorpus:
             df_results.append(df)
 
         df = pd.concat(df_results)
+        df.reset_index(drop=False, inplace=True)
 
 
         if os.path.exists(os.path.join(self.path_to_corpus, "clips/temp_output")):
