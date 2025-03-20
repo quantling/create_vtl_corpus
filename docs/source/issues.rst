@@ -17,6 +17,7 @@ we split the lab files by spaces, punctuation and other characters that are not 
 can lead to misalignment of lexical labels and the labels returned by the aligner.  If this missaligment occurs we return an empty dataframe for this sentence so we can be sure that lexical labels and labels align, when returned in the dataframe.
 currently, at least for multiprocessing we also do not check if the words in the transcript are the same as the words in the transcript given by aligner, this is a possible future improvement.
 While they align in the majority of cases expect some fringe cases where they do not align.
+To correct for this we check if words match. This results in a high loss of words. To fix this we would need to implement a better word seperation algorithm that perhaps scans the whole sentence for words that might match the split words and then correctly works from there.
 Furthermore,when words in the whole corpus are counted for words and then put in a frozen set. 
 
 Estimations of lost words and amount of total words in the corpus

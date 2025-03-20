@@ -356,8 +356,14 @@ def generate_rows(
 
         # remove dots ( might impact pronunciation however)
         lexical_words.append(lexical_word)
-       
-
+        if replace_special_chars(word.label) != lexical_word.lower():
+            logging.warning(
+                f"Word '{word.label}' in the TextGrid does not match '{lexical_word}' in the sentence in {filename_no_extension}, skipping this word"
+            )
+            lost_words += 1
+            total_words += 1
+            continue
+        
         logging.debug("Appended lexical word and completed word check")
 
         names.append(clip_name)
