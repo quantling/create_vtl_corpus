@@ -63,7 +63,7 @@ The DataFrame contains the following columns
 label                    description
 =======================  ===========================================================
 'file_name'              name of the clip
-'label'                  the spoken word as it is in the aligned textgrid
+'mfa_word'                  the spoken word as it is in the aligned textgrid
 'lexical_word'           the word as it is in the dictionary
 'word_position'          the position of the word in the sentence
 'sentence'               the sentence the word is part of
@@ -74,7 +74,7 @@ label                    description
 'mfa_phones'             the phonemes as outputted by the aligner
 'phone_durations_lists'  the duration of each phone in the word as list
 'cp_norm'                normalized cp-trajectories
-'vector'                 embedding vector of the word, based on fastText Embeddings
+'vector'                 embedding vector of the lexical word, based on fastText Embeddings
 'client_id'              id of the client
 =======================  ===========================================================
 
