@@ -64,7 +64,7 @@ label                    description
 =======================  ===========================================================
 'file_name'              name of the clip
 'mfa_word'                  the spoken word as it is in the aligned textgrid
-'lexical_word'           the word as it is in the dictionary
+'lexical_word'           the word as it appears in the sentence
 'word_position'          the position of the word in the sentence
 'sentence'               the sentence the word is part of
 'wav_recording'          spliced out audio as mono audio signal
