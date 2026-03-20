@@ -81,9 +81,9 @@ label                    description
 
 Copyright
 =========
-As the VocalTractLabAPI.so and the JD2.speaker is under GPL v3 the rest of the code
+As the VocalTractLabAPI.so and the JD2.speaker is under GPL v3  license,the rest of the code
 here is GPL  under as well.  If the code is not dependent on VTL anymore you can use
-it under MIT license.
+it under the MIT license.
 
 
 Citing 
@@ -120,8 +120,8 @@ functions from top to bottom. The functions are supplied by the other files.
 
 .. note::
 
-   In the since VTL version 2.3 which can be downloaded as free software from
-   https://www.vocaltractlab.de/index.php?page=vocaltractlab-download most of
+   Since VTL version 2.3, which can be downloaded as free software from
+   https://www.vocaltractlab.de/index.php?page=vocaltractlab-download, most of
    the functionality implemented here is available directly from the VTL api.
    Please use the VTL api directly.
 
